@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/addNewList"
+        android:title="@string/addNewList">
+    </item>
+    <item
+        android:id="@+id/clearAllSelectedItems"
+        android:title="@string/clearAllSelectedItems">
+    </item>
+    <item
+        android:id="@+id/editActiveListTitle"
+        android:title="@string/editActiveListTitle">
+    </item>
+    <item
+        android:id="@+id/deleteActiveList"
+        android:title="@string/deleteActiveList">
+    </item>
+    <item
+        android:id="@+id/masterListSorting"
+        android:title="@string/sortingMasterList">
+    </item>
+    <item
+        android:id="@+id/deleteAllMasterListItems"
+        android:title="@string/deleteAllMasterListItems">
+    </item>
+    <item
+        android:id="@+id/about"
+        android:title="@string/action_about">
+    </item>
+    <item
+        android:id="@+id/masterListSettings"
+        android:title="@string/menu_settings">
+    </item>
+
+</menu>
