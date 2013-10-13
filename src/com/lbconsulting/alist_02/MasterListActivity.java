@@ -1206,9 +1206,7 @@ public class MasterListActivity extends Activity implements
 			cr.insert(SortOrdersTable.CONTENT_URI, values);
 
 			i++;
-
 		} while (i < 5);
-
 	}
 
 	private void TestUpDates() {
