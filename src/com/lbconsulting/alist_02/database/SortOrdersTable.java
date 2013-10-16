@@ -44,7 +44,7 @@ public class SortOrdersTable {
         sqlStatements.add("insert into " + TABLE_SORT_ORDERS + " (" + COL_ID + ", " + COL_SORT_ORDER_NAME + ", "
                 + COL_SORT_ORDER_FIELD + ") values (NULL, 'List Item', '" + MasterListItemsTable.COL_ITEM_NAME + "')");
         sqlStatements.add("insert into " + TABLE_SORT_ORDERS + " (" + COL_ID + ", " + COL_SORT_ORDER_NAME + ", "
-                + COL_SORT_ORDER_FIELD + ") values (NULL, 'Manual', '" + ListsTable.COL_MANUAL_SORT_ORDER + "')");
+                + COL_SORT_ORDER_FIELD + ") values (NULL, 'Manual', '" + Lists_Items_Bridge_Table.COL_MANUAL_SORT_ORDER + "')");
         sqlStatements.add("insert into " + TABLE_SORT_ORDERS + " (" + COL_ID + ", " + COL_SORT_ORDER_NAME + ", "
                 + COL_SORT_ORDER_FIELD + ") values (NULL, 'Category', '" + CategoriesTable.COL_CATEGORY + ", "
                 + MasterListItemsTable.COL_ITEM_NAME + "')");

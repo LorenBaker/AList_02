@@ -37,7 +37,7 @@ import android.widget.Toast;
 
 import com.lbconsulting.alist_02.database.CategoriesTable;
 import com.lbconsulting.alist_02.database.ListTitlesTable;
-import com.lbconsulting.alist_02.database.ListsTable;
+import com.lbconsulting.alist_02.database.Lists_Items_Bridge_Table;
 import com.lbconsulting.alist_02.database.MasterListItemsTable;
 import com.lbconsulting.alist_02.database.PreviousCategoryTable;
 import com.lbconsulting.alist_02.database.SortOrdersTable;
@@ -544,13 +544,14 @@ public class MasterListActivity extends Activity implements
 
 		// Check that masterListItemID is not already included in the ListsTable
 		// for current active list.
-		String[] projection = { ListsTable.COL_ID };
-		String selection = ListsTable.COL_LIST_TITLE_ID + " = ? AND "
-				+ ListsTable.COL_MASTER_LIST_ITEM_ID + " = ?";
+		String[] projection = { Lists_Items_Bridge_Table.COL_LIST_ID };
+		String selection = Lists_Items_Bridge_Table.COL_LIST_ID + " = ? AND "
+				+ Lists_Items_Bridge_Table.COL_ITEM_ID + " = ?";
 		String[] selectionArgs = { String.valueOf(this.activeListID),
 				String.valueOf(newMasterListItemID) };
-		Cursor includedInListsTableCursor = cr.query(ListsTable.CONTENT_URI,
-				projection, selection, selectionArgs, null);
+		Cursor includedInListsTableCursor = cr.query(
+				Lists_Items_Bridge_Table.CONTENT_URI, projection, selection,
+				selectionArgs, null);
 
 		if (includedInListsTableCursor.getCount() > 0) {
 			if (verbose) {
@@ -567,21 +568,24 @@ public class MasterListActivity extends Activity implements
 			// newMasterListItemID is not included in the active list ... so add
 			// it
 			ContentValues values = new ContentValues();
-			values.put(ListsTable.COL_LIST_TITLE_ID, this.activeListID);
-			values.put(ListsTable.COL_MASTER_LIST_ITEM_ID, newMasterListItemID);
+			values.put(Lists_Items_Bridge_Table.COL_LIST_ID, this.activeListID);
+			values.put(Lists_Items_Bridge_Table.COL_ITEM_ID,
+					newMasterListItemID);
 
-			Uri newListUri = cr.insert(ListsTable.CONTENT_URI, values);
+			Uri newListUri = cr.insert(Lists_Items_Bridge_Table.CONTENT_URI,
+					values);
 			long newListID = Long.parseLong(newListUri.getLastPathSegment());
 
 			// make the manual sort order equal to the newListID --- i.e. added
 			// to the bottom of the list.
 			values = new ContentValues();
-			values.put(ListsTable.COL_MANUAL_SORT_ORDER, newListID);
+			values.put(Lists_Items_Bridge_Table.COL_MANUAL_SORT_ORDER,
+					newListID);
 
 			// Check if newMasterListItem has previously used a category
 			projection = new String[] { PreviousCategoryTable.COL_CATEGORY_ID };
-			selection = PreviousCategoryTable.COL_LIST_TITLE_ID + " = ? AND "
-					+ PreviousCategoryTable.COL_MASTER_LIST_ITEM_ID + " = ?";
+			selection = PreviousCategoryTable.COL_LIST_ID + " = ? AND "
+					+ PreviousCategoryTable.COL_ITEM_ID + " = ?";
 			Uri uri = PreviousCategoryTable.CONTENT_URI;
 			Cursor previousCategoryCursor = cr.query(uri, projection,
 					selection, selectionArgs, null);
@@ -591,7 +595,8 @@ public class MasterListActivity extends Activity implements
 				Long previousCategoryID = previousCategoryCursor
 						.getLong(previousCategoryCursor
 								.getColumnIndexOrThrow(PreviousCategoryTable.COL_CATEGORY_ID));
-				values.put(ListsTable.COL_CATEGORY_ID, previousCategoryID);
+				values.put(Lists_Items_Bridge_Table.COL_CATEGORY_ID,
+						previousCategoryID);
 			}
 
 			// update Manual Sort Order and Category of the newly created List
@@ -629,7 +634,7 @@ public class MasterListActivity extends Activity implements
 			return;
 		}
 
-		int numberOfRowsDeleted = ListsTable.RemoveItem(this,
+		int numberOfRowsDeleted = Lists_Items_Bridge_Table.RemoveItem(this,
 				this.activeListID, masterListItemID);
 		if (numberOfRowsDeleted != 1) {
 			Log.e(TAG,
@@ -1041,8 +1046,8 @@ public class MasterListActivity extends Activity implements
 	private void SetLayoutBackgroundColor(long listTitleID) {
 		try {
 			@SuppressWarnings("resource")
-			Cursor listTitlesCursor = ListsTable.getListTitlesCurosr(this,
-					listTitleID);
+			Cursor listTitlesCursor = Lists_Items_Bridge_Table
+					.getListTitlesCurosr(this, listTitleID);
 			if (listTitlesCursor != null) {
 				String strBackgroundColor = listTitlesCursor
 						.getString(listTitlesCursor
@@ -1077,7 +1082,8 @@ public class MasterListActivity extends Activity implements
 
 		// confirm user wants to delete the current active list.
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-		String activeListTitle = ListsTable.getListTitle(this, listTitleID);
+		String activeListTitle = Lists_Items_Bridge_Table.getListTitle(this,
+				listTitleID);
 		String deleteListPrompt = "Delete list: " + "\"" + activeListTitle
 				+ "\" ?";
 
@@ -1087,8 +1093,8 @@ public class MasterListActivity extends Activity implements
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int whichButton) {
-						String activeListTitle = ListsTable.getListTitle(
-								getBaseContext(), activeListID);
+						String activeListTitle = Lists_Items_Bridge_Table
+								.getListTitle(getBaseContext(), activeListID);
 						doDeleteList(activeListID);
 						String deleteListPrompt = "List: " + "\""
 								+ activeListTitle + "\" DELETED.";
@@ -1102,8 +1108,8 @@ public class MasterListActivity extends Activity implements
 					@Override
 					public void onClick(DialogInterface dialog, int whichButton) {
 						// Canceled.
-						String activeListTitle = ListsTable.getListTitle(
-								getBaseContext(), activeListID);
+						String activeListTitle = Lists_Items_Bridge_Table
+								.getListTitle(getBaseContext(), activeListID);
 						String cancelDeleteListPrompt = "Deleting of list: "
 								+ "\"" + activeListTitle + "\" CANCELED.";
 						Toast.makeText(getApplicationContext(),
@@ -1116,11 +1122,13 @@ public class MasterListActivity extends Activity implements
 	}
 
 	private void doDeleteList(long listTitleID) {
-		this.activeListID = ListsTable.FindNextListID(this, listTitleID);
-		ListsTable.DeleteAllItems(this, listTitleID);
-		ListsTable.DeleteAllPreviousCategoryItems(this, listTitleID);
+		this.activeListID = Lists_Items_Bridge_Table.FindNextListID(this,
+				listTitleID);
+		Lists_Items_Bridge_Table.DeleteAllItems(this, listTitleID);
+		Lists_Items_Bridge_Table.DeleteAllPreviousCategoryItems(this,
+				listTitleID);
 		MasterListItemsTable.ResetSelectedColumn(this);
-		ListsTable.DeleteListTitleItem(this, listTitleID);
+		Lists_Items_Bridge_Table.DeleteListTitleItem(this, listTitleID);
 	}
 
 	/** Deletes the Active List from the database. */
@@ -1180,12 +1188,12 @@ public class MasterListActivity extends Activity implements
 			cr.insert(ListTitlesTable.CONTENT_URI, values);
 
 			values = new ContentValues();
-			values.put(ListsTable.COL_CATEGORY_ID, i);
-			values.put(ListsTable.COL_LIST_TITLE_ID, i);
-			values.put(ListsTable.COL_MASTER_LIST_ITEM_ID, i);
-			values.put(ListsTable.COL_MANUAL_SORT_ORDER, i);
-			values.put(ListsTable.COL_STRUCK_OUT, i);
-			cr.insert(ListsTable.CONTENT_URI, values);
+			values.put(Lists_Items_Bridge_Table.COL_CATEGORY_ID, i);
+			values.put(Lists_Items_Bridge_Table.COL_LIST_ID, i);
+			values.put(Lists_Items_Bridge_Table.COL_ITEM_ID, i);
+			values.put(Lists_Items_Bridge_Table.COL_MANUAL_SORT_ORDER, i);
+			values.put(Lists_Items_Bridge_Table.COL_STRUCK_OUT, i);
+			cr.insert(Lists_Items_Bridge_Table.CONTENT_URI, values);
 
 			values = new ContentValues();
 			values.put(CategoriesTable.COL_CATEGORY,
@@ -1194,8 +1202,8 @@ public class MasterListActivity extends Activity implements
 
 			values = new ContentValues();
 			values.put(PreviousCategoryTable.COL_CATEGORY_ID, i);
-			values.put(PreviousCategoryTable.COL_LIST_TITLE_ID, i);
-			values.put(PreviousCategoryTable.COL_MASTER_LIST_ITEM_ID, i);
+			values.put(PreviousCategoryTable.COL_LIST_ID, i);
+			values.put(PreviousCategoryTable.COL_ITEM_ID, i);
 			cr.insert(PreviousCategoryTable.CONTENT_URI, values);
 
 			values = new ContentValues();
@@ -1239,14 +1247,14 @@ public class MasterListActivity extends Activity implements
 							String.valueOf(i)), values, null, null);
 
 			values = new ContentValues();
-			values.put(ListsTable.COL_CATEGORY_ID, i + 5);
-			values.put(ListsTable.COL_LIST_TITLE_ID, i + 5);
-			values.put(ListsTable.COL_MASTER_LIST_ITEM_ID, i + 5);
-			values.put(ListsTable.COL_MANUAL_SORT_ORDER, i + 5);
-			values.put(ListsTable.COL_STRUCK_OUT, i + 5);
-			cr.update(
-					Uri.withAppendedPath(ListsTable.CONTENT_URI,
-							String.valueOf(i)), values, null, null);
+			values.put(Lists_Items_Bridge_Table.COL_CATEGORY_ID, i + 5);
+			values.put(Lists_Items_Bridge_Table.COL_LIST_ID, i + 5);
+			values.put(Lists_Items_Bridge_Table.COL_ITEM_ID, i + 5);
+			values.put(Lists_Items_Bridge_Table.COL_MANUAL_SORT_ORDER, i + 5);
+			values.put(Lists_Items_Bridge_Table.COL_STRUCK_OUT, i + 5);
+			cr.update(Uri.withAppendedPath(
+					Lists_Items_Bridge_Table.CONTENT_URI, String.valueOf(i)),
+					values, null, null);
 
 			values = new ContentValues();
 			values.put(CategoriesTable.COL_CATEGORY,
@@ -1257,8 +1265,8 @@ public class MasterListActivity extends Activity implements
 
 			values = new ContentValues();
 			values.put(PreviousCategoryTable.COL_CATEGORY_ID, i + 5);
-			values.put(PreviousCategoryTable.COL_LIST_TITLE_ID, i + 5);
-			values.put(PreviousCategoryTable.COL_MASTER_LIST_ITEM_ID, i + 5);
+			values.put(PreviousCategoryTable.COL_LIST_ID, i + 5);
+			values.put(PreviousCategoryTable.COL_ITEM_ID, i + 5);
 			cr.update(Uri.withAppendedPath(PreviousCategoryTable.CONTENT_URI,
 					String.valueOf(i)), values, null, null);
 
