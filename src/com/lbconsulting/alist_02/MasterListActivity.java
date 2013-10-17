@@ -36,7 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lbconsulting.alist_02.database.CategoriesTable;
-import com.lbconsulting.alist_02.database.ListTitlesTable;
+import com.lbconsulting.alist_02.database.ListsTable;
 import com.lbconsulting.alist_02.database.Lists_Items_Bridge_Table;
 import com.lbconsulting.alist_02.database.MasterListItemsTable;
 import com.lbconsulting.alist_02.database.PreviousCategoryTable;
@@ -780,9 +780,9 @@ public class MasterListActivity extends Activity implements
 		case LIST_TITLES_LOADER_ID:
 			// Create a new list titles CursorLoader with the following query
 			// parameters.
-			uri = ListTitlesTable.CONTENT_URI;
-			projection = ListTitlesTable.PROJECTION_ALL;
-			sortOrder = ListTitlesTable.SORT_ORDER_LIST_TITLE;
+			uri = ListsTable.CONTENT_URI;
+			projection = ListsTable.PROJECTION_ALL;
+			sortOrder = ListsTable.SORT_ORDER_LIST_TITLE;
 
 			try {
 				cursorLoader = new CursorLoader(MasterListActivity.this, uri,
@@ -953,9 +953,9 @@ public class MasterListActivity extends Activity implements
 							Cursor includedInListTitlesTableCursor = null;
 							try {
 								includedInListTitlesTableCursor = cr
-										.query(ListTitlesTable.CONTENT_URI,
-												new String[] { ListTitlesTable.COL_ID },
-												ListTitlesTable.COL_LIST_TITLE
+										.query(ListsTable.CONTENT_URI,
+												new String[] { ListsTable.COL_ID },
+												ListsTable.COL_LIST_TITLE
 														+ " = ?",
 												new String[] { newListTitle },
 												null);
@@ -971,7 +971,7 @@ public class MasterListActivity extends Activity implements
 								includedInListTitlesTableCursor.moveToFirst();
 								activeListID = includedInListTitlesTableCursor
 										.getLong(includedInListTitlesTableCursor
-												.getColumnIndexOrThrow(ListTitlesTable.COL_ID));
+												.getColumnIndexOrThrow(ListsTable.COL_ID));
 								spnListTitles.setSelection(AListUtilities
 										.getIndex(spnListTitles, activeListID));
 
@@ -986,9 +986,9 @@ public class MasterListActivity extends Activity implements
 							} else {
 								// newListTitle not in ListTitlesTable .. so add
 								// it.
-								Uri uri = ListTitlesTable.CONTENT_URI;
+								Uri uri = ListsTable.CONTENT_URI;
 								ContentValues values = new ContentValues();
-								values.put(ListTitlesTable.COL_LIST_TITLE,
+								values.put(ListsTable.COL_LIST_TITLE,
 										newListTitle);
 								Uri activeListUri = cr.insert(uri, values);
 								activeListID = Long.parseLong(activeListUri
@@ -1051,13 +1051,13 @@ public class MasterListActivity extends Activity implements
 			if (listTitlesCursor != null) {
 				String strBackgroundColor = listTitlesCursor
 						.getString(listTitlesCursor
-								.getColumnIndexOrThrow(ListTitlesTable.COL_BACKGROUND_COLOR));
+								.getColumnIndexOrThrow(ListsTable.COL_BACKGROUND_COLOR));
 				spnListTitlesBackgroundColor = AListUtilities
 						.GetColorInt(strBackgroundColor);
 
 				String strListTitlesTextColor = listTitlesCursor
 						.getString(listTitlesCursor
-								.getColumnIndexOrThrow(ListTitlesTable.COL_NORMAL_TEXT_COLOR));
+								.getColumnIndexOrThrow(ListsTable.COL_NORMAL_TEXT_COLOR));
 				spnListTitlesTextColor = AListUtilities
 						.GetColorInt(strListTitlesTextColor);
 
@@ -1175,17 +1175,17 @@ public class MasterListActivity extends Activity implements
 			cr.insert(MasterListItemsTable.CONTENT_URI, values);
 
 			values = new ContentValues();
-			values.put(ListTitlesTable.COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT, i);
-			values.put(ListTitlesTable.COL_BACKGROUND_COLOR,
+			values.put(ListsTable.COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT, i);
+			values.put(ListsTable.COL_BACKGROUND_COLOR,
 					"Background Color " + String.valueOf(i));
-			values.put(ListTitlesTable.COL_NORMAL_TEXT_COLOR,
+			values.put(ListsTable.COL_NORMAL_TEXT_COLOR,
 					"Normal Text Color " + String.valueOf(i));
-			values.put(ListTitlesTable.COL_STRIKEOUT_TEXT_COLOR,
+			values.put(ListsTable.COL_STRIKEOUT_TEXT_COLOR,
 					"Strikeout Color " + String.valueOf(i));
-			values.put(ListTitlesTable.COL_LIST_TITLE,
+			values.put(ListsTable.COL_LIST_TITLE,
 					"List Title " + String.valueOf(i));
-			values.put(ListTitlesTable.COL_SORT_ORDER_ID, i);
-			cr.insert(ListTitlesTable.CONTENT_URI, values);
+			values.put(ListsTable.COL_SORT_ORDER_ID, i);
+			cr.insert(ListsTable.CONTENT_URI, values);
 
 			values = new ContentValues();
 			values.put(Lists_Items_Bridge_Table.COL_CATEGORY_ID, i);
@@ -1231,19 +1231,19 @@ public class MasterListActivity extends Activity implements
 					String.valueOf(i)), values, null, null);
 
 			values = new ContentValues();
-			values.put(ListTitlesTable.COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT,
+			values.put(ListsTable.COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT,
 					i + 5);
-			values.put(ListTitlesTable.COL_BACKGROUND_COLOR,
+			values.put(ListsTable.COL_BACKGROUND_COLOR,
 					"Background Color " + String.valueOf(i + 5));
-			values.put(ListTitlesTable.COL_NORMAL_TEXT_COLOR,
+			values.put(ListsTable.COL_NORMAL_TEXT_COLOR,
 					"Normal Text Color " + String.valueOf(i + 5));
-			values.put(ListTitlesTable.COL_STRIKEOUT_TEXT_COLOR,
+			values.put(ListsTable.COL_STRIKEOUT_TEXT_COLOR,
 					"Strikeout Color " + String.valueOf(i + 5));
-			values.put(ListTitlesTable.COL_LIST_TITLE,
+			values.put(ListsTable.COL_LIST_TITLE,
 					"List Title " + String.valueOf(i + 5));
-			values.put(ListTitlesTable.COL_SORT_ORDER_ID, i + 5);
+			values.put(ListsTable.COL_SORT_ORDER_ID, i + 5);
 			cr.update(
-					Uri.withAppendedPath(ListTitlesTable.CONTENT_URI,
+					Uri.withAppendedPath(ListsTable.CONTENT_URI,
 							String.valueOf(i)), values, null, null);
 
 			values = new ContentValues();
@@ -1299,20 +1299,20 @@ public class MasterListActivity extends Activity implements
 		cr.update(MasterListItemsTable.CONTENT_URI, values, where, whereArgs);
 
 		values = new ContentValues();
-		values.put(ListTitlesTable.COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT, i + 5);
-		values.put(ListTitlesTable.COL_BACKGROUND_COLOR, "Background Color "
+		values.put(ListsTable.COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT, i + 5);
+		values.put(ListsTable.COL_BACKGROUND_COLOR, "Background Color "
 				+ String.valueOf(i + 5));
-		values.put(ListTitlesTable.COL_NORMAL_TEXT_COLOR, "Normal Text Color "
+		values.put(ListsTable.COL_NORMAL_TEXT_COLOR, "Normal Text Color "
 				+ String.valueOf(i + 5));
-		values.put(ListTitlesTable.COL_STRIKEOUT_TEXT_COLOR, "Strikeout Color "
+		values.put(ListsTable.COL_STRIKEOUT_TEXT_COLOR, "Strikeout Color "
 				+ String.valueOf(i + 5));
-		values.put(ListTitlesTable.COL_LIST_TITLE,
+		values.put(ListsTable.COL_LIST_TITLE,
 				"List Title " + String.valueOf(i + 5));
-		values.put(ListTitlesTable.COL_SORT_ORDER_ID, i + 5);
+		values.put(ListsTable.COL_SORT_ORDER_ID, i + 5);
 
-		where = ListTitlesTable.COL_SORT_ORDER_ID + " = ? OR "
-				+ ListTitlesTable.COL_SORT_ORDER_ID + " = ?";
+		where = ListsTable.COL_SORT_ORDER_ID + " = ? OR "
+				+ ListsTable.COL_SORT_ORDER_ID + " = ?";
 		whereArgs = new String[] { "6", "7" };
-		cr.update(ListTitlesTable.CONTENT_URI, values, where, whereArgs);
+		cr.update(ListsTable.CONTENT_URI, values, where, whereArgs);
 	}
 }

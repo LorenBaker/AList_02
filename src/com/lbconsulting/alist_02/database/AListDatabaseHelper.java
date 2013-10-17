@@ -12,7 +12,7 @@ public class AListDatabaseHelper extends SQLiteOpenHelper {
 	private final String TAG = AListUtilities.TAG;
 
 	private static final String DATABASE_NAME = "AList.db";
-	private static final int DATABASE_VERSION = 8;
+	private static final int DATABASE_VERSION = 9;
 
 	public AListDatabaseHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -22,10 +22,13 @@ public class AListDatabaseHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase database) {
 		if (L)
 			Log.i(TAG, "AListDatabaseHelper onCreate Starting.");
-		CategoriesTable.onCreate(database);
-		Lists_Items_Bridge_Table.onCreate(database);
-		ListTitlesTable.onCreate(database);
+
 		MasterListItemsTable.onCreate(database);
+		ListsTable.onCreate(database);
+		CategoriesTable.onCreate(database);
+		ListTypesTable.onCreate(database);
+
+		Lists_Items_Bridge_Table.onCreate(database);
 		PreviousCategoryTable.onCreate(database);
 		SortOrdersTable.onCreate(database);
 	}
@@ -33,10 +36,12 @@ public class AListDatabaseHelper extends SQLiteOpenHelper {
 	@Override
 	public void onUpgrade(SQLiteDatabase database, int oldVersion,
 			int newVersion) {
-		CategoriesTable.onUpgrade(database, oldVersion, newVersion);
-		Lists_Items_Bridge_Table.onUpgrade(database, oldVersion, newVersion);
-		ListTitlesTable.onUpgrade(database, oldVersion, newVersion);
 		MasterListItemsTable.onUpgrade(database, oldVersion, newVersion);
+		ListsTable.onUpgrade(database, oldVersion, newVersion);
+		CategoriesTable.onUpgrade(database, oldVersion, newVersion);
+		ListTypesTable.onUpgrade(database, oldVersion, newVersion);
+
+		Lists_Items_Bridge_Table.onUpgrade(database, oldVersion, newVersion);
 		PreviousCategoryTable.onUpgrade(database, oldVersion, newVersion);
 		SortOrdersTable.onUpgrade(database, oldVersion, newVersion);
 	}

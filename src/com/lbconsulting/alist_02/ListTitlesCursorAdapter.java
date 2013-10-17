@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.lbconsulting.alist_02.database.ListTitlesTable;
+import com.lbconsulting.alist_02.database.ListsTable;
 
 public class ListTitlesCursorAdapter extends CursorAdapter {
     public Context context;
@@ -39,12 +39,12 @@ public class ListTitlesCursorAdapter extends CursorAdapter {
             LinearLayout v = (LinearLayout) view;
 
             itemName = (TextView) view.findViewById(R.id.txtListTitle);
-            itemName.setText(cursor.getString(cursor.getColumnIndexOrThrow(ListTitlesTable.COL_LIST_TITLE)));
+            itemName.setText(cursor.getString(cursor.getColumnIndexOrThrow(ListsTable.COL_LIST_TITLE)));
             itemName.setTypeface(null, Typeface.BOLD_ITALIC);
 
-            String strTextColor = cursor.getString(cursor.getColumnIndexOrThrow(ListTitlesTable.COL_NORMAL_TEXT_COLOR));
+            String strTextColor = cursor.getString(cursor.getColumnIndexOrThrow(ListsTable.COL_NORMAL_TEXT_COLOR));
             String strBackgroundColor = cursor.getString(cursor
-                    .getColumnIndexOrThrow(ListTitlesTable.COL_BACKGROUND_COLOR));
+                    .getColumnIndexOrThrow(ListsTable.COL_BACKGROUND_COLOR));
 
             int textColor = AListUtilities.GetColorInt(strTextColor);
             int backgroundColor = AListUtilities.GetColorInt(strBackgroundColor);
@@ -57,7 +57,7 @@ public class ListTitlesCursorAdapter extends CursorAdapter {
 
         case R.id.listTitlesDropdownLinearLayout:
             itemName = (TextView) view.findViewById(R.id.txtListTitleDropdown);
-            itemName.setText(cursor.getString(cursor.getColumnIndexOrThrow(ListTitlesTable.COL_LIST_TITLE)));
+            itemName.setText(cursor.getString(cursor.getColumnIndexOrThrow(ListsTable.COL_LIST_TITLE)));
             itemName.setTypeface(null, Typeface.ITALIC);
             itemName.setTextColor(res.getColor(R.color.black));
             break;

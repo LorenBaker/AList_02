@@ -13,11 +13,9 @@ import com.lbconsulting.alist_02.contentprovider.AListContentProvider;
 public class Lists_Items_Bridge_Table {
 	private static final String TAG = AListUtilities.TAG;
 
-	// Lists data table
 	public static final String TABLE_LISTS_ITEMS_BRIDGE = "tblListsItemsBridge";
-	// public static final String COL_ID = "_id";
 	public static final String COL_LIST_ID = "listID";
-	public static final String COL_ITEM_ID = "ItemID";
+	public static final String COL_ITEM_ID = "itemID";
 	public static final String COL_STRUCK_OUT = "struckOut";
 	public static final String COL_MANUAL_SORT_ORDER = "manualSortOrder";
 	public static final String COL_CATEGORY_ID = "categoryID";
@@ -33,16 +31,17 @@ public class Lists_Items_Bridge_Table {
 			+ AListContentProvider.AUTHORITY + "/" + CONTENT_PATH);
 
 	// Database creation SQL statements
-	private static final String DATABASE_CREATE = "create table "
-			+ TABLE_LISTS_ITEMS_BRIDGE + " (" + COL_LIST_ID
-			+ " integer not null references "
-			+ ListTitlesTable.TABLE_LIST_TITLES + "(" + ListTitlesTable.COL_ID
-			+ "), " + COL_ITEM_ID + " integer not null references "
-			+ MasterListItemsTable.TABLE_MASTER_LIST_ITEMS + "("
-			+ MasterListItemsTable.COL_ID + "), " + COL_CATEGORY_ID
-			+ " integer DEFAULT 1, " + COL_STRUCK_OUT + " integer DEFAULT 0, "
-			+ COL_MANUAL_SORT_ORDER + " integer DEFAULT -1. " + "primary key ("
-			+ COL_LIST_ID + ", " + COL_ITEM_ID + "), " + ");";
+	private static final String DATABASE_CREATE =
+			"create table " + TABLE_LISTS_ITEMS_BRIDGE + " ("
+					+ COL_LIST_ID + " integer not null references " + ListsTable.TABLE_LISTS
+					+ "(" + ListsTable.COL_ID + "),"
+					+ COL_ITEM_ID + " integer not null references " + MasterListItemsTable.TABLE_MASTER_LIST_ITEMS
+					+ "(" + MasterListItemsTable.COL_ID + "),"
+					+ COL_CATEGORY_ID + " integer DEFAULT 1,"
+					+ COL_STRUCK_OUT + " integer DEFAULT 0,"
+					+ COL_MANUAL_SORT_ORDER + " integer DEFAULT -1,"
+					+ "primary key (" + COL_LIST_ID + ", " + COL_ITEM_ID + ")"
+					+ ")";
 
 	public static void onCreate(SQLiteDatabase database) {
 		database.execSQL(DATABASE_CREATE);
@@ -61,9 +60,9 @@ public class Lists_Items_Bridge_Table {
 		Cursor cursor = null;
 		try {
 			ContentResolver cr = context.getContentResolver();
-			Uri uri = Uri.withAppendedPath(ListTitlesTable.CONTENT_URI,
+			Uri uri = Uri.withAppendedPath(ListsTable.CONTENT_URI,
 					String.valueOf(listTitleID));
-			String[] projection = ListTitlesTable.PROJECTION_ALL;
+			String[] projection = ListsTable.PROJECTION_ALL;
 			cursor = cr.query(uri, projection, null, null, null);
 		} catch (Exception e) {
 			Log.e(TAG, "An Exception error occurred in getListTitleItem. ", e);
@@ -98,7 +97,7 @@ public class Lists_Items_Bridge_Table {
 			listTitlesCurosr = getListTitlesCurosr(context, listTitleID);
 			if (listTitlesCurosr != null && listTitlesCurosr.getCount() > 0) {
 				listTitle = listTitlesCurosr.getString(listTitlesCurosr
-						.getColumnIndexOrThrow(ListTitlesTable.COL_LIST_TITLE));
+						.getColumnIndexOrThrow(ListsTable.COL_LIST_TITLE));
 			}
 
 		} catch (Exception e) {
@@ -114,9 +113,9 @@ public class Lists_Items_Bridge_Table {
 		long nextListTitleID = -1;
 		try {
 			ContentResolver cr = context.getContentResolver();
-			Uri uri = ListTitlesTable.CONTENT_URI;
-			String[] projection = ListTitlesTable.PROJECTION_ALL;
-			String orderBy = ListTitlesTable.SORT_ORDER_LIST_TITLE;
+			Uri uri = ListsTable.CONTENT_URI;
+			String[] projection = ListsTable.PROJECTION_ALL;
+			String orderBy = ListsTable.SORT_ORDER_LIST_TITLE;
 			listTitlesCursor = cr.query(uri, projection, null, null, orderBy);
 		} catch (Exception e) {
 			Log.e(TAG, "An Exception error occurred in FindNextListID. ", e);
@@ -128,7 +127,7 @@ public class Lists_Items_Bridge_Table {
 			boolean foundID = false;
 			do {
 				id = listTitlesCursor.getLong(listTitlesCursor
-						.getColumnIndexOrThrow(ListTitlesTable.COL_ID));
+						.getColumnIndexOrThrow(ListsTable.COL_ID));
 				if (id == listTitleID) {
 					foundID = true;
 					break;
@@ -138,13 +137,13 @@ public class Lists_Items_Bridge_Table {
 			if (foundID) {
 				if (listTitlesCursor.moveToNext()) {
 					nextListTitleID = listTitlesCursor.getLong(listTitlesCursor
-							.getColumnIndexOrThrow(ListTitlesTable.COL_ID));
+							.getColumnIndexOrThrow(ListsTable.COL_ID));
 
 				} else if (listTitlesCursor.moveToPrevious()
 						&& listTitlesCursor.moveToPrevious()) {
 
 					nextListTitleID = listTitlesCursor.getLong(listTitlesCursor
-							.getColumnIndexOrThrow(ListTitlesTable.COL_ID));
+							.getColumnIndexOrThrow(ListsTable.COL_ID));
 				}
 			}
 		}
@@ -188,7 +187,7 @@ public class Lists_Items_Bridge_Table {
 	public static void DeleteListTitleItem(Context context, long listTitleID) {
 		try {
 			ContentResolver cr = context.getContentResolver();
-			Uri uri = Uri.withAppendedPath(ListTitlesTable.CONTENT_URI,
+			Uri uri = Uri.withAppendedPath(ListsTable.CONTENT_URI,
 					String.valueOf(listTitleID));
 			cr.delete(uri, null, null);
 		} catch (Exception e) {

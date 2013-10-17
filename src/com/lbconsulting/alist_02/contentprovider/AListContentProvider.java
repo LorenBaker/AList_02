@@ -18,7 +18,7 @@ import android.util.Log;
 import com.lbconsulting.alist_02.AListUtilities;
 import com.lbconsulting.alist_02.database.AListDatabaseHelper;
 import com.lbconsulting.alist_02.database.CategoriesTable;
-import com.lbconsulting.alist_02.database.ListTitlesTable;
+import com.lbconsulting.alist_02.database.ListsTable;
 import com.lbconsulting.alist_02.database.Lists_Items_Bridge_Table;
 import com.lbconsulting.alist_02.database.MasterListItemsTable;
 import com.lbconsulting.alist_02.database.PreviousCategoryTable;
@@ -74,9 +74,9 @@ public class AListContentProvider extends ContentProvider {
 		sURIMatcher.addURI(AUTHORITY, MasterListItemsTable.CONTENT_PATH + "/#",
 				ITEMS_SINGLE_ROW);
 
-		sURIMatcher.addURI(AUTHORITY, ListTitlesTable.CONTENT_PATH,
+		sURIMatcher.addURI(AUTHORITY, ListsTable.CONTENT_PATH,
 				LISTS_MULTI_ROWS);
-		sURIMatcher.addURI(AUTHORITY, ListTitlesTable.CONTENT_PATH + "/#",
+		sURIMatcher.addURI(AUTHORITY, ListsTable.CONTENT_PATH + "/#",
 				LISTS_SINGLE_ROW);
 
 		/*
@@ -157,20 +157,20 @@ public class AListContentProvider extends ContentProvider {
 				selection = "1";
 			}
 			// Perform the deletion
-			deleteCount = db.delete(ListTitlesTable.TABLE_LIST_TITLES,
+			deleteCount = db.delete(ListsTable.TABLE_LISTS,
 					selection, selectionArgs);
 			break;
 
 		case LISTS_SINGLE_ROW:
 			// Limit deletion to a single row
 			rowID = uri.getLastPathSegment();
-			selection = ListTitlesTable.COL_ID
+			selection = ListsTable.COL_ID
 					+ "="
 					+ rowID
 					+ (!TextUtils.isEmpty(selection) ? " AND (" + selection
 							+ ")" : "");
 			// Perform the deletion
-			deleteCount = db.delete(ListTitlesTable.TABLE_LIST_TITLES,
+			deleteCount = db.delete(ListsTable.TABLE_LISTS,
 					selection, selectionArgs);
 			break;
 
@@ -257,9 +257,9 @@ public class AListContentProvider extends ContentProvider {
 			return MasterListItemsTable.CONTENT_ITEM_TYPE;
 
 		case LISTS_MULTI_ROWS:
-			return ListTitlesTable.CONTENT_TYPE;
+			return ListsTable.CONTENT_TYPE;
 		case LISTS_SINGLE_ROW:
-			return ListTitlesTable.CONTENT_ITEM_TYPE;
+			return ListsTable.CONTENT_ITEM_TYPE;
 
 			/*
 			 * case BRIDGE_MULTI_ROWS: return
@@ -325,7 +325,7 @@ public class AListContentProvider extends ContentProvider {
 
 		case LISTS_MULTI_ROWS:
 			// get the next Id for the lists title table
-			String nextIDQuery = "name='" + ListTitlesTable.TABLE_LIST_TITLES
+			String nextIDQuery = "name='" + ListsTable.TABLE_LISTS
 					+ "'";
 			long nextId = -1;
 			Cursor nextIDCursor = db.query("SQLITE_SEQUENCE",
@@ -376,22 +376,22 @@ public class AListContentProvider extends ContentProvider {
 					if (values == null) {
 						values = new ContentValues();
 					}
-					values.put(ListTitlesTable.COL_BACKGROUND_COLOR,
+					values.put(ListsTable.COL_BACKGROUND_COLOR,
 							backgroundColor);
-					values.put(ListTitlesTable.COL_NORMAL_TEXT_COLOR, textColor);
+					values.put(ListsTable.COL_NORMAL_TEXT_COLOR, textColor);
 				}
 
 				AListUtilities.closeQuietly(nextIDCursor);
-				newRowId = db.insertOrThrow(ListTitlesTable.TABLE_LIST_TITLES,
+				newRowId = db.insertOrThrow(ListsTable.TABLE_LISTS,
 						nullColumnHack, values);
 
 				// Construct and return the URI of the newly inserted row.
 				Uri newRowUri = ContentUris.withAppendedId(
-						ListTitlesTable.CONTENT_URI, newRowId);
+						ListsTable.CONTENT_URI, newRowId);
 
 				// Notify and observers of the change in the database.
 				getContext().getContentResolver().notifyChange(
-						ListTitlesTable.CONTENT_URI, null);
+						ListsTable.CONTENT_URI, null);
 
 				return newRowUri;
 
@@ -503,14 +503,14 @@ public class AListContentProvider extends ContentProvider {
 			break;
 
 		case LISTS_MULTI_ROWS:
-			queryBuilder.setTables(ListTitlesTable.TABLE_LIST_TITLES);
+			queryBuilder.setTables(ListsTable.TABLE_LISTS);
 			checkListTitlesColumnNames(projection);
 			break;
 
 		case LISTS_SINGLE_ROW:
-			queryBuilder.setTables(ListTitlesTable.TABLE_LIST_TITLES);
+			queryBuilder.setTables(ListsTable.TABLE_LISTS);
 			checkListTitlesColumnNames(projection);
-			queryBuilder.appendWhere(ListTitlesTable.COL_ID + "="
+			queryBuilder.appendWhere(ListsTable.COL_ID + "="
 					+ uri.getLastPathSegment());
 			break;
 
@@ -632,21 +632,21 @@ public class AListContentProvider extends ContentProvider {
 
 		case LISTS_MULTI_ROWS:
 			// Perform the update
-			updateCount = db.update(ListTitlesTable.TABLE_LIST_TITLES, values,
+			updateCount = db.update(ListsTable.TABLE_LISTS, values,
 					selection, selectionArgs);
 			break;
 
 		case LISTS_SINGLE_ROW:
 			// Limit deletion to a single row
 			rowID = uri.getLastPathSegment();
-			selection = ListTitlesTable.COL_ID
+			selection = ListsTable.COL_ID
 					+ "="
 					+ rowID
 					+ (!TextUtils.isEmpty(selection) ? " AND (" + selection
 							+ ")" : "");
 
 			// Perform the update
-			updateCount = db.update(ListTitlesTable.TABLE_LIST_TITLES, values,
+			updateCount = db.update(ListsTable.TABLE_LISTS, values,
 					selection, selectionArgs);
 			break;
 
@@ -747,7 +747,7 @@ public class AListContentProvider extends ContentProvider {
 			HashSet<String> requstedColumns = new HashSet<String>(
 					Arrays.asList(projection));
 			HashSet<String> availableColumns = new HashSet<String>(
-					Arrays.asList(ListTitlesTable.PROJECTION_ALL));
+					Arrays.asList(ListsTable.PROJECTION_ALL));
 
 			// Check if all columns which are requested are available
 			if (!availableColumns.containsAll(requstedColumns)) {
