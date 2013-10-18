@@ -28,7 +28,7 @@ public class AListDatabaseHelper extends SQLiteOpenHelper {
 		CategoriesTable.onCreate(database);
 		ListTypesTable.onCreate(database);
 
-		Lists_Items_Bridge_Table.onCreate(database);
+		List_Item_Table.onCreate(database);
 		PreviousCategoryTable.onCreate(database);
 		SortOrdersTable.onCreate(database);
 	}
@@ -41,7 +41,7 @@ public class AListDatabaseHelper extends SQLiteOpenHelper {
 		CategoriesTable.onUpgrade(database, oldVersion, newVersion);
 		ListTypesTable.onUpgrade(database, oldVersion, newVersion);
 
-		Lists_Items_Bridge_Table.onUpgrade(database, oldVersion, newVersion);
+		List_Item_Table.onUpgrade(database, oldVersion, newVersion);
 		PreviousCategoryTable.onUpgrade(database, oldVersion, newVersion);
 		SortOrdersTable.onUpgrade(database, oldVersion, newVersion);
 	}

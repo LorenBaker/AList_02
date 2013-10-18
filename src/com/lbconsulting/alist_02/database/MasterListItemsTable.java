@@ -47,11 +47,12 @@ public class MasterListItemsTable {
 			+ SELECTED_FALSE;
 
 	// Database creation SQL statements
-	private static final String DATABASE_CREATE = "create table "
-			+ TABLE_MASTER_LIST_ITEMS + " (" + COL_ID
-			+ " integer primary key autoincrement, " + COL_ITEM_NAME
-			+ " text collate nocase, " + COL_SELECTED + " integer DEFAULT 0"
-			+ ");";
+	private static final String DATABASE_CREATE =
+			"create table " + TABLE_MASTER_LIST_ITEMS + " ("
+					+ COL_ID + " integer primary key autoincrement, "
+					+ COL_ITEM_NAME + " text collate nocase, "
+					+ COL_SELECTED + " integer DEFAULT 0"
+					+ ");";
 
 	public static void onCreate(SQLiteDatabase database) {
 		database.execSQL(DATABASE_CREATE);
@@ -216,7 +217,7 @@ public class MasterListItemsTable {
 	public static void SetSelectedColumn(Context context, long listTitleID) {
 		try {
 			@SuppressWarnings("resource")
-			Cursor allListTableItemsCursor = Lists_Items_Bridge_Table
+			Cursor allListTableItemsCursor = List_Item_Table
 					.getAllItems(context, listTitleID);
 			if (allListTableItemsCursor != null
 					&& allListTableItemsCursor.getCount() > 0) {
@@ -233,7 +234,7 @@ public class MasterListItemsTable {
 
 				do {
 					colIndex = allListTableItemsCursor
-							.getColumnIndexOrThrow(Lists_Items_Bridge_Table.COL_ITEM_ID);
+							.getColumnIndexOrThrow(List_Item_Table.COL_ITEM_ID);
 					masterListItemID = allListTableItemsCursor
 							.getLong(colIndex);
 					String[] whereArgs = { String.valueOf(masterListItemID) };
@@ -266,7 +267,7 @@ public class MasterListItemsTable {
 	}
 
 	public static void ClearAllSelectedItems(Context context, long listTitleID) {
-		Lists_Items_Bridge_Table.DeleteAllItems(context, listTitleID);
+		List_Item_Table.DeleteAllItems(context, listTitleID);
 		ResetSelectedColumn(context);
 	}
 

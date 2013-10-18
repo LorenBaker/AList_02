@@ -36,8 +36,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lbconsulting.alist_02.database.CategoriesTable;
+import com.lbconsulting.alist_02.database.List_Item_Table;
 import com.lbconsulting.alist_02.database.ListsTable;
-import com.lbconsulting.alist_02.database.Lists_Items_Bridge_Table;
 import com.lbconsulting.alist_02.database.MasterListItemsTable;
 import com.lbconsulting.alist_02.database.PreviousCategoryTable;
 import com.lbconsulting.alist_02.database.SortOrdersTable;
@@ -60,7 +60,7 @@ public class MasterListActivity extends Activity implements
 	// The loaders' unique ids.
 	// Loader ids are specific to the Activity
 	private static final int MASTER_LIST_LOADER_ID = 1;
-	private static final int LIST_TITLES_LOADER_ID = 2;
+	private static final int LISTS_LOADER_ID = 2;
 
 	// Application preferences
 	private boolean autoAddItem = true;
@@ -188,7 +188,7 @@ public class MasterListActivity extends Activity implements
 		// Notification the activity will be destroyed
 		if (L)
 			Log.i(TAG, "MasterListActivity onDestroy"
-			// Are we finishing?
+					// Are we finishing?
 					+ (isFinishing() ? " Finishing" : ""));
 	}
 
@@ -302,8 +302,7 @@ public class MasterListActivity extends Activity implements
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
 				if ((event.getAction() == KeyEvent.ACTION_DOWN)
 						&& (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER)) {
-					String newMasterListItem = txtListItem.getText().toString()
-							.trim();
+					String newMasterListItem = txtListItem.getText().toString().trim();
 					if (newMasterListItem.isEmpty()) {
 						txtListItem.setText("");
 						return true;
@@ -311,10 +310,8 @@ public class MasterListActivity extends Activity implements
 
 					long newMasterListItemID = AddItemToMasterList(newMasterListItem);
 					txtListItem.setText("");
-					if (autoAddItem && activeListID > 0
-							&& newMasterListItemID > 0) {
-						AddItemToActiveList(newMasterListItem,
-								newMasterListItemID);
+					if (autoAddItem && activeListID > 0 && newMasterListItemID > 0) {
+						AddItemToActiveList(newMasterListItem, newMasterListItemID);
 					}
 					return true;
 				} else {
@@ -327,20 +324,17 @@ public class MasterListActivity extends Activity implements
 			// filter master list as the user inputs text
 			@Override
 			public void afterTextChanged(Editable s) {
-				loaderManager.restartLoader(MASTER_LIST_LOADER_ID, null,
-						masterListCallbacks);
+				loaderManager.restartLoader(MASTER_LIST_LOADER_ID, null, masterListCallbacks);
 			}
 
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-					int after) {
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 				// Do nothing
 
 			}
 
 			@Override
-			public void onTextChanged(CharSequence s, int start, int before,
-					int count) {
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
 				// Do nothing
 
 			}
@@ -351,8 +345,7 @@ public class MasterListActivity extends Activity implements
 		btnAddToMasterList.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				String newMasterListItem = txtListItem.getText().toString()
-						.trim();
+				String newMasterListItem = txtListItem.getText().toString().trim();
 				if (newMasterListItem.isEmpty()) {
 					txtListItem.setText("");
 					return;
@@ -382,54 +375,49 @@ public class MasterListActivity extends Activity implements
 
 		// setup masterListView Listeners
 		masterListView.setOnItemClickListener(new OnItemClickListener() {
+			@SuppressWarnings("resource")
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				Cursor masterListItem = getMasterListItem(id, null);
-				int isSelected = masterListItem.getInt(masterListItem
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				Cursor masterListItemCursor = getMasterListItem(id, null);
+				int isSelected = masterListItemCursor.getInt(masterListItemCursor
 						.getColumnIndexOrThrow(MasterListItemsTable.COL_SELECTED));
 				if (isSelected == 1) {
 					// the clicked masterListItem is already selected ... so
 					// remove it from the active list.
-					RemoveItemFromActiveList(
-							masterListItem
-									.getString(masterListItem
-											.getColumnIndexOrThrow(MasterListItemsTable.COL_ITEM_NAME)),
-							id);
+					RemoveItemFromActiveList(masterListItemCursor.getString(masterListItemCursor
+							.getColumnIndexOrThrow(MasterListItemsTable.COL_ITEM_NAME)), id);
 				} else {
 					// the clicked masterListItem has not been selected for the
 					// active list ... so add it.
 					if (view instanceof LinearLayout) {
 						txtListItem.setText("");
 						LinearLayout linearLayout = (LinearLayout) view;
-						TextView txtView = (TextView) linearLayout
-								.getChildAt(0);
+						TextView txtView = (TextView) linearLayout.getChildAt(0);
 						String newListItem = txtView.getText().toString();
 						AddItemToActiveList(newListItem, id);
 					}
 				}
-				AListUtilities.closeQuietly(masterListItem);
+				AListUtilities.closeQuietly(masterListItemCursor);
 			}
 		});
 
-		masterListView
-				.setOnItemLongClickListener(new OnItemLongClickListener() {
-					@Override
-					public boolean onItemLongClick(AdapterView<?> parent,
-							View view, int position, long id) {
-						// TODO create dialog giving the user the choice to:
-						// Delete or
-						// Edit the selected item, or Cancel
-						if (verbose) {
-							String msg = "masterListView LONG CLICK: Position = "
-									+ position + "; ID = " + id;
-							Toast.makeText(getApplicationContext(), msg,
-									Toast.LENGTH_SHORT).show();
-						}
-						// Long Click handled.
-						return true;
-					}
-				});
+		masterListView.setOnItemLongClickListener(new OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent,
+					View view, int position, long id) {
+				// TODO create dialog giving the user the choice to:
+				// Delete or
+				// Edit the selected item, or Cancel
+				if (verbose) {
+					String msg = "masterListView LONG CLICK: Position = "
+							+ position + "; ID = " + id;
+					Toast.makeText(getApplicationContext(), msg,
+							Toast.LENGTH_SHORT).show();
+				}
+				// Long Click handled.
+				return true;
+			}
+		});
 
 		// setup spnListTitles Listener
 		spnListTitles.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -459,10 +447,8 @@ public class MasterListActivity extends Activity implements
 		masterListCallbacks = this;
 		// Note: using null for the cursor. The masterList and listTitle cursors
 		// loaded via onLoadFinished.
-		loaderManager.initLoader(MASTER_LIST_LOADER_ID, null,
-				masterListCallbacks);
-		loaderManager.initLoader(LIST_TITLES_LOADER_ID, null,
-				masterListCallbacks);
+		loaderManager.initLoader(MASTER_LIST_LOADER_ID, null, masterListCallbacks);
+		loaderManager.initLoader(LISTS_LOADER_ID, null, masterListCallbacks);
 	} // End doCreate
 
 	@Override
@@ -530,73 +516,68 @@ public class MasterListActivity extends Activity implements
 		}
 	}
 
-	private void AddItemToActiveList(String newMasterListItem,
-			long newMasterListItemID) {
+	@SuppressWarnings("resource")
+	private void AddItemToActiveList(String newMasterListItem, long newMasterListItemID) {
 		String msg = null;
 		ContentResolver cr = getContentResolver();
 
 		if (this.activeListID < 0) {
 			msg = "No List selected.\nPlease create or select a List before adding items.";
-			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG)
-					.show();
+			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
 			return;
 		}
 
 		// Check that masterListItemID is not already included in the ListsTable
 		// for current active list.
-		String[] projection = { Lists_Items_Bridge_Table.COL_LIST_ID };
-		String selection = Lists_Items_Bridge_Table.COL_LIST_ID + " = ? AND "
-				+ Lists_Items_Bridge_Table.COL_ITEM_ID + " = ?";
-		String[] selectionArgs = { String.valueOf(this.activeListID),
-				String.valueOf(newMasterListItemID) };
-		Cursor includedInListsTableCursor = cr.query(
-				Lists_Items_Bridge_Table.CONTENT_URI, projection, selection,
-				selectionArgs, null);
+		String[] projection = { List_Item_Table.COL_LIST_ID };
+		String selection = List_Item_Table.COL_LIST_ID + " = ? AND " + List_Item_Table.COL_ITEM_ID + " = ?";
+		String[] selectionArgs = { String.valueOf(this.activeListID), String.valueOf(newMasterListItemID) };
 
-		if (includedInListsTableCursor.getCount() > 0) {
+		Cursor includedInListsTableCursor = null;
+		try {
+			includedInListsTableCursor = cr.query(
+					List_Item_Table.CONTENT_URI, projection, selection, selectionArgs, null);
+		} catch (Exception e) {
+			Log.e(TAG, "AddItemToActiveList: Exception in query.", e);
+		}
+
+		if (includedInListsTableCursor != null && includedInListsTableCursor.getCount() > 0) {
 			if (verbose) {
-				msg = "\"" + newMasterListItem + "\""
-						+ " is already included in the active list!";
-				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT)
-						.show();
+				msg = "\"" + newMasterListItem + "\"" + " is already included in the active list!";
+				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 			}
 			AListUtilities.closeQuietly(includedInListsTableCursor);
 			return;
+
 		} else {
 			AListUtilities.closeQuietly(includedInListsTableCursor);
 
-			// newMasterListItemID is not included in the active list ... so add
-			// it
+			// newMasterListItemID is not included in the active list ...
+			// so add it
 			ContentValues values = new ContentValues();
-			values.put(Lists_Items_Bridge_Table.COL_LIST_ID, this.activeListID);
-			values.put(Lists_Items_Bridge_Table.COL_ITEM_ID,
-					newMasterListItemID);
+			values.put(List_Item_Table.COL_LIST_ID, this.activeListID);
+			values.put(List_Item_Table.COL_ITEM_ID, newMasterListItemID);
 
-			Uri newListUri = cr.insert(Lists_Items_Bridge_Table.CONTENT_URI,
-					values);
+			Uri newListUri = cr.insert(List_Item_Table.CONTENT_URI, values);
 			long newListID = Long.parseLong(newListUri.getLastPathSegment());
 
-			// make the manual sort order equal to the newListID --- i.e. added
-			// to the bottom of the list.
+			// make the manual sort order equal to the newListID ...
+			// i.e. added to the bottom of the list.
 			values = new ContentValues();
-			values.put(Lists_Items_Bridge_Table.COL_MANUAL_SORT_ORDER,
-					newListID);
+			values.put(List_Item_Table.COL_MANUAL_SORT_ORDER, newListID);
 
 			// Check if newMasterListItem has previously used a category
 			projection = new String[] { PreviousCategoryTable.COL_CATEGORY_ID };
 			selection = PreviousCategoryTable.COL_LIST_ID + " = ? AND "
 					+ PreviousCategoryTable.COL_ITEM_ID + " = ?";
 			Uri uri = PreviousCategoryTable.CONTENT_URI;
-			Cursor previousCategoryCursor = cr.query(uri, projection,
-					selection, selectionArgs, null);
+			Cursor previousCategoryCursor = cr.query(uri, projection, selection, selectionArgs, null);
 
 			if (previousCategoryCursor.getCount() > 0) {
 				// previously used category found
-				Long previousCategoryID = previousCategoryCursor
-						.getLong(previousCategoryCursor
-								.getColumnIndexOrThrow(PreviousCategoryTable.COL_CATEGORY_ID));
-				values.put(Lists_Items_Bridge_Table.COL_CATEGORY_ID,
-						previousCategoryID);
+				Long previousCategoryID = previousCategoryCursor.getLong(previousCategoryCursor
+						.getColumnIndexOrThrow(PreviousCategoryTable.COL_CATEGORY_ID));
+				values.put(List_Item_Table.COL_CATEGORY_ID, previousCategoryID);
 			}
 
 			// update Manual Sort Order and Category of the newly created List
@@ -605,61 +586,50 @@ public class MasterListActivity extends Activity implements
 			AListUtilities.closeQuietly(previousCategoryCursor);
 
 			// indicate that newMasterListItem is in the active list
-			uri = Uri.withAppendedPath(MasterListItemsTable.CONTENT_URI,
-					String.valueOf(newMasterListItemID));
+			uri = Uri.withAppendedPath(MasterListItemsTable.CONTENT_URI, String.valueOf(newMasterListItemID));
 			values = new ContentValues();
-			values.put(MasterListItemsTable.COL_SELECTED,
-					MasterListItemsTable.SELECTED_TRUE);
+			values.put(MasterListItemsTable.COL_SELECTED, MasterListItemsTable.SELECTED_TRUE);
 			cr.update(uri, values, null, null);
 
 			if (verbose) {
-				msg = "\"" + newMasterListItem + "\""
-						+ " added to the active List.";
-				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT)
-						.show();
+				msg = "\"" + newMasterListItem + "\"" + " added to the active List.";
+				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 			}
 		}
 
 	} // End AddItemToActiveList
 
-	private void RemoveItemFromActiveList(String masterListItem,
-			long masterListItemID) {
+	private void RemoveItemFromActiveList(String masterListItem, long masterListItemID) {
 		String msg = null;
 		ContentResolver cr = getContentResolver();
 
 		if (this.activeListID < 0) {
-			msg = "No List selected.\nPlease create or select a List before adding items.";
-			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG)
-					.show();
+			msg = "No List selected.\nPlease create or select a List before removing items.";
+			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
 			return;
 		}
 
-		int numberOfRowsDeleted = Lists_Items_Bridge_Table.RemoveItem(this,
-				this.activeListID, masterListItemID);
+		int numberOfRowsDeleted = List_Item_Table.RemoveItem(this, this.activeListID, masterListItemID);
 		if (numberOfRowsDeleted != 1) {
 			Log.e(TAG,
 					"RemoveItemFromActiveList: Incorrect number of rows deleted from the ListsTable! /n"
-							+ "Active List ID = "
-							+ this.activeListID
+							+ "Active List ID = " + this.activeListID
 							+ "; Master List Item = " + masterListItem);
 		} else {
 			// reset the "selected field" in the master List table for
 			// newMasterListItem
-			Uri uri = Uri.withAppendedPath(MasterListItemsTable.CONTENT_URI,
-					String.valueOf(masterListItemID));
+			Uri uri = Uri.withAppendedPath(MasterListItemsTable.CONTENT_URI, String.valueOf(masterListItemID));
 			ContentValues values = new ContentValues();
-			values.put(MasterListItemsTable.COL_SELECTED,
-					MasterListItemsTable.SELECTED_FALSE);
+			values.put(MasterListItemsTable.COL_SELECTED, MasterListItemsTable.SELECTED_FALSE);
 			cr.update(uri, values, null, null);
 			if (verbose) {
-				msg = "\"" + masterListItem
-						+ "\" removed from the active list.";
-				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT)
-						.show();
+				msg = "\"" + masterListItem + "\" removed from the active list.";
+				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 			}
 		}
 	}
 
+	@SuppressWarnings("resource")
 	private long AddItemToMasterList(String newMasterListItem) {
 
 		ContentResolver cr = null;
@@ -672,46 +642,38 @@ public class MasterListActivity extends Activity implements
 					new String[] { MasterListItemsTable.COL_ID },
 					MasterListItemsTable.COL_ITEM_NAME + " = ?",
 					new String[] { newMasterListItem }, null);
-		} catch (SQLiteException e1) {
-			Log.e(TAG, "AddItemToMasterList: SQLiteException", e1);
+		} catch (SQLiteException e) {
+			Log.e(TAG, "AddItemToMasterList: SQLiteException", e);
 			return -1;
 
-		} catch (IllegalArgumentException e1) {
-			Log.e(TAG, "AddItemToMasterList: IllegalArgumentException", e1);
+		} catch (IllegalArgumentException e) {
+			Log.e(TAG, "AddItemToMasterList: IllegalArgumentException", e);
 			return -1;
 		}
 
 		if (includedInMasterListItemsTableCursor.getCount() > 0) {
 			// the master list contains the proposed newMasterListItem
 			newMasterListItemID = includedInMasterListItemsTableCursor
-					.getLong(includedInMasterListItemsTableCursor
-							.getColumnIndexOrThrow(MasterListItemsTable.COL_ID));
+					.getLong(includedInMasterListItemsTableCursor.getColumnIndexOrThrow(MasterListItemsTable.COL_ID));
 
 			if (verbose) {
 				if (!autoAddItem) {
-					String msg = "\"" + newMasterListItem
-							+ "\" already exists in the database!";
-					Toast.makeText(getApplicationContext(), msg,
-							Toast.LENGTH_SHORT).show();
+					String msg = "\"" + newMasterListItem + "\" already exists in the database!";
+					Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 				}
 			}
 		} else {
-			// the proposed newMasterListItem is not in the master list ... so
-			// add it
+			// the proposed newMasterListItem is not in the master list ...
+			// so add it
 			try {
 				ContentValues values = new ContentValues();
-				values.put(MasterListItemsTable.COL_ITEM_NAME,
-						newMasterListItem);
-				Uri newMasterListItemURI = cr.insert(
-						MasterListItemsTable.CONTENT_URI, values);
-				newMasterListItemID = Long.parseLong(newMasterListItemURI
-						.getLastPathSegment());
+				values.put(MasterListItemsTable.COL_ITEM_NAME, newMasterListItem);
+				Uri newMasterListItemURI = cr.insert(MasterListItemsTable.CONTENT_URI, values);
+				newMasterListItemID = Long.parseLong(newMasterListItemURI.getLastPathSegment());
 
 				if (verbose) {
-					String msg = "\"" + newMasterListItem
-							+ "\" added to the master list.";
-					Toast.makeText(getApplicationContext(), msg,
-							Toast.LENGTH_SHORT).show();
+					String msg = "\"" + newMasterListItem + "\" added to the master list.";
+					Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 				}
 			} catch (SQLiteException e) {
 				Log.e(TAG, "AddItemToMasterList: SQLiteException", e);
@@ -738,8 +700,8 @@ public class MasterListActivity extends Activity implements
 
 		switch (id) {
 		case MASTER_LIST_LOADER_ID:
-			// Create a new master list CursorLoader with the following query
-			// parameters.
+			// Create a new master list CursorLoader
+			// with the following query parameters.
 			uri = MasterListItemsTable.CONTENT_URI;
 			projection = MasterListItemsTable.PROJECTION_ALL;
 
@@ -755,12 +717,14 @@ public class MasterListActivity extends Activity implements
 			case SORT_ORDER_SELECTED_AT_TOP:
 				sortOrder = MasterListItemsTable.SORT_ORDER_SELECTED_DESC;
 				break;
+
+			default:
+				break;
 			}
 			// filter the cursor based on user typed text in txtListItem
 			String masterListItem = txtListItem.getText().toString().trim();
 			if (!masterListItem.isEmpty()) {
-				selection = MasterListItemsTable.COL_ITEM_NAME + " Like '%"
-						+ masterListItem + "%'";
+				selection = MasterListItemsTable.COL_ITEM_NAME + " Like '%" + masterListItem + "%'";
 			}
 
 			try {
@@ -777,7 +741,7 @@ public class MasterListActivity extends Activity implements
 			}
 			break;
 
-		case LIST_TITLES_LOADER_ID:
+		case LISTS_LOADER_ID:
 			// Create a new list titles CursorLoader with the following query
 			// parameters.
 			uri = ListsTable.CONTENT_URI;
@@ -785,8 +749,8 @@ public class MasterListActivity extends Activity implements
 			sortOrder = ListsTable.SORT_ORDER_LIST_TITLE;
 
 			try {
-				cursorLoader = new CursorLoader(MasterListActivity.this, uri,
-						projection, selection, selectionArgs, sortOrder);
+				cursorLoader = new CursorLoader(MasterListActivity.this, uri, projection, selection, selectionArgs,
+						sortOrder);
 
 			} catch (SQLiteException e) {
 				Log.e(TAG, "onCreateLoader: SQLiteException", e);
@@ -806,8 +770,8 @@ public class MasterListActivity extends Activity implements
 		if (L) {
 			Log.i(TAG, "onLoadFinished. loader id = " + loader.getId());
 		}
-		// The asynchronous load is complete and the newCursor is now available
-		// for use.
+		// The asynchronous load is complete and
+		// the newCursor is now available for use.
 		// Update the masterListAdapter to show the changed data.
 		switch (loader.getId()) {
 		case MASTER_LIST_LOADER_ID:
@@ -822,7 +786,7 @@ public class MasterListActivity extends Activity implements
 			}
 			break;
 
-		case LIST_TITLES_LOADER_ID:
+		case LISTS_LOADER_ID:
 			listTitlesAdapter.swapCursor(newCursor);
 			if (newCursor.getCount() > 0) {
 				layoutListTitle.setVisibility(View.VISIBLE);
@@ -838,6 +802,9 @@ public class MasterListActivity extends Activity implements
 						spnListTitles, this.activeListID));
 			}
 			break;
+
+		default:
+			break;
 		}
 	}
 
@@ -846,7 +813,6 @@ public class MasterListActivity extends Activity implements
 		if (L) {
 			Log.i(TAG, "onLoaderReset. loader id = " + loader.getId());
 		}
-
 		// For whatever reason, the Loader's data is now unavailable.
 		// Remove any references to the old data by replacing it with a null
 		// Cursor.
@@ -855,8 +821,11 @@ public class MasterListActivity extends Activity implements
 			masterListAdapter.swapCursor(null);
 			break;
 
-		case LIST_TITLES_LOADER_ID:
+		case LISTS_LOADER_ID:
 			listTitlesAdapter.swapCursor(null);
+			break;
+
+		default:
 			break;
 		}
 	}
@@ -889,8 +858,7 @@ public class MasterListActivity extends Activity implements
 		final String[] items = { getString(R.string.sort_alphabetical),
 				getString(R.string.sort_selected_at_bottom),
 				getString(R.string.sort_selected_at_top) };
-		AlertDialog.Builder builder = new AlertDialog.Builder(
-				MasterListActivity.this);
+		AlertDialog.Builder builder = new AlertDialog.Builder(MasterListActivity.this);
 		builder.setTitle(getString(R.string.sort_dialog_title));
 		builder.setSingleChoiceItems(items, masterListSortOrder,
 				new DialogInterface.OnClickListener() {
@@ -905,8 +873,7 @@ public class MasterListActivity extends Activity implements
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int item) {
-						loaderManager.restartLoader(MASTER_LIST_LOADER_ID,
-								null, masterListCallbacks);
+						loaderManager.restartLoader(MASTER_LIST_LOADER_ID, null, masterListCallbacks);
 					}
 				});
 
@@ -927,22 +894,20 @@ public class MasterListActivity extends Activity implements
 
 		// Set an EditText view to get user input
 		final EditText txtNewListTitleInput = new EditText(this);
-		txtNewListTitleInput
-				.setHint(getString(R.string.txtNewListTitleInputHint));
-		txtNewListTitleInput.setInputType(InputType.TYPE_CLASS_TEXT
-				| InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
-				| InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+		txtNewListTitleInput.setHint(getString(R.string.txtNewListTitleInputHint));
+		txtNewListTitleInput.setInputType(
+				InputType.TYPE_CLASS_TEXT
+						| InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
+						| InputType.TYPE_TEXT_FLAG_CAP_WORDS);
 		alert.setView(txtNewListTitleInput);
 
 		alert.setPositiveButton(getString(R.string.btnCreateNewList),
 				new DialogInterface.OnClickListener() {
-
 					@SuppressWarnings("resource")
 					@Override
 					public void onClick(DialogInterface dialog, int whichButton) {
 
-						String newListTitle = txtNewListTitleInput.getText()
-								.toString().trim();
+						String newListTitle = txtNewListTitleInput.getText().toString().trim();
 						// validate the String input
 						if (null != newListTitle && newListTitle.length() > 0) {
 							// create a new list
@@ -955,8 +920,7 @@ public class MasterListActivity extends Activity implements
 								includedInListTitlesTableCursor = cr
 										.query(ListsTable.CONTENT_URI,
 												new String[] { ListsTable.COL_ID },
-												ListsTable.COL_LIST_TITLE
-														+ " = ?",
+												ListsTable.COL_LIST_TITLE + " = ?",
 												new String[] { newListTitle },
 												null);
 							} catch (Exception e) {
@@ -964,41 +928,32 @@ public class MasterListActivity extends Activity implements
 							}
 
 							if (includedInListTitlesTableCursor != null
-									&& includedInListTitlesTableCursor
-											.getCount() > 0) {
+									&& includedInListTitlesTableCursor.getCount() > 0) {
 								// newListTitle already in ListTitlesTable
-								// and make it active
+								// so make it active
 								includedInListTitlesTableCursor.moveToFirst();
 								activeListID = includedInListTitlesTableCursor
 										.getLong(includedInListTitlesTableCursor
 												.getColumnIndexOrThrow(ListsTable.COL_ID));
-								spnListTitles.setSelection(AListUtilities
-										.getIndex(spnListTitles, activeListID));
+								spnListTitles.setSelection(AListUtilities.getIndex(spnListTitles, activeListID));
 
 								if (verbose) {
-									String msg = "\""
-											+ newListTitle
-											+ "\" already exists in the database!";
-									Toast.makeText(getApplicationContext(),
-											msg, Toast.LENGTH_SHORT).show();
+									String msg = "\"" + newListTitle + "\" already exists in the database!";
+									Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 								}
 
 							} else {
-								// newListTitle not in ListTitlesTable .. so add
-								// it.
+								// newListTitle not in ListTitlesTable ..
+								// so add it.
 								Uri uri = ListsTable.CONTENT_URI;
 								ContentValues values = new ContentValues();
-								values.put(ListsTable.COL_LIST_TITLE,
-										newListTitle);
+								values.put(ListsTable.COL_LIST_TITLE, newListTitle);
 								Uri activeListUri = cr.insert(uri, values);
-								activeListID = Long.parseLong(activeListUri
-										.getLastPathSegment());
+								activeListID = Long.parseLong(activeListUri.getLastPathSegment());
 
 								if (verbose) {
-									String msg = "List: " + "\"" + newListTitle
-											+ "\"" + " added to the database.";
-									Toast.makeText(getApplicationContext(),
-											msg, Toast.LENGTH_SHORT).show();
+									String msg = "List: " + "\"" + newListTitle + "\"" + " added to the database.";
+									Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 								}
 							}
 							AListUtilities
@@ -1007,12 +962,9 @@ public class MasterListActivity extends Activity implements
 
 						else {
 							String msg = "No list title provided!/nPlease try creating a new list again.";
-							Toast.makeText(getApplicationContext(), msg,
-									Toast.LENGTH_SHORT).show();
+							Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 						}
-
 					}
-
 				});
 
 		alert.setNegativeButton(getString(R.string.Cancel),
@@ -1031,40 +983,33 @@ public class MasterListActivity extends Activity implements
 		alert.show();
 	}
 
-	private void ActivateList(long listTitleID) {
+	private void ActivateList(long listID) {
 		try {
-			this.activeListID = listTitleID;
-			SetLayoutBackgroundColor(listTitleID);
+			this.activeListID = listID;
+			SetLayoutBackgroundColor(listID);
 			MasterListItemsTable.ResetSelectedColumn(this);
-			MasterListItemsTable.SetSelectedColumn(this, listTitleID);
+			MasterListItemsTable.SetSelectedColumn(this, listID);
 
 		} catch (Exception e) {
 			Log.e(TAG, "An Exception error occurred in ActivateList. ", e);
 		}
 	}
 
-	private void SetLayoutBackgroundColor(long listTitleID) {
+	private void SetLayoutBackgroundColor(long listID) {
 		try {
 			@SuppressWarnings("resource")
-			Cursor listTitlesCursor = Lists_Items_Bridge_Table
-					.getListTitlesCurosr(this, listTitleID);
+			Cursor listTitlesCursor = List_Item_Table.getListsCurosr(this, listID);
 			if (listTitlesCursor != null) {
-				String strBackgroundColor = listTitlesCursor
-						.getString(listTitlesCursor
-								.getColumnIndexOrThrow(ListsTable.COL_BACKGROUND_COLOR));
-				spnListTitlesBackgroundColor = AListUtilities
-						.GetColorInt(strBackgroundColor);
+				String strBackgroundColor = listTitlesCursor.getString(listTitlesCursor
+						.getColumnIndexOrThrow(ListsTable.COL_BACKGROUND_COLOR));
+				spnListTitlesBackgroundColor = AListUtilities.GetColorInt(strBackgroundColor);
 
-				String strListTitlesTextColor = listTitlesCursor
-						.getString(listTitlesCursor
-								.getColumnIndexOrThrow(ListsTable.COL_NORMAL_TEXT_COLOR));
-				spnListTitlesTextColor = AListUtilities
-						.GetColorInt(strListTitlesTextColor);
+				String strListTitlesTextColor = listTitlesCursor.getString(listTitlesCursor
+						.getColumnIndexOrThrow(ListsTable.COL_NORMAL_TEXT_COLOR));
+				spnListTitlesTextColor = AListUtilities.GetColorInt(strListTitlesTextColor);
 
 				btnStartListsViewActivity.setTextColor(spnListTitlesTextColor);
-				layoutListTitle
-						.setBackgroundColor(spnListTitlesBackgroundColor);
-
+				layoutListTitle.setBackgroundColor(spnListTitlesBackgroundColor);
 			}
 			AListUtilities.closeQuietly(listTitlesCursor);
 		} catch (Exception e) {
@@ -1074,18 +1019,16 @@ public class MasterListActivity extends Activity implements
 		}
 	}
 
-	private void DeleteList(long listTitleID) {
+	private void DeleteList(long listID) {
 
-		if (listTitleID < 0) {
+		if (listID < 0) {
 			return;
 		}
 
 		// confirm user wants to delete the current active list.
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-		String activeListTitle = Lists_Items_Bridge_Table.getListTitle(this,
-				listTitleID);
-		String deleteListPrompt = "Delete list: " + "\"" + activeListTitle
-				+ "\" ?";
+		String activeListTitle = List_Item_Table.getListTitle(this, listID);
+		String deleteListPrompt = "Delete list: " + "\"" + activeListTitle + "\" ?";
 
 		alert.setTitle(deleteListPrompt);
 
@@ -1093,13 +1036,13 @@ public class MasterListActivity extends Activity implements
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int whichButton) {
-						String activeListTitle = Lists_Items_Bridge_Table
+						// TODO: verify that activeListID should be used
+						// or if listID should be used
+						String listTitle = List_Item_Table
 								.getListTitle(getBaseContext(), activeListID);
 						doDeleteList(activeListID);
-						String deleteListPrompt = "List: " + "\""
-								+ activeListTitle + "\" DELETED.";
-						Toast.makeText(getApplicationContext(),
-								deleteListPrompt, Toast.LENGTH_SHORT).show();
+						String prompt = "List: " + "\"" + listTitle + "\" DELETED.";
+						Toast.makeText(getApplicationContext(), prompt, Toast.LENGTH_SHORT).show();
 					}
 				});
 
@@ -1108,27 +1051,24 @@ public class MasterListActivity extends Activity implements
 					@Override
 					public void onClick(DialogInterface dialog, int whichButton) {
 						// Canceled.
-						String activeListTitle = Lists_Items_Bridge_Table
+						String listTitle = List_Item_Table
 								.getListTitle(getBaseContext(), activeListID);
 						String cancelDeleteListPrompt = "Deleting of list: "
-								+ "\"" + activeListTitle + "\" CANCELED.";
+								+ "\"" + listTitle + "\" CANCELED.";
 						Toast.makeText(getApplicationContext(),
-								cancelDeleteListPrompt, Toast.LENGTH_SHORT)
-								.show();
+								cancelDeleteListPrompt, Toast.LENGTH_SHORT).show();
 					}
 				});
 
 		alert.show();
 	}
 
-	private void doDeleteList(long listTitleID) {
-		this.activeListID = Lists_Items_Bridge_Table.FindNextListID(this,
-				listTitleID);
-		Lists_Items_Bridge_Table.DeleteAllItems(this, listTitleID);
-		Lists_Items_Bridge_Table.DeleteAllPreviousCategoryItems(this,
-				listTitleID);
+	private void doDeleteList(long listID) {
+		this.activeListID = List_Item_Table.FindNextListID(this, listID);
+		List_Item_Table.DeleteAllItems(this, listID);
+		List_Item_Table.DeleteAllPreviousCategoryItems(this, listID);
 		MasterListItemsTable.ResetSelectedColumn(this);
-		Lists_Items_Bridge_Table.DeleteListTitleItem(this, listTitleID);
+		List_Item_Table.DeleteList(this, listID);
 	}
 
 	/** Deletes the Active List from the database. */
@@ -1188,12 +1128,12 @@ public class MasterListActivity extends Activity implements
 			cr.insert(ListsTable.CONTENT_URI, values);
 
 			values = new ContentValues();
-			values.put(Lists_Items_Bridge_Table.COL_CATEGORY_ID, i);
-			values.put(Lists_Items_Bridge_Table.COL_LIST_ID, i);
-			values.put(Lists_Items_Bridge_Table.COL_ITEM_ID, i);
-			values.put(Lists_Items_Bridge_Table.COL_MANUAL_SORT_ORDER, i);
-			values.put(Lists_Items_Bridge_Table.COL_STRUCK_OUT, i);
-			cr.insert(Lists_Items_Bridge_Table.CONTENT_URI, values);
+			values.put(List_Item_Table.COL_CATEGORY_ID, i);
+			values.put(List_Item_Table.COL_LIST_ID, i);
+			values.put(List_Item_Table.COL_ITEM_ID, i);
+			values.put(List_Item_Table.COL_MANUAL_SORT_ORDER, i);
+			values.put(List_Item_Table.COL_STRUCK_OUT, i);
+			cr.insert(List_Item_Table.CONTENT_URI, values);
 
 			values = new ContentValues();
 			values.put(CategoriesTable.COL_CATEGORY,
@@ -1247,13 +1187,13 @@ public class MasterListActivity extends Activity implements
 							String.valueOf(i)), values, null, null);
 
 			values = new ContentValues();
-			values.put(Lists_Items_Bridge_Table.COL_CATEGORY_ID, i + 5);
-			values.put(Lists_Items_Bridge_Table.COL_LIST_ID, i + 5);
-			values.put(Lists_Items_Bridge_Table.COL_ITEM_ID, i + 5);
-			values.put(Lists_Items_Bridge_Table.COL_MANUAL_SORT_ORDER, i + 5);
-			values.put(Lists_Items_Bridge_Table.COL_STRUCK_OUT, i + 5);
+			values.put(List_Item_Table.COL_CATEGORY_ID, i + 5);
+			values.put(List_Item_Table.COL_LIST_ID, i + 5);
+			values.put(List_Item_Table.COL_ITEM_ID, i + 5);
+			values.put(List_Item_Table.COL_MANUAL_SORT_ORDER, i + 5);
+			values.put(List_Item_Table.COL_STRUCK_OUT, i + 5);
 			cr.update(Uri.withAppendedPath(
-					Lists_Items_Bridge_Table.CONTENT_URI, String.valueOf(i)),
+					List_Item_Table.CONTENT_URI, String.valueOf(i)),
 					values, null, null);
 
 			values = new ContentValues();

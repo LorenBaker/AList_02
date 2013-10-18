@@ -15,7 +15,7 @@ public class ListsTable {
 	public static final String TABLE_LISTS = "tblLists";
 	public static final String COL_ID = "_id";
 	public static final String COL_LIST_TITLE = "listTitle";
-	public static final String COL_LIST_TYPE_ID = "listType";
+	public static final String COL_LIST_TYPE_ID = "listTypeID";
 	public static final String COL_SORT_ORDER_ID = "sortOrderID";
 	public static final String COL_BACKGROUND_COLOR = "backgroundColor";
 	public static final String COL_NORMAL_TEXT_COLOR = "normalTextColor";
@@ -41,7 +41,8 @@ public class ListsTable {
 			+ TABLE_LISTS + " ("
 			+ COL_ID + " integer primary key autoincrement, "
 			+ COL_LIST_TITLE + " text collate nocase, "
-			+ COL_LIST_TYPE_ID + " integer default 1, "
+			+ COL_LIST_TYPE_ID + " integer not null references " + ListTypesTable.TABLE_LIST_TYPES
+			+ "(" + ListTypesTable.COL_ID + ") default 1, "
 			+ COL_SORT_ORDER_ID + " integer default 0, "
 			+ COL_BACKGROUND_COLOR + " text default '#0000FF', "
 			+ COL_NORMAL_TEXT_COLOR + " text default '#FFFFFF', "

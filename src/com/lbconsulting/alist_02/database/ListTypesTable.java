@@ -16,7 +16,7 @@ public class ListTypesTable {
 	// MasterListItems data table
 	public static final String TABLE_LIST_TYPES = "tblListTypes";
 	public static final String COL_ID = "_id";
-	public static final String COL_LIST_TYPE = "category";
+	public static final String COL_LIST_TYPE = "type";
 	public static final String[] PROJECTION_ALL = { COL_ID, COL_LIST_TYPE };
 
 	public static final String CONTENT_PATH = TABLE_LIST_TYPES;

@@ -13,12 +13,12 @@ public class PreviousCategoryTable {
 
 	// PreviousCategoryTable data table and constants
 	public static final String TABLE_PREVIOUS_CATEGORY = "tblPreviousCategory";
-	/* public static final String COL_ID = "_id"; */
+	public static final String COL_ID = "_id";
 	public static final String COL_LIST_ID = "listID";
 	public static final String COL_ITEM_ID = "itemID";
 	public static final String COL_CATEGORY_ID = "categoryID";
 	public static final String[] PROJECTION_ALL = {
-			COL_LIST_ID, COL_ITEM_ID, COL_CATEGORY_ID
+			COL_ID, COL_LIST_ID, COL_ITEM_ID, COL_CATEGORY_ID
 	};
 
 	public static final String CONTENT_PATH = TABLE_PREVIOUS_CATEGORY;
@@ -33,12 +33,13 @@ public class PreviousCategoryTable {
 	// Database creation SQL statements
 	private static final String DATABASE_CREATE =
 			"create table " + TABLE_PREVIOUS_CATEGORY + " ("
+					+ COL_ID + " integer primary key autoincrement, "
 					+ COL_LIST_ID + " integer not null references " + ListsTable.TABLE_LISTS
 					+ "(" + ListsTable.COL_ID + "),"
 					+ COL_ITEM_ID + " integer not null references " + MasterListItemsTable.TABLE_MASTER_LIST_ITEMS
 					+ "(" + MasterListItemsTable.COL_ID + "),"
-					+ COL_CATEGORY_ID + " integer not null,"
-					+ "primary key (" + COL_LIST_ID + ", " + COL_ITEM_ID + ")"
+					+ COL_CATEGORY_ID + " integer not null references " + CategoriesTable.TABLE_CATEGORIES
+					+ "(" + CategoriesTable.COL_ID + ") default 1"
 					+ ")";
 
 	public static void onCreate(SQLiteDatabase database) {
