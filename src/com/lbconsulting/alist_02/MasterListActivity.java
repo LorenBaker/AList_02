@@ -1,5 +1,7 @@
 package com.lbconsulting.alist_02;
 
+import java.util.Calendar;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
@@ -188,7 +190,7 @@ public class MasterListActivity extends Activity implements
 		// Notification the activity will be destroyed
 		if (L)
 			Log.i(TAG, "MasterListActivity onDestroy"
-			// Are we finishing?
+					// Are we finishing?
 					+ (isFinishing() ? " Finishing" : ""));
 	}
 
@@ -530,15 +532,13 @@ public class MasterListActivity extends Activity implements
 		}
 	}
 
-	private void AddItemToActiveList(String newMasterListItem,
-			long newMasterListItemID) {
+	private void AddItemToActiveList(String newMasterListItem, long newMasterListItemID) {
 		String msg = null;
 		ContentResolver cr = getContentResolver();
 
 		if (this.activeListID < 0) {
 			msg = "No List selected.\nPlease create or select a List before adding items.";
-			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG)
-					.show();
+			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
 			return;
 		}
 
@@ -554,18 +554,15 @@ public class MasterListActivity extends Activity implements
 
 		if (includedInListsTableCursor.getCount() > 0) {
 			if (verbose) {
-				msg = "\"" + newMasterListItem + "\""
-						+ " is already included in the active list!";
-				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT)
-						.show();
+				msg = "\"" + newMasterListItem + "\"" + " is already included in the active list!";
+				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 			}
 			AListUtilities.closeQuietly(includedInListsTableCursor);
 			return;
 		} else {
 			AListUtilities.closeQuietly(includedInListsTableCursor);
 
-			// newMasterListItemID is not included in the active list ... so add
-			// it
+			// newMasterListItemID is not included in the active list ... so add it
 			ContentValues values = new ContentValues();
 			values.put(ListsTable.COL_LIST_TITLE_ID, this.activeListID);
 			values.put(ListsTable.COL_MASTER_LIST_ITEM_ID, newMasterListItemID);
@@ -573,8 +570,8 @@ public class MasterListActivity extends Activity implements
 			Uri newListUri = cr.insert(ListsTable.CONTENT_URI, values);
 			long newListID = Long.parseLong(newListUri.getLastPathSegment());
 
-			// make the manual sort order equal to the newListID --- i.e. added
-			// to the bottom of the list.
+			// make the manual sort order equal to the newListID 
+			// i.e. added to the bottom of the list.
 			values = new ContentValues();
 			values.put(ListsTable.COL_MANUAL_SORT_ORDER, newListID);
 
@@ -588,30 +585,28 @@ public class MasterListActivity extends Activity implements
 
 			if (previousCategoryCursor.getCount() > 0) {
 				// previously used category found
-				Long previousCategoryID = previousCategoryCursor
-						.getLong(previousCategoryCursor
-								.getColumnIndexOrThrow(PreviousCategoryTable.COL_CATEGORY_ID));
+				Long previousCategoryID = previousCategoryCursor.getLong(previousCategoryCursor
+						.getColumnIndexOrThrow(PreviousCategoryTable.COL_CATEGORY_ID));
 				values.put(ListsTable.COL_CATEGORY_ID, previousCategoryID);
 			}
 
-			// update Manual Sort Order and Category of the newly created List
-			// row
+			// update Manual Sort Order and Category of the newly created List row
 			cr.update(newListUri, values, null, null);
 			AListUtilities.closeQuietly(previousCategoryCursor);
 
 			// indicate that newMasterListItem is in the active list
-			uri = Uri.withAppendedPath(MasterListItemsTable.CONTENT_URI,
-					String.valueOf(newMasterListItemID));
+			// update date_time last used
+			uri = Uri.withAppendedPath(MasterListItemsTable.CONTENT_URI, String.valueOf(newMasterListItemID));
 			values = new ContentValues();
-			values.put(MasterListItemsTable.COL_SELECTED,
-					MasterListItemsTable.SELECTED_TRUE);
+			values.put(MasterListItemsTable.COL_SELECTED, MasterListItemsTable.SELECTED_TRUE);
+			long currentDateTime = Calendar.getInstance().getTimeInMillis();
+			values.put(MasterListItemsTable.COL_DATE_TIME_LAST_USED, currentDateTime);
 			cr.update(uri, values, null, null);
 
 			if (verbose) {
-				msg = "\"" + newMasterListItem + "\""
-						+ " added to the active List.";
-				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT)
-						.show();
+				msg = "\"" + newMasterListItem + "\"" + " added to the active List.\nDate: "
+						+ AListUtilities.formatDateTime(currentDateTime);
+				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 			}
 		}
 
@@ -684,10 +679,8 @@ public class MasterListActivity extends Activity implements
 
 			if (verbose) {
 				if (!autoAddItem) {
-					String msg = "\"" + newMasterListItem
-							+ "\" already exists in the database!";
-					Toast.makeText(getApplicationContext(), msg,
-							Toast.LENGTH_SHORT).show();
+					String msg = "\"" + newMasterListItem + "\" already exists in the database!";
+					Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 				}
 			}
 		} else {
@@ -695,18 +688,14 @@ public class MasterListActivity extends Activity implements
 			// add it
 			try {
 				ContentValues values = new ContentValues();
-				values.put(MasterListItemsTable.COL_ITEM_NAME,
-						newMasterListItem);
-				Uri newMasterListItemURI = cr.insert(
-						MasterListItemsTable.CONTENT_URI, values);
-				newMasterListItemID = Long.parseLong(newMasterListItemURI
-						.getLastPathSegment());
+				values.put(MasterListItemsTable.COL_ITEM_NAME, newMasterListItem);
+				values.put(MasterListItemsTable.COL_DATE_TIME_LAST_USED, Calendar.getInstance().getTimeInMillis());
+				Uri newMasterListItemURI = cr.insert(MasterListItemsTable.CONTENT_URI, values);
+				newMasterListItemID = Long.parseLong(newMasterListItemURI.getLastPathSegment());
 
 				if (verbose) {
-					String msg = "\"" + newMasterListItem
-							+ "\" added to the master list.";
-					Toast.makeText(getApplicationContext(), msg,
-							Toast.LENGTH_SHORT).show();
+					String msg = "\"" + newMasterListItem + "\" added to the master list.";
+					Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 				}
 			} catch (SQLiteException e) {
 				Log.e(TAG, "AddItemToMasterList: SQLiteException", e);

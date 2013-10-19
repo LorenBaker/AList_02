@@ -4,8 +4,12 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.TimeZone;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -138,5 +142,47 @@ public class AListUtilities {
 		// did not find the text in the spinner!
 		closeQuietly(spinnerItem);
 		return -1;
+	}
+
+	public static String formatDateTime(Context context, String timeToFormat) {
+
+		String finalDateTime = "";
+
+		SimpleDateFormat iso8601Format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+		Date date = null;
+		if (timeToFormat != null) {
+			try {
+				date = iso8601Format.parse(timeToFormat);
+			} catch (Exception e) {
+				date = null;
+			}
+
+			if (date != null) {
+				long when = date.getTime();
+				int flags = 0;
+				flags |= android.text.format.DateUtils.FORMAT_SHOW_TIME;
+				flags |= android.text.format.DateUtils.FORMAT_SHOW_DATE;
+				flags |= android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
+				flags |= android.text.format.DateUtils.FORMAT_SHOW_YEAR;
+
+				finalDateTime = android.text.format.DateUtils.formatDateTime(context,
+						when + TimeZone.getDefault().getOffset(when), flags);
+			}
+		}
+		return finalDateTime;
+	}
+
+	public static String formatDateTime(long timeToFormatInMilliseconds) {
+
+		/*SimpleDateFormat iso8601Format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
+		Date date = iso8601Format.parse(timeToFormatInMilliseconds);*/
+
+		SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a");
+
+		formatter.setTimeZone(TimeZone.getDefault());
+		String currentDate = formatter.format(timeToFormatInMilliseconds);
+		return currentDate;
+
 	}
 }
