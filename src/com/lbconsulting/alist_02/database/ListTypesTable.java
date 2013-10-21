@@ -42,9 +42,11 @@ public class ListTypesTable {
 
 		ArrayList<String> sqlStatements = new ArrayList<String>();
 		sqlStatements.add("insert into " + TABLE_LIST_TYPES + " (" + COL_ID + ", " + COL_LIST_TYPE
-				+ ") VALUES (NULL, '[None]')");
+				+ ") VALUES (NULL, '[All]')");
 		sqlStatements.add("insert into " + TABLE_LIST_TYPES + " (" + COL_ID + ", " + COL_LIST_TYPE
-				+ ") VALUES (NULL, 'Groceries')");
+				+ ") VALUES (NULL, 'Grocery Items')");
+		sqlStatements.add("insert into " + TABLE_LIST_TYPES + " (" + COL_ID + ", " + COL_LIST_TYPE
+				+ ") VALUES (NULL, 'TO DO Items')");
 
 		AListUtilities.execMultipleSQL(database, sqlStatements);
 	}

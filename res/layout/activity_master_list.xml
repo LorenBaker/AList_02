@@ -7,38 +7,54 @@
     android:baselineAligned="false"
     android:gravity="center_horizontal"
     android:orientation="vertical" >
-    	
+
+    <LinearLayout
+        android:id="@+id/linearLayoutListType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="false"
+        android:orientation="horizontal" >
+
+        <Spinner
+            android:id="@+id/spnListType"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:background="@color/lightcyan"
+            android:clickable="true"
+            android:longClickable="false" >
+        </Spinner>
+    </LinearLayout>
+
     <LinearLayout
         android:id="@+id/linearLayoutListTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="false"
         android:orientation="horizontal" >
-         
-		<Spinner
-		    android:id="@+id/spnListTitle"
-		    android:layout_width="0dp"
-		    android:layout_height="wrap_content"
-		    android:layout_weight="5"
-		    android:background="@color/lightcyan"
-		    android:clickable="true"
-		    android:longClickable="false"
-		    android:prompt="@string/spnListTitleEmpty" >
-    
-		</Spinner>
 
-		<Button
-		    android:id="@+id/btnStartListsViewActivity"
-		    android:layout_width="0dp"
-		    android:layout_height="wrap_content"
-		    android:layout_weight="1"
-		    android:text="@string/btnStartListsViewActivity" />
-	
+        <Spinner
+            android:id="@+id/spnListTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:background="@color/lightcyan"
+            android:clickable="true"
+            android:longClickable="false"
+            android:prompt="@string/spnListTitleEmpty" >
+        </Spinner>
+
+        <Button
+            android:id="@+id/btnStartListsViewActivity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btnStartListsViewActivity" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" 
+        android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
         <EditText
@@ -60,10 +76,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/addMasterListItem" />
-
     </LinearLayout>
 
-    
     <ListView
         android:id="@+id/lstItems"
         android:layout_width="match_parent"

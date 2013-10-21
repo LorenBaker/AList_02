@@ -21,9 +21,11 @@ public class MasterListItemsTable {
 	public static final String TABLE_MASTER_LIST_ITEMS = "tblMasterListItems";
 	public static final String COL_ID = "_id";
 	public static final String COL_ITEM_NAME = "itemName";
+	public static final String COL_ITEM_TYPE_ID = "itemTypeID";
 	public static final String COL_SELECTED = "selected";
 	public static final String COL_DATE_TIME_LAST_USED = "dateTimeLastUsed";
-	public static final String[] PROJECTION_ALL = { COL_ID, COL_ITEM_NAME, COL_SELECTED, COL_DATE_TIME_LAST_USED };
+	public static final String[] PROJECTION_ALL = { COL_ID, COL_ITEM_NAME, COL_ITEM_TYPE_ID, COL_SELECTED,
+			COL_DATE_TIME_LAST_USED };
 
 	public static final String CONTENT_PATH = TABLE_MASTER_LIST_ITEMS;
 	public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + "vnd.lbconsulting."
@@ -48,7 +50,9 @@ public class MasterListItemsTable {
 					+ " ("
 					+ COL_ID + " integer primary key autoincrement, "
 					+ COL_ITEM_NAME + " text collate nocase, "
-					+ COL_SELECTED + " integer DEFAULT 0, "
+					+ COL_ITEM_TYPE_ID + " integer not null references "
+					+ ListTypesTable.TABLE_LIST_TYPES + " (" + ListTypesTable.COL_ID + ") default 1, "
+					+ COL_SELECTED + " integer default 0, "
 					+ COL_DATE_TIME_LAST_USED + " integer"
 					+ ");";
 
@@ -60,158 +64,172 @@ public class MasterListItemsTable {
 
 		ArrayList<String> sqlStatements = new ArrayList<String>();
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Apples', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Apples', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Bacon', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Bacon', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Baked Beans', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Baked Beans', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Balsamic Vinegar', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Balsamic Vinegar', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Bananas', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Bananas', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Beer', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Beer', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Black Olives', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Black Olives', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Blue Cheese', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Blue Cheese', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Blueberries', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Blueberries', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Bread', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Bread', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Broccoli', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Broccoli', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Buns', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Buns', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Buttermilk', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Buttermilk', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Carrots', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Carrots', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Cereal', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Cereal', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Cheese', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Cheese', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Chicken', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Chicken', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Chicken Broth', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Chicken Broth', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Cinnamon', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Cinnamon', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Corn', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Corn', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Cottage Cheese', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Cottage Cheese', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Cream Cheese', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Cream Cheese', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Distilled Water', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Distilled Water', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Eggs', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Eggs', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Garlic', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Garlic', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Ground Beef', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Ground Beef', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Hummus', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Hummus', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Kleenex', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Kleenex', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Lemons', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Lemons', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Limes', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Limes', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Manicotti Noodles', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Manicotti Noodles', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Mustard', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Mustard', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Olive Oil', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Olive Oil', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Parmesan Cheese', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Parmesan Cheese', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Peanut Butter', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Peanut Butter', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Pickles', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Pickles', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Pineapple', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Pineapple', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Potatoes', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Potatoes', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Relish', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Relish', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Satsumas', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Satsumas', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Sour Cream', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Sour Cream', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'String Cheese', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'String Cheese', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Toilet Paper', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Toilet Paper', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Tomatoes', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Tomatoes', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Toothpaste', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Toothpaste', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Tuna', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Tuna', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Vanilla', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Vanilla', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Vinegar', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Vinegar', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Wine', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Wine', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Yogurt', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Yogurt', 2, " + currentDateTimeInMillis + ")");
 		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
-				+ COL_DATE_TIME_LAST_USED
-				+ ") values (NULL, 'Avocado', " + currentDateTimeInMillis + ")");
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Avocado', 2, " + currentDateTimeInMillis + ")");
+
+		// To Do List
+		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Buy Groceries', 3, " + currentDateTimeInMillis + ")");
+		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Pickup Laundry', 3, " + currentDateTimeInMillis + ")");
+		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Service The Car', 3, " + currentDateTimeInMillis + ")");
+		sqlStatements.add("insert into " + TABLE_MASTER_LIST_ITEMS + "(" + COL_ID + ", " + COL_ITEM_NAME + ", "
+				+ COL_ITEM_TYPE_ID + ", " + COL_DATE_TIME_LAST_USED
+				+ ") values (NULL, 'Prepare For Meeting', 3, " + currentDateTimeInMillis + ")");
 
 		AListUtilities.execMultipleSQL(database, sqlStatements);
 	}
