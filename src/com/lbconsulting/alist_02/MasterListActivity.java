@@ -170,7 +170,7 @@ public class MasterListActivity extends Activity implements
 		applicationStates.putLong("activeListID", this.activeListID);
 		applicationStates.putLong("activeListTypeID", this.activeListTypeID);
 		applicationStates.putString("txtListItem", txtListItem.getText().toString());
-		applicationStates.putInt("masterListSortOrder", this.masterListSortOrder);
+		applicationStates.putInt("masterListSortOrder", masterListSortOrder);
 
 		applicationStates.putInt("masterListViewFirstVisiblePosition", masterListView.getFirstVisiblePosition());
 		View v = masterListView.getChildAt(0);
@@ -295,9 +295,11 @@ public class MasterListActivity extends Activity implements
 		// Set application states
 		this.autoAddItem = storedStates.getBoolean("autoAddItem", true);
 		this.verbose = storedStates.getBoolean("verbose", true);
-		this.activeListID = storedStates.getLong("activeListID", -1);
+		// TODO: For testing -- change activeListID default to -1
+		// this.activeListID = storedStates.getLong("activeListID", -1);
+		this.activeListID = storedStates.getLong("activeListID", 2);
 		this.activeListTypeID = storedStates.getLong("activeListTypeID", 2); // 2 = Groceries
-		this.masterListSortOrder = storedStates.getInt("masterListSortOrder", SORT_ORDER_ALPHABETICAL);
+		this.masterListSortOrder = storedStates.getInt("masterListSortOrder", this.SORT_ORDER_ALPHABETICAL);
 		this.txtListItem.setText(storedStates.getString("txtListItem", null));
 		this.masterListViewFirstVisiblePosition = storedStates.getInt("masterListViewFirstVisiblePosition", 0);
 		this.masterListViewTop = storedStates.getInt("masterListViewTop", 0);
@@ -323,10 +325,8 @@ public class MasterListActivity extends Activity implements
 
 					long newMasterListItemID = AddItemToMasterList(newMasterListItem);
 					txtListItem.setText("");
-					if (autoAddItem && activeListID > 0
-							&& newMasterListItemID > 0) {
-						AddItemToActiveList(newMasterListItem,
-								newMasterListItemID);
+					if (autoAddItem && activeListID > 0 && newMasterListItemID > 0) {
+						AddItemToActiveList(newMasterListItem, newMasterListItemID);
 					}
 					return true;
 				} else {
@@ -423,9 +423,7 @@ public class MasterListActivity extends Activity implements
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent,
 					View view, int position, long id) {
-				// TODO create dialog giving the user the choice to:
-				// Delete or
-				// Edit the selected item, or Cancel
+				// TODO create dialog giving the user the choice to: Delete or Edit the selected item, or Cancel
 				if (verbose) {
 					String msg = "masterListView LONG CLICK: Position = "
 							+ position + "; ID = " + id;
@@ -555,8 +553,7 @@ public class MasterListActivity extends Activity implements
 	}
 
 	private void AddItemToActiveList(String newMasterListItem, long newMasterListItemID) {
-		String msg = null;
-		ContentResolver cr = getContentResolver();
+		String msg = "";
 
 		if (this.activeListID < 0) {
 			msg = "No List selected.\nPlease create or select a List before adding items.";
@@ -565,27 +562,18 @@ public class MasterListActivity extends Activity implements
 		}
 
 		// Check that masterListItemID is not already included in the ListsTable
-		// for current active list.
-		String[] projection = { ListsTable.COL_ID };
-		String selection = ListsTable.COL_LIST_TITLE_ID + " = ? AND "
-				+ ListsTable.COL_MASTER_LIST_ITEM_ID + " = ?";
-		String[] selectionArgs = { String.valueOf(this.activeListID),
-				String.valueOf(newMasterListItemID) };
-		Cursor includedInListsTableCursor = cr.query(ListsTable.CONTENT_URI,
-				projection, selection, selectionArgs, null);
-
-		if (includedInListsTableCursor.getCount() > 0) {
+		long listID = ListsTable.FindListID(this, this.activeListID, newMasterListItemID);
+		if (listID > 0) {
 			if (verbose) {
 				msg = "\"" + newMasterListItem + "\"" + " is already included in the active list!";
 				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 			}
-			AListUtilities.closeQuietly(includedInListsTableCursor);
-			return;
-		} else {
-			AListUtilities.closeQuietly(includedInListsTableCursor);
-
+		}
+		else {
 			// newMasterListItemID is not included in the active list ... so add it
+			ContentResolver cr = this.getContentResolver();
 			ContentValues values = new ContentValues();
+
 			values.put(ListsTable.COL_LIST_TITLE_ID, this.activeListID);
 			values.put(ListsTable.COL_MASTER_LIST_ITEM_ID, newMasterListItemID);
 
@@ -598,26 +586,19 @@ public class MasterListActivity extends Activity implements
 			values.put(ListsTable.COL_MANUAL_SORT_ORDER, newListID);
 
 			// Check if newMasterListItem has previously used a category
-			projection = new String[] { PreviousCategoryTable.COL_CATEGORY_ID };
-			selection = PreviousCategoryTable.COL_LIST_TITLE_ID + " = ? AND "
-					+ PreviousCategoryTable.COL_MASTER_LIST_ITEM_ID + " = ?";
-			Uri uri = PreviousCategoryTable.CONTENT_URI;
-			Cursor previousCategoryCursor = cr.query(uri, projection, selection, selectionArgs, null);
-
-			if (previousCategoryCursor.getCount() > 0) {
+			long previousCategoryID = PreviousCategoryTable.FindPreviousCategoryID(this, this.activeListID,
+					newMasterListItemID);
+			if (previousCategoryID > 0) {
 				// previously used category found
-				Long previousCategoryID = previousCategoryCursor.getLong(previousCategoryCursor
-						.getColumnIndexOrThrow(PreviousCategoryTable.COL_CATEGORY_ID));
 				values.put(ListsTable.COL_CATEGORY_ID, previousCategoryID);
 			}
 
 			// update Manual Sort Order and Category of the newly created List row
 			cr.update(newListUri, values, null, null);
-			AListUtilities.closeQuietly(previousCategoryCursor);
 
 			// indicate that newMasterListItem is in the active list
 			// update date_time last used
-			uri = Uri.withAppendedPath(MasterListItemsTable.CONTENT_URI, String.valueOf(newMasterListItemID));
+			Uri uri = Uri.withAppendedPath(MasterListItemsTable.CONTENT_URI, String.valueOf(newMasterListItemID));
 			values = new ContentValues();
 			values.put(MasterListItemsTable.COL_SELECTED, MasterListItemsTable.SELECTED_TRUE);
 			long currentDateTime = Calendar.getInstance().getTimeInMillis();
@@ -653,7 +634,8 @@ public class MasterListActivity extends Activity implements
 							+ "Active List ID = "
 							+ this.activeListID
 							+ "; Master List Item = " + masterListItem);
-		} else {
+		}
+		else {
 			// reset the "selected field" in the master List table for
 			// newMasterListItem
 			Uri uri = Uri.withAppendedPath(MasterListItemsTable.CONTENT_URI,
@@ -671,64 +653,50 @@ public class MasterListActivity extends Activity implements
 		}
 	}
 
-	private long AddItemToMasterList(String newMasterListItem) {
+	private long AddItemToMasterList(String proposedMasterListItem) {
 
-		ContentResolver cr = null;
-		Cursor includedInMasterListItemsTableCursor = null;
-		long newMasterListItemID = -1;
-		try {
-			cr = getContentResolver();
-			includedInMasterListItemsTableCursor = cr.query(
-					MasterListItemsTable.CONTENT_URI,
-					new String[] { MasterListItemsTable.COL_ID },
-					MasterListItemsTable.COL_ITEM_NAME + " = ?",
-					new String[] { newMasterListItem }, null);
-		} catch (SQLiteException e1) {
-			Log.e(TAG, "AddItemToMasterList: SQLiteException", e1);
-			return -1;
-
-		} catch (IllegalArgumentException e1) {
-			Log.e(TAG, "AddItemToMasterList: IllegalArgumentException", e1);
-			return -1;
-		}
-
-		if (includedInMasterListItemsTableCursor.getCount() > 0) {
+		long proposedMasterListItemID = MasterListItemsTable.FindMasterListItemID(
+				this, proposedMasterListItem, this.activeListTypeID);
+		if (proposedMasterListItemID > 0) {
 			// the master list contains the proposed newMasterListItem
-			newMasterListItemID = includedInMasterListItemsTableCursor
-					.getLong(includedInMasterListItemsTableCursor
-							.getColumnIndexOrThrow(MasterListItemsTable.COL_ID));
-
 			if (verbose) {
 				if (!autoAddItem) {
-					String msg = "\"" + newMasterListItem + "\" already exists in the database!";
+					String msg = "\"" + proposedMasterListItem + "\" already exists in the database!";
 					Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 				}
-			}
-		} else {
-			// the proposed newMasterListItem is not in the master list ... so add it
-			try {
-				ContentValues values = new ContentValues();
-				values.put(MasterListItemsTable.COL_ITEM_NAME, newMasterListItem);
-				values.put(MasterListItemsTable.COL_DATE_TIME_LAST_USED, Calendar.getInstance().getTimeInMillis());
-				//TODO: if activeListTypeID=1 [default] ask user to select a different activeListTypeID
-				values.put(MasterListItemsTable.COL_ITEM_TYPE_ID, this.activeListTypeID);
-				Uri newMasterListItemURI = cr.insert(MasterListItemsTable.CONTENT_URI, values);
-				newMasterListItemID = Long.parseLong(newMasterListItemURI.getLastPathSegment());
-
-				if (verbose) {
-					String msg = "\"" + newMasterListItem + "\" added to the master list.";
-					Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-				}
-			} catch (SQLiteException e) {
-				Log.e(TAG, "AddItemToMasterList: SQLiteException", e);
-				return -1;
-			} catch (IllegalArgumentException e) {
-				Log.e(TAG, "AddItemToMasterList: IllegalArgumentException", e);
-				return -1;
 			}
 		}
-		AListUtilities.closeQuietly(includedInMasterListItemsTableCursor);
-		return newMasterListItemID;
+		else {
+			// the master list does not contain the proposed newMasterListItem ... so add it
+
+			// Verify that activeListTypeID does not equal 1. If so ... notify the user. 
+			if (activeListTypeID == 1) {
+				String title = "AList";
+				String message = "Cannot create item " + "\"" + proposedMasterListItem + "\""
+						+ " when the master list is filtered by [All Items].\n\n"
+						+ "Please select a different master list filter.";
+				int style = DialogBox.OK_ONLY;
+				DialogBox msgBox = new DialogBox(this, title, message, style);
+				msgBox.Show();
+				return -1;
+			}
+
+			// add the proposedMasterListItem to the database
+			ContentResolver cr = this.getContentResolver();
+			ContentValues values = new ContentValues();
+			values.put(MasterListItemsTable.COL_ITEM_NAME, proposedMasterListItem);
+			values.put(MasterListItemsTable.COL_DATE_TIME_LAST_USED, Calendar.getInstance().getTimeInMillis());
+
+			values.put(MasterListItemsTable.COL_ITEM_TYPE_ID, this.activeListTypeID);
+			Uri newMasterListItemURI = cr.insert(MasterListItemsTable.CONTENT_URI, values);
+			proposedMasterListItemID = Long.parseLong(newMasterListItemURI.getLastPathSegment());
+
+			if (verbose) {
+				String msg = "\"" + proposedMasterListItem + "\" added to the master list.";
+				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+			}
+		}
+		return proposedMasterListItemID;
 	}
 
 	@Override
@@ -1037,17 +1005,14 @@ public class MasterListActivity extends Activity implements
 								// it.
 								Uri uri = ListTitlesTable.CONTENT_URI;
 								ContentValues values = new ContentValues();
-								values.put(ListTitlesTable.COL_LIST_TITLE,
-										newListTitle);
+								values.put(ListTitlesTable.COL_LIST_TITLE, newListTitle);
 								Uri activeListUri = cr.insert(uri, values);
-								activeListID = Long.parseLong(activeListUri
-										.getLastPathSegment());
+								activeListID = Long.parseLong(activeListUri.getLastPathSegment());
 
 								if (verbose) {
 									String msg = "List: " + "\"" + newListTitle
 											+ "\"" + " added to the database.";
-									Toast.makeText(getApplicationContext(),
-											msg, Toast.LENGTH_SHORT).show();
+									Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 								}
 							}
 							AListUtilities

@@ -573,7 +573,13 @@ public class AListContentProvider extends ContentProvider {
 		if (null != db) {
 			String groupBy = null;
 			String having = null;
-			Cursor cursor = queryBuilder.query(db, projection, selection, selectionArgs, groupBy, having, sortOrder);
+			Cursor cursor = null;
+			try {
+				cursor = queryBuilder.query(db, projection, selection, selectionArgs, groupBy, having, sortOrder);
+			} catch (Exception e) {
+				Log.e(TAG, "An Exception error occurred in AListContentProvider:query. ", e);
+			}
+
 			if (null != cursor) {
 				cursor.moveToFirst();
 				cursor.setNotificationUri(getContext().getContentResolver(), uri);

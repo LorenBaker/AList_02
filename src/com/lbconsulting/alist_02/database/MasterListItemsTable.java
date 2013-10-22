@@ -304,4 +304,40 @@ public class MasterListItemsTable {
 		ResetSelectedColumn(context);
 	}
 
+	public static Cursor getMasterListItemsCursor(Context context, String itemName, long itemTypeID) {
+		Uri uri = CONTENT_URI;
+		String[] projection = PROJECTION_ALL;
+		String selection = COL_ITEM_NAME + " = ? AND " + COL_ITEM_TYPE_ID + " = ?";
+		String selectionArgs[] = new String[] { itemName, String.valueOf(itemTypeID) };
+		String sortOrder = null;
+
+		ContentResolver cr = context.getContentResolver();
+		Cursor cursor = null;
+		try {
+			cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+		} catch (Exception e) {
+			Log.e(TAG, "An Exception error occurred in MasterListItemsTable: getMasterListItemsCursor. ", e);
+		}
+		return cursor;
+	}
+
+	public static long FindMasterListItemID(Context context, String itemName, long itemTypeID) {
+
+		Cursor cursor = getMasterListItemsCursor(context, itemName, itemTypeID);
+
+		if (cursor == null) {
+			return -1;
+		}
+
+		if (cursor.getCount() > 0) {
+			long newMasterListItemID = cursor.getLong(cursor.getColumnIndexOrThrow(COL_ID));
+			cursor.close();
+			return newMasterListItemID;
+		}
+		else {
+			// master list item not found
+			cursor.close();
+			return -1;
+		}
+	}
 }

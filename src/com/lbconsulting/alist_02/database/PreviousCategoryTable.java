@@ -1,6 +1,10 @@
 package com.lbconsulting.alist_02.database;
 
+import java.util.ArrayList;
+
 import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
@@ -41,6 +45,31 @@ public class PreviousCategoryTable {
 
 	public static void onCreate(SQLiteDatabase database) {
 		database.execSQL(DATABASE_CREATE);
+
+		//TODO: For testing
+		ArrayList<String> sqlStatements = new ArrayList<String>();
+		sqlStatements.add("insert into " + TABLE_PREVIOUS_CATEGORY + " ("
+				+ COL_ID + ", "
+				+ COL_LIST_TITLE_ID + ", "
+				+ COL_MASTER_LIST_ITEM_ID + ", "
+				+ COL_CATEGORY_ID
+				+ ") VALUES (NULL, 2,23,2)");
+
+		sqlStatements.add("insert into " + TABLE_PREVIOUS_CATEGORY + " ("
+				+ COL_ID + ", "
+				+ COL_LIST_TITLE_ID + ", "
+				+ COL_MASTER_LIST_ITEM_ID + ", "
+				+ COL_CATEGORY_ID
+				+ ") VALUES (NULL, 3,26,3)");
+
+		sqlStatements.add("insert into " + TABLE_PREVIOUS_CATEGORY + " ("
+				+ COL_ID + ", "
+				+ COL_LIST_TITLE_ID + ", "
+				+ COL_MASTER_LIST_ITEM_ID + ", "
+				+ COL_CATEGORY_ID
+				+ ") VALUES (NULL, 1,18,4)");
+
+		AListUtilities.execMultipleSQL(database, sqlStatements);
 	}
 
 	public static void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
@@ -48,5 +77,38 @@ public class PreviousCategoryTable {
 				+ newVersion + ".");
 		database.execSQL("DROP TABLE IF EXISTS " + TABLE_PREVIOUS_CATEGORY);
 		onCreate(database);
+	}
+
+	public static Cursor getPreviousCategoryCurosr(Context context, long listTitleID, long masterListItemID) {
+		Cursor cursor = null;
+
+		try {
+			ContentResolver cr = context.getContentResolver();
+			Uri uri = CONTENT_URI;
+			String[] projection = PROJECTION_ALL;
+			String where = COL_LIST_TITLE_ID + "= ?" + " AND " + COL_MASTER_LIST_ITEM_ID + "= ?";
+			String[] selectionArgs = { String.valueOf(listTitleID), String.valueOf(masterListItemID) };
+			cursor = cr.query(uri, projection, where, selectionArgs, null);
+
+		} catch (Exception e) {
+			Log.e(TAG, "An Exception error occurred in PreviousCategoryTable: getPreviousCategoryCurosr.", e);
+		}
+		return cursor;
+	}
+
+	public static long FindPreviousCategoryID(Context context, long listTitleID, long masterListItemID) {
+		Cursor cursor = getPreviousCategoryCurosr(context, listTitleID, masterListItemID);
+		if (cursor == null) {
+			return -1;
+		}
+		if (cursor.getCount() > 0) {
+			long listItemID = cursor.getLong(cursor.getColumnIndexOrThrow(COL_ID));
+			cursor.close();
+			return listItemID;
+		}
+		else {
+			cursor.close();
+			return -1;
+		}
 	}
 }

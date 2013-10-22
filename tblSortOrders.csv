@@ -1,0 +1,4 @@
+"_id","sortOrderName","sortOrderField"
+"1","List Item","itemName"
+"2","Manual","manualSortOrder"
+"3","Category","category, itemName"

@@ -1,0 +1,4 @@
+"_id","listTitle","sortOrderID","backgroundColor","normalTextColor","strikeoutTextColor","autoAddCategoriesOnStrikeout"
+"1","Safeway","0","#00008B","#FFFFFF","#D3D3D3","1"
+"2","QFC","1","#006400","#000000","#123456","1"
+"3","To Do List","2","#E9967A","#FFFFFF","#D3D3D3","0"
