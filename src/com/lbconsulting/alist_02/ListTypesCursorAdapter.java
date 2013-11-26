@@ -15,13 +15,14 @@ import com.lbconsulting.alist_02.database.ListTypesTable;
 
 public class ListTypesCursorAdapter extends CursorAdapter {
 	public Context context;
-	public LayoutInflater inflater;
+
+	//public LayoutInflater inflater;
 
 	public ListTypesCursorAdapter(Context context, Cursor c, int flags) {
 		super(context, c, flags);
 
 		this.context = context;
-		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		//this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
 	@Override

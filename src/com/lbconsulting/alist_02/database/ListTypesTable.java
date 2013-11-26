@@ -3,6 +3,8 @@ package com.lbconsulting.alist_02.database;
 import java.util.ArrayList;
 
 import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
@@ -42,11 +44,11 @@ public class ListTypesTable {
 
 		ArrayList<String> sqlStatements = new ArrayList<String>();
 		sqlStatements.add("insert into " + TABLE_LIST_TYPES + " (" + COL_ID + ", " + COL_LIST_TYPE
-				+ ") VALUES (NULL, '[All Items]')");
+				+ ") VALUES (NULL, '[None]')");
 		sqlStatements.add("insert into " + TABLE_LIST_TYPES + " (" + COL_ID + ", " + COL_LIST_TYPE
 				+ ") VALUES (NULL, 'Grocery Items')");
 		sqlStatements.add("insert into " + TABLE_LIST_TYPES + " (" + COL_ID + ", " + COL_LIST_TYPE
-				+ ") VALUES (NULL, 'TO DO Items')");
+				+ ") VALUES (NULL, 'To Do Items')");
 
 		AListUtilities.execMultipleSQL(database, sqlStatements);
 	}
@@ -57,4 +59,34 @@ public class ListTypesTable {
 		database.execSQL("DROP TABLE IF EXISTS " + TABLE_LIST_TYPES);
 		onCreate(database);
 	}
+
+	private static Cursor getListTypeItemsCursor(Context context, long listID) {
+		Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(listID));
+		String[] projection = PROJECTION_ALL;
+		String selection = null;
+		String selectionArgs[] = null;
+		String sortOrder = null;
+
+		ContentResolver cr = context.getContentResolver();
+		Cursor cursor = null;
+		try {
+			cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+		} catch (Exception e) {
+			Log.e(TAG, "An Exception error occurred in ListTypesTable: getListTypeItemsCursor. ", e);
+		}
+		return cursor;
+	}
+
+	public static String getListTypeName(Context context, long listTypeID) {
+		String listTypeName = "";
+		Cursor cursor = getListTypeItemsCursor(context, listTypeID);
+		if (cursor != null && cursor.getCount() > 0) {
+			listTypeName = cursor.getString(cursor.getColumnIndex(COL_LIST_TYPE));
+		}
+		if (cursor != null) {
+			cursor.close();
+		}
+		return listTypeName;
+	}
+
 }

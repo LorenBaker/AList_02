@@ -2,6 +2,7 @@ package com.lbconsulting.alist_02;
 
 import java.util.Calendar;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
@@ -9,6 +10,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -17,7 +19,6 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -64,7 +65,7 @@ public class MasterListActivity extends Activity implements
 	// Loader ids are specific to the Activity
 	private static final int MASTER_LIST_LOADER_ID = 1;
 	private static final int LIST_TITLES_LOADER_ID = 2;
-	private static final int LIST_TYPES_LOADER_ID = 3;
+	//private static final int LIST_TYPES_LOADER_ID = 3;
 
 	// Application preferences
 	private boolean autoAddItem = true;
@@ -74,11 +75,11 @@ public class MasterListActivity extends Activity implements
 	private int masterListSortOrder = SORT_ORDER_ALPHABETICAL;
 	private int masterListViewFirstVisiblePosition = 0;
 	private int masterListViewTop = 0;
-	private Boolean flagFirstTimeThruMasterListLoader = true;
+	private boolean flagFirstTimeThruMasterListLoader = true;
 	private boolean flagFirstTimeThruListTitlesLoader = true;
-	private boolean flagFirstTimeThruListTypesLoader = true;
+	/*private boolean flagFirstTimeThruListTypesLoader = true;*/
 	private int spnListTitlesPosition = -1;
-	private int spnListTypesPosition = -1;
+	/*private int spnListTypesPosition = -1;*/
 
 	// TODO create preferences for color, text size, etc for
 	// MasterListActivity's views.
@@ -103,9 +104,13 @@ public class MasterListActivity extends Activity implements
 	private static Button btnStartListsViewActivity = null;
 	private static EditText txtListItem = null;
 	private static Spinner spnListTitles = null;
-	private static Spinner spnListTypes = null;
+	/*private static Spinner spnListTypes = null;*/
 	private static LinearLayout layoutListTitle = null;
-	private static LinearLayout layoutListType = null;
+
+	private ActionBar actionBar = null;
+	private long proposedListTypeId;
+
+	/*private static LinearLayout layoutListType = null;*/
 
 	// /////////////////////////////////////////////////////////////////////////////
 	// MasterListActivity skeleton
@@ -119,7 +124,7 @@ public class MasterListActivity extends Activity implements
 
 		this.flagFirstTimeThruMasterListLoader = true;
 		this.flagFirstTimeThruListTitlesLoader = true;
-		this.flagFirstTimeThruListTypesLoader = true;
+		/*this.flagFirstTimeThruListTypesLoader = true;*/
 		// To keep this method simple place onCreate code at doCreate
 		doCreate(savedInstanceState);
 
@@ -162,7 +167,7 @@ public class MasterListActivity extends Activity implements
 			Log.i(TAG, "MasterListActivity onPause" + (isFinishing() ? " Finishing" : ""));
 
 		// Store values between instances here
-		SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+		SharedPreferences preferences = getSharedPreferences("AList", MODE_PRIVATE);
 		SharedPreferences.Editor applicationStates = preferences.edit();
 
 		applicationStates.putBoolean("autoAddItem", autoAddItem);
@@ -177,7 +182,7 @@ public class MasterListActivity extends Activity implements
 		masterListViewTop = (v == null) ? 0 : v.getTop();
 		applicationStates.putInt("masterListViewTop", masterListViewTop);
 		applicationStates.putInt("spnListTitlesPosition", spnListTitles.getSelectedItemPosition());
-		applicationStates.putInt("spnListTypesPosition", spnListTypes.getSelectedItemPosition());
+		/*applicationStates.putInt("spnListTypesPosition", spnListTypes.getSelectedItemPosition());*/
 
 		// Commit to storage
 		applicationStates.commit();
@@ -279,18 +284,21 @@ public class MasterListActivity extends Activity implements
 	private void doCreate(Bundle savedInstanceState) {
 		setContentView(R.layout.activity_master_list);
 
+		actionBar = getActionBar();
+		actionBar.setTitle("AList");
+
 		// Initialize the controls
 		txtListItem = (EditText) findViewById(R.id.txtListItem);
 		masterListView = (ListView) findViewById(R.id.lstItems);
 		btnAddToMasterList = (Button) findViewById(R.id.btnAddToMasterList);
 		btnStartListsViewActivity = (Button) findViewById(R.id.btnStartListsViewActivity);
 		spnListTitles = (Spinner) findViewById(R.id.spnListTitle);
-		spnListTypes = (Spinner) findViewById(R.id.spnListType);
+		/*spnListTypes = (Spinner) findViewById(R.id.spnListType);*/
 		layoutListTitle = (LinearLayout) findViewById(R.id.linearLayoutListTitle);
-		layoutListType = (LinearLayout) findViewById(R.id.linearLayoutListType);
+		/*layoutListType = (LinearLayout) findViewById(R.id.linearLayoutListType);*/
 
 		// Get the between instance stored values
-		SharedPreferences storedStates = getPreferences(MODE_PRIVATE);
+		SharedPreferences storedStates = getSharedPreferences("AList", MODE_PRIVATE);
 
 		// Set application states
 		this.autoAddItem = storedStates.getBoolean("autoAddItem", true);
@@ -304,7 +312,7 @@ public class MasterListActivity extends Activity implements
 		this.masterListViewFirstVisiblePosition = storedStates.getInt("masterListViewFirstVisiblePosition", 0);
 		this.masterListViewTop = storedStates.getInt("masterListViewTop", 0);
 		this.spnListTitlesPosition = storedStates.getInt("spnListTitlesPosition", -1);
-		this.spnListTypesPosition = storedStates.getInt("spnListTitlesPosition", -1);
+		/*this.spnListTypesPosition = storedStates.getInt("spnListTypesPosition", -1);*/
 
 		if (this.activeListID < 0) {
 			layoutListTitle.setVisibility(View.INVISIBLE);
@@ -360,8 +368,7 @@ public class MasterListActivity extends Activity implements
 		btnAddToMasterList.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				String newMasterListItem = txtListItem.getText().toString()
-						.trim();
+				String newMasterListItem = txtListItem.getText().toString().trim();
 				if (newMasterListItem.isEmpty()) {
 					txtListItem.setText("");
 					return;
@@ -450,23 +457,6 @@ public class MasterListActivity extends Activity implements
 
 		});
 
-		// setup spnListTypes Listener
-		spnListTypes.setOnItemSelectedListener(new OnItemSelectedListener() {
-			@Override
-			public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-				activeListTypeID = id;
-				loaderManager.restartLoader(MASTER_LIST_LOADER_ID, null, masterListCallbacks);
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> parentView) {
-				/*layoutListType.setVisibility(View.INVISIBLE);*/
-				activeListTypeID = 1;
-				loaderManager.restartLoader(MASTER_LIST_LOADER_ID, null, masterListCallbacks);
-			}
-
-		});
-
 		// set up masterListView adapter and loader
 		loaderManager = getLoaderManager();
 
@@ -476,15 +466,15 @@ public class MasterListActivity extends Activity implements
 		listTitlesAdapter = new ListTitlesCursorAdapter(this, null, 0);
 		spnListTitles.setAdapter(listTitlesAdapter);
 
-		listTypesAdapter = new ListTypesCursorAdapter(this, null, 0);
-		spnListTypes.setAdapter(listTypesAdapter);
+		/*listTypesAdapter = new ListTypesCursorAdapter(this, null, 0);*/
+		/*spnListTypes.setAdapter(listTypesAdapter);*/
 
 		masterListCallbacks = this;
 		// Note: using null for the cursor. The masterList and listTitle cursors
 		// loaded via onLoadFinished.
 		loaderManager.initLoader(MASTER_LIST_LOADER_ID, null, masterListCallbacks);
 		loaderManager.initLoader(LIST_TITLES_LOADER_ID, null, masterListCallbacks);
-		loaderManager.initLoader(LIST_TYPES_LOADER_ID, null, masterListCallbacks);
+		//loaderManager.initLoader(LIST_TYPES_LOADER_ID, null, masterListCallbacks);
 	} // End doCreate
 
 	@Override
@@ -630,7 +620,7 @@ public class MasterListActivity extends Activity implements
 				this.activeListID, masterListItemID);
 		if (numberOfRowsDeleted != 1) {
 			Log.e(TAG,
-					"RemoveItemFromActiveList: Incorrect number of rows deleted from the ListsTable! /n"
+					"RemoveItemFromActiveList: Incorrect number of rows deleted from the ListsTable! \n"
 							+ "Active List ID = "
 							+ this.activeListID
 							+ "; Master List Item = " + masterListItem);
@@ -665,16 +655,14 @@ public class MasterListActivity extends Activity implements
 					Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 				}
 			}
-		}
-		else {
+		} else {
 			// the master list does not contain the proposed newMasterListItem ... so add it
 
 			// Verify that activeListTypeID does not equal 1. If so ... notify the user. 
 			if (activeListTypeID == 1) {
 				String title = "AList";
 				String message = "Cannot create item " + "\"" + proposedMasterListItem + "\""
-						+ " when the master list is filtered by [All Items].\n\n"
-						+ "Please select a different master list filter.";
+						+ ". No List Type provided.";
 				int style = DialogBox.OK_ONLY;
 				DialogBox msgBox = new DialogBox(this, title, message, style);
 				msgBox.Show();
@@ -685,9 +673,9 @@ public class MasterListActivity extends Activity implements
 			ContentResolver cr = this.getContentResolver();
 			ContentValues values = new ContentValues();
 			values.put(MasterListItemsTable.COL_ITEM_NAME, proposedMasterListItem);
+			values.put(MasterListItemsTable.COL_LIST_TYPE_ID, this.activeListTypeID);
 			values.put(MasterListItemsTable.COL_DATE_TIME_LAST_USED, Calendar.getInstance().getTimeInMillis());
 
-			values.put(MasterListItemsTable.COL_ITEM_TYPE_ID, this.activeListTypeID);
 			Uri newMasterListItemURI = cr.insert(MasterListItemsTable.CONTENT_URI, values);
 			proposedMasterListItemID = Long.parseLong(newMasterListItemURI.getLastPathSegment());
 
@@ -701,7 +689,9 @@ public class MasterListActivity extends Activity implements
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-		Log.i(TAG, "onCreateLoader. id = " + id);
+		if (L) {
+			Log.i(TAG, "onCreateLoader. id = " + id);
+		}
 
 		CursorLoader cursorLoader = null;
 		Uri uri = null;
@@ -729,6 +719,10 @@ public class MasterListActivity extends Activity implements
 			case SORT_ORDER_SELECTED_AT_TOP:
 				sortOrder = MasterListItemsTable.SORT_ORDER_SELECTED_DESC;
 				break;
+
+			default:
+				sortOrder = MasterListItemsTable.SORT_ORDER_ITEM_NAME;
+				break;
 			}
 			// filter the cursor based on user typed text in txtListItem and the activeListTypeID
 			String txtListItemText = txtListItem.getText().toString().trim();
@@ -736,13 +730,13 @@ public class MasterListActivity extends Activity implements
 				selection = MasterListItemsTable.COL_ITEM_NAME + " Like '%" + txtListItemText + "%'";
 				if (this.activeListTypeID > 1) {
 					selection = selection + " AND "
-							+ MasterListItemsTable.COL_ITEM_TYPE_ID + " = " + this.activeListTypeID;
+							+ MasterListItemsTable.COL_LIST_TYPE_ID + " = " + this.activeListTypeID;
 				}
 			}
 			else {
 				// txtListItemText is empty
 				if (this.activeListTypeID > 1) {
-					selection = MasterListItemsTable.COL_ITEM_TYPE_ID + " = " + this.activeListTypeID;
+					selection = MasterListItemsTable.COL_LIST_TYPE_ID + " = " + this.activeListTypeID;
 				}
 			}
 
@@ -780,7 +774,7 @@ public class MasterListActivity extends Activity implements
 			}
 			break;
 
-		case LIST_TYPES_LOADER_ID:
+		/*case LIST_TYPES_LOADER_ID:
 			// Create a new list types CursorLoader with the following query parameters.
 			uri = ListTypesTable.CONTENT_URI;
 			projection = ListTypesTable.PROJECTION_ALL;
@@ -798,6 +792,9 @@ public class MasterListActivity extends Activity implements
 				Log.e(TAG, "onCreateLoader: IllegalArgumentException", e);
 				return null;
 			}
+			break;*/
+
+		default:
 			break;
 		}
 		return cursorLoader;
@@ -838,20 +835,12 @@ public class MasterListActivity extends Activity implements
 			}
 			break;
 
-		case LIST_TYPES_LOADER_ID:
-			listTypesAdapter.swapCursor(newCursor);
-			if (newCursor.getCount() > 0) {
-				layoutListType.setVisibility(View.VISIBLE);
-			}
+		/*		case LIST_TYPES_LOADER_ID:
+					listTypesAdapter.swapCursor(newCursor);
 
-			if (this.flagFirstTimeThruListTypesLoader) {
-				if (spnListTypesPosition > -1) {
-					spnListTypes.setSelection(this.spnListTypesPosition);
-				}
-				this.flagFirstTimeThruListTypesLoader = false;
-			} else {
-				spnListTypes.setSelection(AListUtilities.getIndex(spnListTypes, this.activeListTypeID));
-			}
+					break;*/
+
+		default:
 			break;
 		}
 	}
@@ -873,8 +862,11 @@ public class MasterListActivity extends Activity implements
 			listTitlesAdapter.swapCursor(null);
 			break;
 
-		case LIST_TYPES_LOADER_ID:
-			listTypesAdapter.swapCursor(null);
+		/*		case LIST_TYPES_LOADER_ID:
+					listTypesAdapter.swapCursor(null);
+					break;*/
+
+		default:
 			break;
 		}
 	}
@@ -937,96 +929,144 @@ public class MasterListActivity extends Activity implements
 	 * Adds a new List to ListTitlesTable.
 	 */
 	private void AddNewList() {
-		// Show a dialog so the user can input the new List's Title.
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
+		Intent creatListActivityIntent = new Intent(MasterListActivity.this, CreatListActivity.class);
+		MasterListActivity.this.startActivity(creatListActivityIntent);
+
+		// Show a dialog so the user can input the new List's Title and Item Type.
+		/*AlertDialog.Builder alert = new AlertDialog.Builder(this);
 		alert.setTitle(getString(R.string.newListTitlePrompt));
+		LinearLayout addNewListLayout =
+				(LinearLayout) this.getLayoutInflater().inflate(R.layout.add_new_list_alert, null);
+		final EditText txtNewListTitleInput = (EditText) addNewListLayout.findViewById(R.id.txtNewListTitle);
+		final Spinner spnListItemType = (Spinner) addNewListLayout.findViewById(R.id.spnListItemType);
+		final Button btnNewListItemType = (Button) addNewListLayout.findViewById(R.id.btnNewListItemType);
 
-		// Set an EditText view to get user input
-		final EditText txtNewListTitleInput = new EditText(this);
-		txtNewListTitleInput
-				.setHint(getString(R.string.txtNewListTitleInputHint));
-		txtNewListTitleInput.setInputType(InputType.TYPE_CLASS_TEXT
-				| InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
-				| InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-		alert.setView(txtNewListTitleInput);
+		final LinearLayout add_new_items_type = (LinearLayout) addNewListLayout.findViewById(R.id.add_new_items_type);
+		final EditText txtNewItemsType = (EditText) addNewListLayout.findViewById(R.id.txtNewItemsType);
+		final Button btnAddNewItemType = (Button) addNewListLayout.findViewById(R.id.btnAddNewItemType);
+
+		final long proposedListTypeId = -1;
+
+		spnListItemType.setAdapter(listTypesAdapter);
+
+		// setup spnListItemType Listener
+		spnListItemType.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+				proposedListTypeId = id;
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parentView) {
+				proposedListTypeId = 1; // [None]
+			}
+
+		});
+
+		btnNewListItemType.setOnClickListener(new Button.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				add_new_items_type.setVisibility(View.VISIBLE);
+			}
+		});
+
+		btnAddNewItemType.setOnClickListener(new Button.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+
+				add_new_items_type.setVisibility(View.GONE);
+			}
+		});
+
+		alert.setView(addNewListLayout);
 
 		alert.setPositiveButton(getString(R.string.btnCreateNewList),
 				new DialogInterface.OnClickListener() {
 
-					@SuppressWarnings("resource")
 					@Override
 					public void onClick(DialogInterface dialog, int whichButton) {
-
-						String newListTitle = txtNewListTitleInput.getText()
-								.toString().trim();
-						// validate the String input
-						if (null != newListTitle && newListTitle.length() > 0) {
-							// create a new list
-							ContentResolver cr = getContentResolver();
-
-							// check if the newListTitle is already in
-							// ListTitlesTable
-							Cursor includedInListTitlesTableCursor = null;
-							try {
-								includedInListTitlesTableCursor = cr
-										.query(ListTitlesTable.CONTENT_URI,
-												new String[] { ListTitlesTable.COL_ID },
-												ListTitlesTable.COL_LIST_TITLE
-														+ " = ?",
-												new String[] { newListTitle },
-												null);
-							} catch (Exception e) {
-								Log.e(TAG, "AddNewList: Exception in query.", e);
-							}
-
-							if (includedInListTitlesTableCursor != null
-									&& includedInListTitlesTableCursor
-											.getCount() > 0) {
-								// newListTitle already in ListTitlesTable
-								// and make it active
-								includedInListTitlesTableCursor.moveToFirst();
-								activeListID = includedInListTitlesTableCursor
-										.getLong(includedInListTitlesTableCursor
-												.getColumnIndexOrThrow(ListTitlesTable.COL_ID));
-								spnListTitles.setSelection(AListUtilities
-										.getIndex(spnListTitles, activeListID));
-
-								if (verbose) {
-									String msg = "\""
-											+ newListTitle
-											+ "\" already exists in the database!";
-									Toast.makeText(getApplicationContext(),
-											msg, Toast.LENGTH_SHORT).show();
-								}
-
-							} else {
-								// newListTitle not in ListTitlesTable .. so add
-								// it.
-								Uri uri = ListTitlesTable.CONTENT_URI;
-								ContentValues values = new ContentValues();
-								values.put(ListTitlesTable.COL_LIST_TITLE, newListTitle);
-								Uri activeListUri = cr.insert(uri, values);
-								activeListID = Long.parseLong(activeListUri.getLastPathSegment());
-
-								if (verbose) {
-									String msg = "List: " + "\"" + newListTitle
-											+ "\"" + " added to the database.";
-									Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-								}
-							}
-							AListUtilities
-									.closeQuietly(includedInListTitlesTableCursor);
+						// validate the selected list type
+						if (proposedListTypeId < 2) {
+							String msg = "Unable to create a new List.\nNo list type provided!\nPlease try again.";
+							Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+							return;
 						}
-
-						else {
-							String msg = "No list title provided!/nPlease try creating a new list again.";
-							Toast.makeText(getApplicationContext(), msg,
-									Toast.LENGTH_SHORT).show();
+						// validate the list title input
+						String proposedListTitle = txtNewListTitleInput.getText().toString().trim();
+						if (proposedListTitle != null && proposedListTitle.length() > 0) {
+							// inputs are valid
+							CreateNewList(proposedListTitle, proposedListTypeId);
+						} else {
+							String msg = "Unable to create a new List.\nNo list list title provided!\nPlease try again.";
+							Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+							return;
 						}
-
 					}
 
+					private void CreateNewList(String listTitle, long listTypeId) {
+						ContentResolver cr = getContentResolver();
+
+						// check if the newListTitle is already in the ListTitlesTable
+						Cursor includedInListTitlesTableCursor = null;
+						Uri uri = ListTitlesTable.CONTENT_URI;
+						String[] projection = ListTitlesTable.PROJECTION_ALL;
+						String selection = ListTitlesTable.COL_LIST_TITLE + " = ?";
+						String selectionArgs[] = { listTitle };
+						String sortOrder = ListTitlesTable.SORT_ORDER_LIST_TITLE;
+						try {
+							includedInListTitlesTableCursor = cr.query(uri, projection, selection, selectionArgs,
+									sortOrder);
+						} catch (Exception e) {
+							Log.e(TAG, "AddNewList: Exception in query.", e);
+							String msg = "Unable to create a new List.\nUnable to determine if \""
+									+ listTitle
+									+ "\" is already in the database!\nPlease try again.";
+							Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+							if (includedInListTitlesTableCursor != null) {
+								includedInListTitlesTableCursor.close();
+							}
+							return;
+						}
+
+						if (includedInListTitlesTableCursor != null
+								&& includedInListTitlesTableCursor.getCount() > 0) {
+							// newListTitle already in ListTitlesTable
+							// so make it active
+							activeListID = includedInListTitlesTableCursor.getLong(
+									includedInListTitlesTableCursor.getColumnIndexOrThrow(ListTitlesTable.COL_ID));
+
+							long spnListTitleSelectedItemId = spnListTitles.getSelectedItemId();
+							if (spnListTitleSelectedItemId == activeListID) {
+								ActivateList(activeListID);
+							} else {
+								spnListTitles.setSelection(AListUtilities.getIndex(spnListTitles, activeListID));
+							}
+
+							if (verbose) {
+								String msg = "\"" + listTitle + "\" already exists in the database!";
+								Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+							}
+
+						} else {
+							// newListTitle not in ListTitlesTable .. so add it.
+							uri = ListTitlesTable.CONTENT_URI;
+							ContentValues values = new ContentValues();
+							values.put(ListTitlesTable.COL_LIST_TITLE, listTitle);
+							values.put(ListTitlesTable.COL_LIST_TYPE_ID, listTypeId);
+							Uri activeListUri = cr.insert(uri, values);
+							activeListID = Long.parseLong(activeListUri.getLastPathSegment());
+							ActivateList(activeListID);
+							if (verbose) {
+								String msg = "List: " + "\"" + listTitle + "\"" + " added to the database.";
+								Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+							}
+						}
+
+						if (includedInListTitlesTableCursor != null) {
+							includedInListTitlesTableCursor.close();
+						}
+					}
 				});
 
 		alert.setNegativeButton(getString(R.string.Cancel),
@@ -1036,21 +1076,24 @@ public class MasterListActivity extends Activity implements
 						// Canceled.
 						if (verbose) {
 							String msg = "Creating new list CANCELED.";
-							Toast.makeText(getApplicationContext(), msg,
-									Toast.LENGTH_SHORT).show();
+							Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 						}
 					}
 				});
 
-		alert.show();
+		alert.show();*/
 	}
 
-	private void ActivateList(long listTitleID) {
+	private void ActivateList(long listID) {
 		try {
-			this.activeListID = listTitleID;
-			SetLayoutBackgroundColor(listTitleID);
+			this.activeListID = listID;
+			this.activeListTypeID = ListTitlesTable.getListTypeID(this, listID);
+			SetLayoutBackgroundColor(listID);
+			loaderManager.restartLoader(MASTER_LIST_LOADER_ID, null, masterListCallbacks);
 			MasterListItemsTable.ResetSelectedColumn(this);
-			MasterListItemsTable.SetSelectedColumn(this, listTitleID);
+			MasterListItemsTable.SetSelectedColumn(this, listID);
+			String listTypeName = ListTypesTable.getListTypeName(this, this.activeListTypeID);
+			actionBar.setSubtitle(listTypeName);
 
 		} catch (Exception e) {
 			Log.e(TAG, "An Exception error occurred in ActivateList. ", e);
@@ -1060,24 +1103,18 @@ public class MasterListActivity extends Activity implements
 	private void SetLayoutBackgroundColor(long listTitleID) {
 		try {
 			@SuppressWarnings("resource")
-			Cursor listTitlesCursor = ListsTable.getListTitlesCurosr(this,
-					listTitleID);
+			Cursor listTitlesCursor = ListsTable.getListTitlesCurosr(this, listTitleID);
 			if (listTitlesCursor != null) {
-				String strBackgroundColor = listTitlesCursor
-						.getString(listTitlesCursor
-								.getColumnIndexOrThrow(ListTitlesTable.COL_BACKGROUND_COLOR));
-				spnListTitlesBackgroundColor = AListUtilities
-						.GetColorInt(strBackgroundColor);
+				String strBackgroundColor = listTitlesCursor.getString(listTitlesCursor
+						.getColumnIndexOrThrow(ListTitlesTable.COL_BACKGROUND_COLOR));
+				spnListTitlesBackgroundColor = AListUtilities.GetColorInt(strBackgroundColor);
 
-				String strListTitlesTextColor = listTitlesCursor
-						.getString(listTitlesCursor
-								.getColumnIndexOrThrow(ListTitlesTable.COL_NORMAL_TEXT_COLOR));
-				spnListTitlesTextColor = AListUtilities
-						.GetColorInt(strListTitlesTextColor);
+				String strListTitlesTextColor = listTitlesCursor.getString(listTitlesCursor
+						.getColumnIndexOrThrow(ListTitlesTable.COL_NORMAL_TEXT_COLOR));
+				spnListTitlesTextColor = AListUtilities.GetColorInt(strListTitlesTextColor);
 
 				btnStartListsViewActivity.setTextColor(spnListTitlesTextColor);
-				layoutListTitle
-						.setBackgroundColor(spnListTitlesBackgroundColor);
+				layoutListTitle.setBackgroundColor(spnListTitlesBackgroundColor);
 
 			}
 			AListUtilities.closeQuietly(listTitlesCursor);

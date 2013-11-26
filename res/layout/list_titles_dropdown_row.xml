@@ -3,16 +3,17 @@
     android:id="@+id/listTitlesDropdownLinearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:gravity="left|center_vertical"
+    android:orientation="vertical"
+    android:padding="3dp" >
 
     <TextView
         android:id="@+id/txtListTitleDropdown"
+        style="@android:style/TextAppearance.Medium"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:hint="@string/listTitlesTextViewHint"
-        android:padding="@dimen/activity_horizontal_margin"
         android:textColor="@color/black"
-        android:textSize="20sp"
         android:visibility="visible" />
 
 </LinearLayout>

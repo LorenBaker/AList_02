@@ -1,30 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/root"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:id="@+id/masterListRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="@color/lt_grey"
     android:baselineAligned="false"
     android:gravity="center_horizontal"
-    android:orientation="vertical" >
-
-    <LinearLayout
-        android:id="@+id/linearLayoutListType"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="false"
-        android:orientation="horizontal" >
-
-        <Spinner
-            android:id="@+id/spnListType"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="5"
-            android:background="@color/lightcyan"
-            android:clickable="true"
-            android:longClickable="false" >
-        </Spinner>
-    </LinearLayout>
+    android:orientation="vertical"
+    android:paddingBottom="4dp"
+    android:paddingLeft="4dp"
+    android:paddingRight="4dp"
+    android:paddingTop="4dp" >
 
     <LinearLayout
         android:id="@+id/linearLayoutListTitle"
@@ -37,7 +23,8 @@
             android:id="@+id/spnListTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="5"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
             android:background="@color/lightcyan"
             android:clickable="true"
             android:longClickable="false"
@@ -46,9 +33,8 @@
 
         <Button
             android:id="@+id/btnStartListsViewActivity"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="@string/btnStartListsViewActivity" />
     </LinearLayout>
 
@@ -61,20 +47,20 @@
             android:id="@+id/txtListItem"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="3dp"
-            android:layout_marginRight="3dp"
-            android:layout_weight="5"
+            android:layout_weight="1"
             android:background="@drawable/rectangle_black_stroke"
             android:hint="@string/addMasterListItemHint"
             android:inputType="textAutoCorrect|textCapWords"
             android:maxLines="1"
-            android:padding="@dimen/activity_horizontal_margin" />
+            android:paddingBottom="6dp"
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp"
+            android:paddingTop="6dp" />
 
         <Button
             android:id="@+id/btnAddToMasterList"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="@string/addMasterListItem" />
     </LinearLayout>
 
@@ -82,6 +68,8 @@
         android:id="@+id/lstItems"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
+        android:divider="@null"
+        android:dividerHeight="0dp"
         android:listSelector="@drawable/list_selector" >
     </ListView>
 

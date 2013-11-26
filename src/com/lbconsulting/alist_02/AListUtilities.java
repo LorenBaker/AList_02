@@ -127,21 +127,27 @@ public class AListUtilities {
 		return colorString;
 	}
 
+	@SuppressWarnings("resource")
 	public static int getIndex(Spinner spinner, long itemID) {
 		Cursor spinnerItem = null;
 		long spinnerItemID = -1;
+		int spinnerIndex = -1;
+
 		for (int i = 0; i < spinner.getCount(); i++) {
 			spinnerItem = (Cursor) spinner.getItemAtPosition(i);
-			spinnerItemID = spinnerItem.getLong(spinnerItem
-					.getColumnIndexOrThrow("_id"));
+			spinnerItemID = spinnerItem.getLong(spinnerItem.getColumnIndexOrThrow("_id"));
 			if (spinnerItemID == itemID) {
-				/* closeQuietly(spinnerItem); */
-				return i;
+				spinnerIndex = i;
+				break;
 			}
 		}
-		// did not find the text in the spinner!
-		closeQuietly(spinnerItem);
-		return -1;
+
+		// Cannot close the spinnerItem
+		// It is used in the spinnter
+		/*if (spinnerItem != null) {
+			spinnerItem.close();
+		}*/
+		return spinnerIndex;
 	}
 
 	public static String formatDateTime(Context context, String timeToFormat) {

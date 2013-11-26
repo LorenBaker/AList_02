@@ -35,5 +35,9 @@
     <string name="Cancel">Cancel</string>
     <string name="Yes">Yes</string>
     <string name="No">No</string>
+    <string name="txtNewListTitleHint">New List Title</string>
+    <string name="btnNewText">New</string>
+    <string name="NewItemTypeHint">New Item Type</string>
+    <string name="btnAddNewItemTypeHint">Add</string>
 
 </resources>

@@ -3,16 +3,16 @@
     android:id="@+id/listTypesLinearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:padding="3dp" >
 
     <TextView
         android:id="@+id/txtListType"
+        style="@android:style/TextAppearance.Medium"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="@string/listTypesTextViewHint"
-        android:padding="@dimen/activity_horizontal_margin"
         android:textColor="@color/black"
-        android:textSize="20sp"
         android:visibility="visible" />
 
 </LinearLayout>
