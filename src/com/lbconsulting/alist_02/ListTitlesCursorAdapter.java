@@ -42,12 +42,11 @@ public class ListTitlesCursorAdapter extends CursorAdapter {
 			itemName.setText(cursor.getString(cursor.getColumnIndexOrThrow(ListTitlesTable.COL_LIST_TITLE)));
 			itemName.setTypeface(null, Typeface.BOLD_ITALIC);
 
-			String strTextColor = cursor.getString(cursor.getColumnIndexOrThrow(ListTitlesTable.COL_NORMAL_TEXT_COLOR));
-			String strBackgroundColor = cursor.getString(cursor
-					.getColumnIndexOrThrow(ListTitlesTable.COL_BACKGROUND_COLOR));
+			int textColor = cursor.getInt(cursor.getColumnIndexOrThrow(ListTitlesTable.COL_NORMAL_TEXT_COLOR));
+			int backgroundColor = cursor.getInt(cursor.getColumnIndexOrThrow(ListTitlesTable.COL_BACKGROUND_COLOR));
 
-			int textColor = AListUtilities.GetColorInt(strTextColor);
-			int backgroundColor = AListUtilities.GetColorInt(strBackgroundColor);
+			/*int textColor = AListUtilities.GetColorInt(strTextColor);
+			int backgroundColor = AListUtilities.GetColorInt(strBackgroundColor);*/
 
 			itemName.setTextColor(textColor);
 			itemName.setBackgroundColor(backgroundColor);

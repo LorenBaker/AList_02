@@ -3,21 +3,32 @@ package com.lbconsulting.alist_02;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
+import com.lbconsulting.alist_02.R.color;
+import com.lbconsulting.alist_02.database.AListDatabaseHelper;
+import com.lbconsulting.alist_02.database.ListTitlesTable;
 import com.lbconsulting.alist_02.database.ListTypesTable;
 
 public class CreatListActivity extends Activity implements
@@ -25,6 +36,18 @@ public class CreatListActivity extends Activity implements
 	// String for logging the class name
 	public final String TAG = AListUtilities.TAG;
 	private final boolean L = AListUtilities.L; // enable Logging
+
+	/*// Starting List Colors
+	private static final String DARKBLUE = "#00008B";
+	private static final String DARKGREEN = "#006400";
+	private static final String DARKSALMON = "#E9967A";
+	private static final String GHOSTWHITE = "#F8F8FF";
+	private static final String HOTPINK = "#FF69B4";
+	private static final String LAVENDER = "#E6E6FA";
+
+	private static final String BLACK = "#000000";
+	private static final String WHITE = "#FFFFFF";
+	private static final int DARKGREY = R.color.darkgray;*/
 
 	// CreateListActivity Views and related variables
 	private EditText txtNewListTitle = null;
@@ -36,14 +59,21 @@ public class CreatListActivity extends Activity implements
 	private Button btnCancel = null;
 	private Button btnCreateNewList = null;
 	private ListView lstPreview = null;
+	private LinearLayout newListTypeLinearLayout = null;
 
 	private ActionBar actionBar = null;
 
 	// CreateListActivity Variables
-	public long activeListID = -1;
-	public long activeListTypeID = 2;
+	private boolean verbose = true;
+	private long activeListID = -1;
+	private long activeListTypeID = 2;
+
+	private int backgroundColor;
+	private int normalTextColor;
+	private int strikeoutTextColor;
+
 	//private int spnListTypesPosition = -1;
-	private final boolean isNewListCreated = false;
+	private boolean isNewListCreated = false;
 
 	// The loaders' unique ids.
 	// Loader ids are specific to the Activity
@@ -52,6 +82,7 @@ public class CreatListActivity extends Activity implements
 	// The callbacks through which we will interact with the LoaderManager.
 	private LoaderManager.LoaderCallbacks<Cursor> createListActivityCallbacks;
 	private ListTypesCursorAdapter listTypesAdapter;
+	private AListDatabaseHelper database = null;
 
 	// /////////////////////////////////////////////////////////////////////////////
 	// CreateListActivity skeleton
@@ -99,11 +130,11 @@ public class CreatListActivity extends Activity implements
 		SharedPreferences storedStates = getSharedPreferences("AList", MODE_PRIVATE);
 
 		// Set application states
+		this.verbose = storedStates.getBoolean("verbose", true);
 		this.activeListID = storedStates.getLong("activeListID", 1);
 		this.activeListTypeID = storedStates.getLong("activeListTypeID", 2); // 2 = Groceries		
 		//this.txtNewListTitle.setText(storedStates.getString("txtNewListTitle", null));
 		//this.spnListTypesPosition = storedStates.getInt("spnListTypesPosition", 1); // 1 = [None]
-
 	}
 
 	@Override
@@ -240,9 +271,13 @@ public class CreatListActivity extends Activity implements
 		btnCancel = (Button) findViewById(R.id.btnCancel);
 		btnCreateNewList = (Button) findViewById(R.id.btnCreateNewList);
 
+		newListTypeLinearLayout = (LinearLayout) findViewById(R.id.newListTypeLinearLayout);
+
 		lstPreview = (ListView) findViewById(R.id.lstPreview);
 		String[] previewList = { "List Item Normal Text", "List Item Strikeout Text" };
 		ListPreviewArrayAdapter listPreviewArrayAdapter = new ListPreviewArrayAdapter(this, previewList);
+		this.setNewListColors();
+		listPreviewArrayAdapter.setColors(this.backgroundColor, this.normalTextColor, this.strikeoutTextColor);
 		lstPreview.setAdapter(listPreviewArrayAdapter);
 
 		// set up laderManager
@@ -250,29 +285,41 @@ public class CreatListActivity extends Activity implements
 		createListActivityCallbacks = this;
 		// Note: using null for the cursor. The masterList and listTitle cursors
 		// loaded via onLoadFinished.
-		/*loaderManager.initLoader(MASTER_LIST_LOADER_ID, null, createListActivityCallbacks);
-		loaderManager.initLoader(LIST_TITLES_LOADER_ID, null, createListActivityCallbacks);*/
 		loaderManager.initLoader(LIST_TYPES_LOADER_ID, null, createListActivityCallbacks);
 
+		this.setNewListColors();
 		listTypesAdapter = new ListTypesCursorAdapter(this, null, 0);
 		spnListTypes.setAdapter(listTypesAdapter);
+		spnListTypes.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+				activeListTypeID = id;
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parentView) {
+				activeListTypeID = -1;
+			}
+
+		});
 
 		// set button Click Listeners
 
 		btnNewListType.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO: code btnNewListType onClick method
-
+				newListTypeLinearLayout.setVisibility(View.VISIBLE);
+				txtNewListTypeName.setFocusableInTouchMode(true);
+				txtNewListTypeName.requestFocus();
 			}
 		});
 
 		btnAddListType.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO: code btnAddListType onClick method
-
+				CreateNewListType();
 			}
+
 		});
 
 		btnSelectColors.setOnClickListener(new Button.OnClickListener() {
@@ -286,24 +333,246 @@ public class CreatListActivity extends Activity implements
 		btnCancel.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (isNewListCreated) {
-
-				} else {
-					onBackPressed();
-				}
-				// TODO: code btnCancel onClick method
-
+				// exit to the MasterListActivity
+				onBackPressed();
 			}
 		});
 
 		btnCreateNewList.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO: code btnCreateNewList onClick method
+				// validate the selected list type
+				if (activeListTypeID < 2) {
+					String msg = "Unable to create a new List.\nNo list type provided!\nPlease try again.";
+					Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+					isNewListCreated = false;
+					return;
+				}
 
+				// validate the list title input
+				String proposedListTitle = txtNewListTitle.getText().toString().trim();
+				if (proposedListTitle != null && proposedListTitle.length() > 0) {
+					// inputs are valid
+					CreateNewList(proposedListTitle);
+				} else {
+					String msg = "Unable to create a new List.\nNo list list title provided!\nPlease try again.";
+					Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+					isNewListCreated = false;
+					return;
+				}
+
+				if (isNewListCreated) {
+					// exit to the MasterListActivity
+					onBackPressed();
+				}
 			}
+
 		});
 
+	}
+
+	private void CreateNewListType() {
+		ContentResolver cr = getContentResolver();
+		Cursor listTypesCursor = null;
+		String proposedListType = txtNewListTypeName.getText().toString().trim();
+
+		if (proposedListType != null && proposedListType.length() > 0) {
+
+			// check if the proposedListType is already in the ListTypesTable
+			Uri uri = ListTypesTable.CONTENT_URI;
+			String[] projection = ListTypesTable.PROJECTION_ALL;
+			String selection = ListTypesTable.COL_LIST_TYPE + " = ?";
+			String selectionArgs[] = { proposedListType };
+			String sortOrder = ListTypesTable.SORT_ORDER_LIST_TYPE;
+			listTypesCursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+
+		} else {
+			Log.e(TAG, "ERROR in CreateNewListType: no ListTypeName provided!");
+			String msg = "Unable to create a new List Type.\nNo ListType provided!\nPlease try again.";
+			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+			return;
+		}
+
+		if (listTypesCursor != null) {
+			if (listTypesCursor.getCount() > 0) {
+				// Proposed list type already in the database ... so make it active
+				this.activeListTypeID = listTypesCursor.getLong(listTypesCursor
+						.getColumnIndexOrThrow(ListTypesTable.COL_ID));
+				listTypesCursor.close();
+				spnListTypes.setSelection(AListUtilities.getIndex(spnListTypes, this.activeListTypeID));
+				newListTypeLinearLayout.setVisibility(View.GONE);
+				txtNewListTypeName.setText("");
+				return;
+			} else {
+				// Proposed list type is not in the database ... so add it
+
+				Uri uri = ListTypesTable.CONTENT_URI;
+				ContentValues values = new ContentValues();
+				values.put(ListTypesTable.COL_LIST_TYPE, proposedListType);
+				Uri listTypeUri = cr.insert(uri, values);
+				this.activeListTypeID = Long.parseLong(listTypeUri.getLastPathSegment());
+
+				if (verbose) {
+					String msg = "List: " + "\"" + proposedListType + "\"" + " added to the database.";
+					Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+				}
+
+				listTypesCursor.close();
+				newListTypeLinearLayout.setVisibility(View.GONE);
+				txtNewListTypeName.setText("");
+
+				return;
+			}
+
+		} else {
+			Log.e(TAG,
+					"ERROR in CreateNewListType: Exception in query. Unable to determine if proposed list type is in the database!");
+			String msg = "Unable to create a new List Type.\nUnable to determine if \""
+					+ proposedListType
+					+ "\" is already in the database!\nPlease try again.";
+			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+
+			return;
+		}
+	}
+
+	private void setNewListColors() {
+
+		// Open a WritableDatabase database to support the insert transaction
+		database = new AListDatabaseHelper(this);
+		SQLiteDatabase db = database.getWritableDatabase();
+		// get the next Id for the lists title table
+		String nextIDQuery = "name='" + ListTitlesTable.TABLE_LIST_TITLES + "'";
+		long nextId = -1;
+		Cursor nextIDCursor = db
+				.query("SQLITE_SEQUENCE", new String[] { "*" }, nextIDQuery, null, null, null, null);
+		if (nextIDCursor != null) {
+			if (nextIDCursor.getCount() > 0) {
+				nextIDCursor.moveToFirst();
+				nextId = nextIDCursor.getLong(nextIDCursor.getColumnIndexOrThrow("seq"));
+				nextId++;
+				nextIDCursor.close();
+			} else {
+				nextId = 1;
+			}
+
+			Resources res = this.getResources();
+			if (nextId > 0) {
+				// select the new list title's colors
+
+				int selector = (int) nextId % 6;
+				switch (selector) {
+				case 0:
+					this.backgroundColor = res.getColor(color.ghostwhite);
+					this.normalTextColor = res.getColor(R.color.black);
+					this.strikeoutTextColor = res.getColor(R.color.darkgray);
+					break;
+				case 1:
+					this.backgroundColor = res.getColor(R.color.darkblue);
+					this.normalTextColor = res.getColor(R.color.white);
+					this.strikeoutTextColor = res.getColor(R.color.lightgrey);
+					break;
+				case 2:
+					this.backgroundColor = res.getColor(R.color.darkgreen);
+					this.normalTextColor = res.getColor(R.color.white);
+					this.strikeoutTextColor = res.getColor(R.color.lightgrey);
+					break;
+				case 3:
+					this.backgroundColor = res.getColor(R.color.darksalmon);
+					this.normalTextColor = res.getColor(R.color.white);
+					this.strikeoutTextColor = res.getColor(R.color.darkgreen);
+					break;
+				case 4:
+					this.backgroundColor = res.getColor(R.color.hotpink);
+					this.normalTextColor = res.getColor(R.color.black);
+					this.strikeoutTextColor = res.getColor(R.color.darkgray);
+					break;
+				case 5:
+					this.backgroundColor = res.getColor(R.color.lavender);
+					this.normalTextColor = res.getColor(R.color.black);
+					this.strikeoutTextColor = res.getColor(R.color.lightgrey);
+					break;
+				default:
+					this.backgroundColor = res.getColor(R.color.darkblue);
+					this.normalTextColor = res.getColor(R.color.white);
+					this.strikeoutTextColor = res.getColor(R.color.lightgoldenrodyellow);
+					break;
+				}
+			} else {
+				this.backgroundColor = res.getColor(R.color.darkblue);
+				this.normalTextColor = res.getColor(R.color.white);
+				this.strikeoutTextColor = res.getColor(R.color.lightgrey);
+			}
+		}
+	}
+
+	private void CreateNewList(String proposedListTitle) {
+		ContentResolver cr = getContentResolver();
+
+		// check if the newListTitle is already in the ListTitlesTable
+		Cursor listTitlesCursor = null;
+		Uri uri = ListTitlesTable.CONTENT_URI;
+		String[] projection = ListTitlesTable.PROJECTION_ALL;
+		String selection = ListTitlesTable.COL_LIST_TITLE + " = ?";
+		String selectionArgs[] = { proposedListTitle };
+		String sortOrder = ListTitlesTable.SORT_ORDER_LIST_TITLE;
+		try {
+			listTitlesCursor = cr.query(uri, projection, selection, selectionArgs,
+					sortOrder);
+		} catch (Exception e) {
+			Log.e(TAG, "AddNewList: Exception in query.", e);
+			String msg = "Unable to create a new List.\nUnable to determine if \""
+					+ proposedListTitle
+					+ "\" is already in the database!\nPlease try again.";
+			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+			if (listTitlesCursor != null) {
+				listTitlesCursor.close();
+			}
+			this.isNewListCreated = false;
+			return;
+		}
+
+		if (listTitlesCursor != null
+				&& listTitlesCursor.getCount() > 0) {
+			// newListTitle already in ListTitlesTable
+			// so make it active
+			this.activeListID = listTitlesCursor.getLong(
+					listTitlesCursor.getColumnIndexOrThrow(ListTitlesTable.COL_ID));
+			this.activeListTypeID = listTitlesCursor.getLong(
+					listTitlesCursor.getColumnIndexOrThrow(ListTitlesTable.COL_LIST_TYPE_ID));
+
+			this.isNewListCreated = true;
+
+			if (verbose) {
+				String msg = "\"" + proposedListTitle + "\" already exists in the database!";
+				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+			}
+
+		} else {
+			// newListTitle not in ListTitlesTable .. so add it.
+			uri = ListTitlesTable.CONTENT_URI;
+			ContentValues values = new ContentValues();
+			values.put(ListTitlesTable.COL_LIST_TITLE, proposedListTitle);
+			values.put(ListTitlesTable.COL_LIST_TYPE_ID, this.activeListTypeID);
+
+			values.put(ListTitlesTable.COL_BACKGROUND_COLOR, this.backgroundColor);
+			values.put(ListTitlesTable.COL_NORMAL_TEXT_COLOR, this.normalTextColor);
+			values.put(ListTitlesTable.COL_STRIKEOUT_TEXT_COLOR, this.strikeoutTextColor);
+
+			Uri activeListUri = cr.insert(uri, values);
+			this.activeListID = Long.parseLong(activeListUri.getLastPathSegment());
+
+			this.isNewListCreated = true;
+
+			if (verbose) {
+				String msg = "List: " + "\"" + proposedListTitle + "\"" + " added to the database.";
+				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+			}
+		}
+
+		if (listTitlesCursor != null) {
+			listTitlesCursor.close();
+		}
 	}
 
 	@Override

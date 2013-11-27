@@ -44,13 +44,15 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/newListTypeLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:visibility="gone" >
 
         <EditText
             android:id="@+id/txtNewListTypeName"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/rectangle_black_stroke"
@@ -69,13 +71,6 @@
             android:text="Add" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btnSelectColors"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:enabled="False"
-        android:text="Select Colors" />
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -92,6 +87,14 @@
         android:dividerHeight="0dp" >
     </ListView>
 
+    <Button
+        android:id="@+id/btnSelectColors"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:enabled="False"
+        android:text="Color Selection Control" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -100,14 +103,14 @@
         <Button
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="96dp"
             android:layout_weight="1"
             android:text="@string/Cancel" />
 
         <Button
             android:id="@+id/btnCreateNewList"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="96dp"
             android:layout_weight="1"
             android:text="@string/btnCreateNewList" />
     </LinearLayout>

@@ -12,7 +12,6 @@ import java.util.TimeZone;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.util.Log;
 import android.widget.Spinner;
 
@@ -105,7 +104,7 @@ public class AListUtilities {
 		}
 	}
 
-	public static int GetColorInt(String ColorString) {
+	/*public static int GetColorInt(String ColorString) {
 		int colorInt = 0;
 		try {
 			colorInt = Color.parseColor(ColorString);
@@ -114,7 +113,7 @@ public class AListUtilities {
 			Log.e(TAG, "An Exception error occurred in GetColorInt. ", e);
 		}
 		return colorInt;
-	}
+	}*/
 
 	public static String GetColorString(int ColorInt) {
 		String colorString = null;

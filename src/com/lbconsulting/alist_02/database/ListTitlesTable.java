@@ -1,7 +1,5 @@
 package com.lbconsulting.alist_02.database;
 
-import java.util.ArrayList;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -47,52 +45,52 @@ public class ListTitlesTable {
 			+ COL_LIST_TITLE + " text collate nocase, "
 			+ COL_LIST_TYPE_ID + " integer not null references "
 			+ ListTypesTable.TABLE_LIST_TYPES + " (" + ListTypesTable.COL_ID + ") default 1, "
-			+ COL_SORT_ORDER_ID + " integer default 0, "
-			+ COL_BACKGROUND_COLOR + " text default '#0000FF', "
-			+ COL_NORMAL_TEXT_COLOR + " text default '#FFFFFF', "
-			+ COL_STRIKEOUT_TEXT_COLOR + " text default '#D3D3D3', "
-			+ COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT + " integer default 1"
+			+ COL_SORT_ORDER_ID + " integer default 0, " // default alphabetical
+			+ COL_BACKGROUND_COLOR + " integer default 0, "
+			+ COL_NORMAL_TEXT_COLOR + " integer default 0,"
+			+ COL_STRIKEOUT_TEXT_COLOR + " integer default 0, "
+			+ COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT + " integer default 1" // default true
 			+ ");";
 
 	public static void onCreate(SQLiteDatabase database) {
 		database.execSQL(DATABASE_CREATE);
 
 		// TODO: Remove -- used for testing
-		ArrayList<String> sqlStatements = new ArrayList<String>();
-		sqlStatements.add("insert into " + TABLE_LIST_TITLES + " ("
-				+ COL_ID + ", "
-				+ COL_LIST_TITLE + ", "
-				+ COL_LIST_TYPE_ID + ", " // 2=Groceries Type Items
-				+ COL_SORT_ORDER_ID + ", "
-				+ COL_BACKGROUND_COLOR + ", "
-				+ COL_NORMAL_TEXT_COLOR + ", "
-				+ COL_STRIKEOUT_TEXT_COLOR + ", "
-				+ COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT
-				+ ") VALUES (NULL, 'Safeway',2, 0,'#00008B', '#FFFFFF', '#D3D3D3', 1)");
+		/*		ArrayList<String> sqlStatements = new ArrayList<String>();
+				sqlStatements.add("insert into " + TABLE_LIST_TITLES + " ("
+						+ COL_ID + ", "
+						+ COL_LIST_TITLE + ", "
+						+ COL_LIST_TYPE_ID + ", " // 2=Groceries Type Items
+						+ COL_SORT_ORDER_ID + ", "
+						+ COL_BACKGROUND_COLOR + ", "
+						+ COL_NORMAL_TEXT_COLOR + ", "
+						+ COL_STRIKEOUT_TEXT_COLOR + ", "
+						+ COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT
+						+ ") VALUES (NULL, 'Safeway',2, 0,'#00008B', '#FFFFFF', '#D3D3D3', 1)");
 
-		sqlStatements.add("insert into " + TABLE_LIST_TITLES + " ("
-				+ COL_ID + ", "
-				+ COL_LIST_TITLE + ", "
-				+ COL_LIST_TYPE_ID + ", " // 2=Groceries Type Items
-				+ COL_SORT_ORDER_ID + ", "
-				+ COL_BACKGROUND_COLOR + ", "
-				+ COL_NORMAL_TEXT_COLOR + ", "
-				+ COL_STRIKEOUT_TEXT_COLOR + ", "
-				+ COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT
-				+ ") VALUES (NULL, 'QFC',2, 1,'#006400', '#000000', '#123456', 1)");
+				sqlStatements.add("insert into " + TABLE_LIST_TITLES + " ("
+						+ COL_ID + ", "
+						+ COL_LIST_TITLE + ", "
+						+ COL_LIST_TYPE_ID + ", " // 2=Groceries Type Items
+						+ COL_SORT_ORDER_ID + ", "
+						+ COL_BACKGROUND_COLOR + ", "
+						+ COL_NORMAL_TEXT_COLOR + ", "
+						+ COL_STRIKEOUT_TEXT_COLOR + ", "
+						+ COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT
+						+ ") VALUES (NULL, 'QFC',2, 1,'#006400', '#000000', '#123456', 1)");
 
-		sqlStatements.add("insert into " + TABLE_LIST_TITLES + " ("
-				+ COL_ID + ", "
-				+ COL_LIST_TITLE + ", "
-				+ COL_LIST_TYPE_ID + ", " // 3=ToDo Type Items
-				+ COL_SORT_ORDER_ID + ", "
-				+ COL_BACKGROUND_COLOR + ", "
-				+ COL_NORMAL_TEXT_COLOR + ", "
-				+ COL_STRIKEOUT_TEXT_COLOR + ", "
-				+ COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT
-				+ ") VALUES (NULL, 'To Do List',3, 2,'#E9967A', '#FFFFFF', '#D3D3D3', 0)");
+				sqlStatements.add("insert into " + TABLE_LIST_TITLES + " ("
+						+ COL_ID + ", "
+						+ COL_LIST_TITLE + ", "
+						+ COL_LIST_TYPE_ID + ", " // 3=ToDo Type Items
+						+ COL_SORT_ORDER_ID + ", "
+						+ COL_BACKGROUND_COLOR + ", "
+						+ COL_NORMAL_TEXT_COLOR + ", "
+						+ COL_STRIKEOUT_TEXT_COLOR + ", "
+						+ COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT
+						+ ") VALUES (NULL, 'To Do List',3, 2,'#E9967A', '#FFFFFF', '#D3D3D3', 0)");
 
-		AListUtilities.execMultipleSQL(database, sqlStatements);
+				AListUtilities.execMultipleSQL(database, sqlStatements);*/
 
 	}
 

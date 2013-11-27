@@ -1,7 +1,5 @@
 package com.lbconsulting.alist_02.database;
 
-import java.util.ArrayList;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -52,89 +50,89 @@ public class ListsTable {
 		database.execSQL(DATABASE_CREATE);
 
 		//TODO: For test purposes
-		ArrayList<String> sqlStatements = new ArrayList<String>();
-		sqlStatements.add("insert into " + TABLE_LISTS + " ("
-				+ COL_ID + ", "
-				+ COL_LIST_TITLE_ID + ", "
-				+ COL_MASTER_LIST_ITEM_ID + ", "
-				+ COL_CATEGORY_ID + ", "
-				+ COL_STRUCK_OUT + ", "
-				+ COL_MANUAL_SORT_ORDER
-				+ ") VALUES (NULL, 1,1,1,1,1)");
+		/*		ArrayList<String> sqlStatements = new ArrayList<String>();
+				sqlStatements.add("insert into " + TABLE_LISTS + " ("
+						+ COL_ID + ", "
+						+ COL_LIST_TITLE_ID + ", "
+						+ COL_MASTER_LIST_ITEM_ID + ", "
+						+ COL_CATEGORY_ID + ", "
+						+ COL_STRUCK_OUT + ", "
+						+ COL_MANUAL_SORT_ORDER
+						+ ") VALUES (NULL, 1,1,1,1,1)");
 
-		sqlStatements.add("insert into " + TABLE_LISTS + " ("
-				+ COL_ID + ", "
-				+ COL_LIST_TITLE_ID + ", "
-				+ COL_MASTER_LIST_ITEM_ID + ", "
-				+ COL_CATEGORY_ID + ", "
-				+ COL_STRUCK_OUT + ", "
-				+ COL_MANUAL_SORT_ORDER
-				+ ") VALUES (NULL, 2,23,2,1,2)");
+				sqlStatements.add("insert into " + TABLE_LISTS + " ("
+						+ COL_ID + ", "
+						+ COL_LIST_TITLE_ID + ", "
+						+ COL_MASTER_LIST_ITEM_ID + ", "
+						+ COL_CATEGORY_ID + ", "
+						+ COL_STRUCK_OUT + ", "
+						+ COL_MANUAL_SORT_ORDER
+						+ ") VALUES (NULL, 2,23,2,1,2)");
 
-		sqlStatements.add("insert into " + TABLE_LISTS + " ("
-				+ COL_ID + ", "
-				+ COL_LIST_TITLE_ID + ", "
-				+ COL_MASTER_LIST_ITEM_ID + ", "
-				+ COL_CATEGORY_ID + ", "
-				+ COL_STRUCK_OUT + ", "
-				+ COL_MANUAL_SORT_ORDER
-				+ ") VALUES (NULL, 3,26,3,0,3)");
+				sqlStatements.add("insert into " + TABLE_LISTS + " ("
+						+ COL_ID + ", "
+						+ COL_LIST_TITLE_ID + ", "
+						+ COL_MASTER_LIST_ITEM_ID + ", "
+						+ COL_CATEGORY_ID + ", "
+						+ COL_STRUCK_OUT + ", "
+						+ COL_MANUAL_SORT_ORDER
+						+ ") VALUES (NULL, 3,26,3,0,3)");
 
-		sqlStatements.add("insert into " + TABLE_LISTS + " ("
-				+ COL_ID + ", "
-				+ COL_LIST_TITLE_ID + ", "
-				+ COL_MASTER_LIST_ITEM_ID + ", "
-				+ COL_CATEGORY_ID + ", "
-				+ COL_STRUCK_OUT + ", "
-				+ COL_MANUAL_SORT_ORDER
-				+ ") VALUES (NULL, 1,18,4,0,4)");
+				sqlStatements.add("insert into " + TABLE_LISTS + " ("
+						+ COL_ID + ", "
+						+ COL_LIST_TITLE_ID + ", "
+						+ COL_MASTER_LIST_ITEM_ID + ", "
+						+ COL_CATEGORY_ID + ", "
+						+ COL_STRUCK_OUT + ", "
+						+ COL_MANUAL_SORT_ORDER
+						+ ") VALUES (NULL, 1,18,4,0,4)");
 
-		sqlStatements.add("insert into " + TABLE_LISTS + " ("
-				+ COL_ID + ", "
-				+ COL_LIST_TITLE_ID + ", "
-				+ COL_MASTER_LIST_ITEM_ID + ", "
-				+ COL_CATEGORY_ID + ", "
-				+ COL_STRUCK_OUT + ", "
-				+ COL_MANUAL_SORT_ORDER
-				+ ") VALUES (NULL, 2,55,5,1,5)");
+				sqlStatements.add("insert into " + TABLE_LISTS + " ("
+						+ COL_ID + ", "
+						+ COL_LIST_TITLE_ID + ", "
+						+ COL_MASTER_LIST_ITEM_ID + ", "
+						+ COL_CATEGORY_ID + ", "
+						+ COL_STRUCK_OUT + ", "
+						+ COL_MANUAL_SORT_ORDER
+						+ ") VALUES (NULL, 2,55,5,1,5)");
 
-		sqlStatements.add("insert into " + TABLE_LISTS + " ("
-				+ COL_ID + ", "
-				+ COL_LIST_TITLE_ID + ", "
-				+ COL_MASTER_LIST_ITEM_ID + ", "
-				+ COL_CATEGORY_ID + ", "
-				+ COL_STRUCK_OUT + ", "
-				+ COL_MANUAL_SORT_ORDER
-				+ ") VALUES (NULL, 3,52,6,0,6)");
+				sqlStatements.add("insert into " + TABLE_LISTS + " ("
+						+ COL_ID + ", "
+						+ COL_LIST_TITLE_ID + ", "
+						+ COL_MASTER_LIST_ITEM_ID + ", "
+						+ COL_CATEGORY_ID + ", "
+						+ COL_STRUCK_OUT + ", "
+						+ COL_MANUAL_SORT_ORDER
+						+ ") VALUES (NULL, 3,52,6,0,6)");
 
-		sqlStatements.add("insert into " + TABLE_LISTS + " ("
-				+ COL_ID + ", "
-				+ COL_LIST_TITLE_ID + ", "
-				+ COL_MASTER_LIST_ITEM_ID + ", "
-				+ COL_CATEGORY_ID + ", "
-				+ COL_STRUCK_OUT + ", "
-				+ COL_MANUAL_SORT_ORDER
-				+ ") VALUES (NULL, 1,40,7,0,7)");
+				sqlStatements.add("insert into " + TABLE_LISTS + " ("
+						+ COL_ID + ", "
+						+ COL_LIST_TITLE_ID + ", "
+						+ COL_MASTER_LIST_ITEM_ID + ", "
+						+ COL_CATEGORY_ID + ", "
+						+ COL_STRUCK_OUT + ", "
+						+ COL_MANUAL_SORT_ORDER
+						+ ") VALUES (NULL, 1,40,7,0,7)");
 
-		sqlStatements.add("insert into " + TABLE_LISTS + " ("
-				+ COL_ID + ", "
-				+ COL_LIST_TITLE_ID + ", "
-				+ COL_MASTER_LIST_ITEM_ID + ", "
-				+ COL_CATEGORY_ID + ", "
-				+ COL_STRUCK_OUT + ", "
-				+ COL_MANUAL_SORT_ORDER
-				+ ") VALUES (NULL, 2,54,8,0,8)");
+				sqlStatements.add("insert into " + TABLE_LISTS + " ("
+						+ COL_ID + ", "
+						+ COL_LIST_TITLE_ID + ", "
+						+ COL_MASTER_LIST_ITEM_ID + ", "
+						+ COL_CATEGORY_ID + ", "
+						+ COL_STRUCK_OUT + ", "
+						+ COL_MANUAL_SORT_ORDER
+						+ ") VALUES (NULL, 2,54,8,0,8)");
 
-		sqlStatements.add("insert into " + TABLE_LISTS + " ("
-				+ COL_ID + ", "
-				+ COL_LIST_TITLE_ID + ", "
-				+ COL_MASTER_LIST_ITEM_ID + ", "
-				+ COL_CATEGORY_ID + ", "
-				+ COL_STRUCK_OUT + ", "
-				+ COL_MANUAL_SORT_ORDER
-				+ ") VALUES (NULL, 3,55,9,1,9)");
+				sqlStatements.add("insert into " + TABLE_LISTS + " ("
+						+ COL_ID + ", "
+						+ COL_LIST_TITLE_ID + ", "
+						+ COL_MASTER_LIST_ITEM_ID + ", "
+						+ COL_CATEGORY_ID + ", "
+						+ COL_STRUCK_OUT + ", "
+						+ COL_MANUAL_SORT_ORDER
+						+ ") VALUES (NULL, 3,55,9,1,9)");
 
-		AListUtilities.execMultipleSQL(database, sqlStatements);
+				AListUtilities.execMultipleSQL(database, sqlStatements);*/
 	}
 
 	public static void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {

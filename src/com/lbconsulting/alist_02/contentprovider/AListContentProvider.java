@@ -30,16 +30,16 @@ public class AListContentProvider extends ContentProvider {
 	private final boolean L = AListUtilities.L; // enable Logging
 	private final String TAG = AListUtilities.TAG;
 
-	// Starting List Colors
-	private static final String DARKBLUE = "#00008B";
-	private static final String DARKGREEN = "#006400";
-	private static final String DARKSALMON = "#E9967A";
-	private static final String GHOSTWHITE = "#F8F8FF";
-	private static final String HOTPINK = "#FF69B4";
-	private static final String LAVENDER = "#E6E6FA";
+	/*	// Starting List Colors
+		private static final String DARKBLUE = "#00008B";
+		private static final String DARKGREEN = "#006400";
+		private static final String DARKSALMON = "#E9967A";
+		private static final String GHOSTWHITE = "#F8F8FF";
+		private static final String HOTPINK = "#FF69B4";
+		private static final String LAVENDER = "#E6E6FA";
 
-	private static final String BLACK = "#000000";
-	private static final String WHITE = "#FFFFFF";
+		private static final String BLACK = "#000000";
+		private static final String WHITE = "#FFFFFF";*/
 
 	// AList database
 	private AListDatabaseHelper database = null;
@@ -315,7 +315,7 @@ public class AListContentProvider extends ContentProvider {
 					"Method insert: Cannon insert a new row with a single row URI. Illegal URI: " + uri);
 
 		case LIST_TITLE_MULTI_ROWS:
-			// get the next Id for the lists title table
+			/*// get the next Id for the lists title table
 			String nextIDQuery = "name='" + ListTitlesTable.TABLE_LIST_TITLES + "'";
 			long nextId = -1;
 			Cursor nextIDCursor = db
@@ -380,6 +380,17 @@ public class AListContentProvider extends ContentProvider {
 
 				return newRowUri;
 
+			} else {
+				return null;
+			}*/
+
+			newRowId = db.insertOrThrow(ListTitlesTable.TABLE_LIST_TITLES, nullColumnHack, values);
+			if (newRowId > -1) {
+				// Construct and return the URI of the newly inserted row.
+				Uri newRowUri = ContentUris.withAppendedId(ListTitlesTable.CONTENT_URI, newRowId);
+				// Notify and observers of the change in the database.
+				getContext().getContentResolver().notifyChange(ListTitlesTable.CONTENT_URI, null);
+				return newRowUri;
 			} else {
 				return null;
 			}

@@ -8,7 +8,6 @@ import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.lbconsulting.alist_02.database.ListTypesTable;
@@ -32,17 +31,13 @@ public class ListTypesCursorAdapter extends CursorAdapter {
 
 		switch (view.getId()) {
 		case R.id.listTypesLinearLayout:
-			LinearLayout v = (LinearLayout) view;
+			//LinearLayout v = (LinearLayout) view;
 
 			listTypeTextView = (TextView) view.findViewById(R.id.txtListType);
 			listTypeTextView.setText(cursor.getString(cursor.getColumnIndexOrThrow(ListTypesTable.COL_LIST_TYPE)));
-			listTypeTextView.setTypeface(null, Typeface.BOLD_ITALIC);
+			/*listTypeTextView.setTypeface(null, Typeface.BOLD_ITALIC);*/
+			listTypeTextView.setTypeface(null, Typeface.NORMAL);
 			listTypeTextView.setTextColor(res.getColor(R.color.black));
-
-			/*			ColorDrawable cd = (ColorDrawable) listTypeTextView.getBackground();
-						int colorCode = cd.getColor();
-						v.setBackgroundColor(colorCode);*/
-
 			break;
 
 		case R.id.listTypesDropdownLinearLayout:
@@ -68,4 +63,5 @@ public class ListTypesCursorAdapter extends CursorAdapter {
 		View v = View.inflate(c, R.layout.list_types_dropdown_row, null);
 		return v;
 	}
+
 }
