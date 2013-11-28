@@ -16,8 +16,9 @@ public class CategoriesTable {
 	// Categories data table
 	public static final String TABLE_CATEGORIES = "tblCategories";
 	public static final String COL_ID = "_id";
-	public static final String COL_CATEGORY = "category";
-	public static final String[] PROJECTION_ALL = { COL_ID, COL_CATEGORY };
+	public static final String COL_CATEGORY_NAME = "categoryName";
+	public static final String COL_LIST_TYPE_ID = "listTypeID";
+	public static final String[] PROJECTION_ALL = { COL_ID, COL_CATEGORY_NAME, COL_LIST_TYPE_ID };
 
 	public static final String CONTENT_PATH = TABLE_CATEGORIES;
 	public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + "vnd.lbconsulting."
@@ -26,40 +27,52 @@ public class CategoriesTable {
 			+ TABLE_CATEGORIES;
 	public static final Uri CONTENT_URI = Uri.parse("content://" + AListContentProvider.AUTHORITY + "/" + CONTENT_PATH);
 
-	public static final String SORT_ORDER_CATEGORY = COL_CATEGORY + " ASC";
+	public static final String SORT_ORDER_CATEGORY = COL_CATEGORY_NAME + " ASC";
 
 	// Database creation SQL statements
 	private static final String DATABASE_CREATE = "create table "
 			+ TABLE_CATEGORIES
 			+ " ("
 			+ COL_ID + " integer primary key autoincrement, "
-			+ COL_CATEGORY + " text collate nocase"
+			+ COL_CATEGORY_NAME + " text collate nocase,"
+			+ COL_LIST_TYPE_ID + " integer not null references "
+			+ ListTypesTable.TABLE_LIST_TYPES + " (" + ListTypesTable.COL_ID + ") default 1 "
 			+ ");";
 
 	public static void onCreate(SQLiteDatabase database) {
 		database.execSQL(DATABASE_CREATE);
 
 		ArrayList<String> sqlStatements = new ArrayList<String>();
-		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY
-				+ ") VALUES (NULL, '[None]')");
-		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY
-				+ ") VALUES (NULL, 'Aisle 1')");
-		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY
-				+ ") VALUES (NULL, 'Aisle 2')");
-		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY
-				+ ") VALUES (NULL, 'Aisle 3')");
-		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY
-				+ ") VALUES (NULL, 'Aisle 4')");
-		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY
-				+ ") VALUES (NULL, 'Aisle 5')");
-		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY
-				+ ") VALUES (NULL, 'Produce')");
-		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY
-				+ ") VALUES (NULL, 'Dairy')");
-		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY
-				+ ") VALUES (NULL, 'Meats')");
-		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY
-				+ ") VALUES (NULL, 'Bakery')");
+		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY_NAME
+				+ ", " + COL_LIST_TYPE_ID
+				+ ") VALUES (NULL, '[None]', -1)");
+		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY_NAME
+				+ ", " + COL_LIST_TYPE_ID
+				+ ") VALUES (NULL, 'Aisle 1', 1)");
+		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY_NAME
+				+ ", " + COL_LIST_TYPE_ID
+				+ ") VALUES (NULL, 'Aisle 2', 1)");
+		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY_NAME
+				+ ", " + COL_LIST_TYPE_ID
+				+ ") VALUES (NULL, 'Aisle 3', 1)");
+		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY_NAME
+				+ ", " + COL_LIST_TYPE_ID
+				+ ") VALUES (NULL, 'Aisle 4', 1)");
+		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY_NAME
+				+ ", " + COL_LIST_TYPE_ID
+				+ ") VALUES (NULL, 'Aisle 5', 1)");
+		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY_NAME
+				+ ", " + COL_LIST_TYPE_ID
+				+ ") VALUES (NULL, 'Produce', 1)");
+		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY_NAME
+				+ ", " + COL_LIST_TYPE_ID
+				+ ") VALUES (NULL, 'Dairy', 1)");
+		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY_NAME
+				+ ", " + COL_LIST_TYPE_ID
+				+ ") VALUES (NULL, 'Meats', 1)");
+		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY_NAME
+				+ ", " + COL_LIST_TYPE_ID
+				+ ") VALUES (NULL, 'Bakery', 1)");
 
 		AListUtilities.execMultipleSQL(database, sqlStatements);
 	}

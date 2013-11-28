@@ -92,7 +92,7 @@ public class MasterListActivity extends Activity implements
 	private ListTypesCursorAdapter listTypesAdapter;
 
 	private static Button btnAddToMasterList = null;
-	private static Button btnStartListsViewActivity = null;
+	private static Button btnShowListsActivity = null;
 	private EditText txtListItem = null;
 	private static Spinner spnListTitles = null;
 	private static LinearLayout layoutListTitle = null;
@@ -299,7 +299,7 @@ public class MasterListActivity extends Activity implements
 		txtListItem = (EditText) findViewById(R.id.txtListItem);
 		masterListView = (ListView) findViewById(R.id.lstItems);
 		btnAddToMasterList = (Button) findViewById(R.id.btnAddToMasterList);
-		btnStartListsViewActivity = (Button) findViewById(R.id.btnStartListsViewActivity);
+		btnShowListsActivity = (Button) findViewById(R.id.btnShowListsActivity);
 		spnListTitles = (Spinner) findViewById(R.id.spnListTitle);
 		layoutListTitle = (LinearLayout) findViewById(R.id.linearLayoutListTitle);
 		layoutListItem = (LinearLayout) findViewById(R.id.linearLayoutListItem);
@@ -376,14 +376,11 @@ public class MasterListActivity extends Activity implements
 		});
 
 		// setup btnStartListsViewActivity
-		btnStartListsViewActivity.setOnClickListener(new Button.OnClickListener() {
+		btnShowListsActivity.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO Code ListsViewActivity
-				if (L) {
-					String msg = "Start ListsViewActivity is under construction.";
-					Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-				}
+				Intent showListsActivityIntent = new Intent(MasterListActivity.this, ShowListsActivity.class);
+				MasterListActivity.this.startActivity(showListsActivityIntent);
 			}
 		});
 
@@ -951,7 +948,7 @@ public class MasterListActivity extends Activity implements
 				int spnListTitlesTextColor = listTitlesCursor.getInt(listTitlesCursor
 						.getColumnIndexOrThrow(ListTitlesTable.COL_NORMAL_TEXT_COLOR));
 
-				btnStartListsViewActivity.setTextColor(spnListTitlesTextColor);
+				btnShowListsActivity.setTextColor(spnListTitlesTextColor);
 				layoutListTitle.setBackgroundColor(spnListTitlesBackgroundColor);
 
 			}
@@ -1070,7 +1067,7 @@ public class MasterListActivity extends Activity implements
 					"Normal Text Color " + String.valueOf(i));
 			values.put(ListTitlesTable.COL_STRIKEOUT_TEXT_COLOR,
 					"Strikeout Color " + String.valueOf(i));
-			values.put(ListTitlesTable.COL_LIST_TITLE,
+			values.put(ListTitlesTable.COL_LIST_TITLE_NAME,
 					"List Title " + String.valueOf(i));
 			values.put(ListTitlesTable.COL_SORT_ORDER_ID, i);
 			cr.insert(ListTitlesTable.CONTENT_URI, values);
@@ -1084,7 +1081,7 @@ public class MasterListActivity extends Activity implements
 			cr.insert(ListsTable.CONTENT_URI, values);
 
 			values = new ContentValues();
-			values.put(CategoriesTable.COL_CATEGORY,
+			values.put(CategoriesTable.COL_CATEGORY_NAME,
 					"Category " + String.valueOf(i));
 			cr.insert(CategoriesTable.CONTENT_URI, values);
 
@@ -1127,7 +1124,7 @@ public class MasterListActivity extends Activity implements
 					"Normal Text Color " + String.valueOf(i + 5));
 			values.put(ListTitlesTable.COL_STRIKEOUT_TEXT_COLOR,
 					"Strikeout Color " + String.valueOf(i + 5));
-			values.put(ListTitlesTable.COL_LIST_TITLE,
+			values.put(ListTitlesTable.COL_LIST_TITLE_NAME,
 					"List Title " + String.valueOf(i + 5));
 			values.put(ListTitlesTable.COL_SORT_ORDER_ID, i + 5);
 			cr.update(
@@ -1145,7 +1142,7 @@ public class MasterListActivity extends Activity implements
 							String.valueOf(i)), values, null, null);
 
 			values = new ContentValues();
-			values.put(CategoriesTable.COL_CATEGORY,
+			values.put(CategoriesTable.COL_CATEGORY_NAME,
 					"Category " + String.valueOf(i + 5));
 			cr.update(
 					Uri.withAppendedPath(CategoriesTable.CONTENT_URI,
@@ -1194,7 +1191,7 @@ public class MasterListActivity extends Activity implements
 				+ String.valueOf(i + 5));
 		values.put(ListTitlesTable.COL_STRIKEOUT_TEXT_COLOR, "Strikeout Color "
 				+ String.valueOf(i + 5));
-		values.put(ListTitlesTable.COL_LIST_TITLE,
+		values.put(ListTitlesTable.COL_LIST_TITLE_NAME,
 				"List Title " + String.valueOf(i + 5));
 		values.put(ListTitlesTable.COL_SORT_ORDER_ID, i + 5);
 

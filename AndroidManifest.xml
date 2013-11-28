@@ -25,6 +25,9 @@
         <activity
             android:name="CreatListActivity"
             android:label="@string/app_name" />
+        <activity
+            android:name="ShowListsActivity"
+            android:label="@string/app_name" />
 
         <provider
             android:name="com.lbconsulting.alist_02.contentprovider.AListContentProvider"

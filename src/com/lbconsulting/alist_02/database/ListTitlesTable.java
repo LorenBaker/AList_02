@@ -16,7 +16,7 @@ public class ListTitlesTable {
 	// MasterListItems data table
 	public static final String TABLE_LIST_TITLES = "tblListTitles";
 	public static final String COL_ID = "_id";
-	public static final String COL_LIST_TITLE = "listTitle";
+	public static final String COL_LIST_TITLE_NAME = "listTitle";
 	public static final String COL_LIST_TYPE_ID = "listTypeID";
 	public static final String COL_SORT_ORDER_ID = "sortOrderID";
 	public static final String COL_BACKGROUND_COLOR = "backgroundColor";
@@ -24,7 +24,7 @@ public class ListTitlesTable {
 	public static final String COL_STRIKEOUT_TEXT_COLOR = "strikeoutTextColor";
 	public static final String COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT = "autoAddCategoriesOnStrikeout";
 
-	public static final String[] PROJECTION_ALL = { COL_ID, COL_LIST_TITLE, COL_LIST_TYPE_ID, COL_SORT_ORDER_ID,
+	public static final String[] PROJECTION_ALL = { COL_ID, COL_LIST_TITLE_NAME, COL_LIST_TYPE_ID, COL_SORT_ORDER_ID,
 			COL_BACKGROUND_COLOR,
 			COL_NORMAL_TEXT_COLOR, COL_STRIKEOUT_TEXT_COLOR, COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT };
 
@@ -35,14 +35,14 @@ public class ListTitlesTable {
 			+ TABLE_LIST_TITLES;
 	public static final Uri CONTENT_URI = Uri.parse("content://" + AListContentProvider.AUTHORITY + "/" + CONTENT_PATH);
 
-	public static final String SORT_ORDER_LIST_TITLE = COL_LIST_TITLE + " ASC";
+	public static final String SORT_ORDER_LIST_TITLE = COL_LIST_TITLE_NAME + " ASC";
 
 	// Database creation SQL statements
 	private static final String DATABASE_CREATE = "create table "
 			+ TABLE_LIST_TITLES
 			+ " ("
 			+ COL_ID + " integer primary key autoincrement, "
-			+ COL_LIST_TITLE + " text collate nocase, "
+			+ COL_LIST_TITLE_NAME + " text collate nocase, "
 			+ COL_LIST_TYPE_ID + " integer not null references "
 			+ ListTypesTable.TABLE_LIST_TYPES + " (" + ListTypesTable.COL_ID + ") default 1, "
 			+ COL_SORT_ORDER_ID + " integer default 0, " // default alphabetical
@@ -59,7 +59,7 @@ public class ListTitlesTable {
 		/*		ArrayList<String> sqlStatements = new ArrayList<String>();
 				sqlStatements.add("insert into " + TABLE_LIST_TITLES + " ("
 						+ COL_ID + ", "
-						+ COL_LIST_TITLE + ", "
+						+ COL_LIST_TITLE_NAME + ", "
 						+ COL_LIST_TYPE_ID + ", " // 2=Groceries Type Items
 						+ COL_SORT_ORDER_ID + ", "
 						+ COL_BACKGROUND_COLOR + ", "
@@ -70,7 +70,7 @@ public class ListTitlesTable {
 
 				sqlStatements.add("insert into " + TABLE_LIST_TITLES + " ("
 						+ COL_ID + ", "
-						+ COL_LIST_TITLE + ", "
+						+ COL_LIST_TITLE_NAME + ", "
 						+ COL_LIST_TYPE_ID + ", " // 2=Groceries Type Items
 						+ COL_SORT_ORDER_ID + ", "
 						+ COL_BACKGROUND_COLOR + ", "
@@ -81,7 +81,7 @@ public class ListTitlesTable {
 
 				sqlStatements.add("insert into " + TABLE_LIST_TITLES + " ("
 						+ COL_ID + ", "
-						+ COL_LIST_TITLE + ", "
+						+ COL_LIST_TITLE_NAME + ", "
 						+ COL_LIST_TYPE_ID + ", " // 3=ToDo Type Items
 						+ COL_SORT_ORDER_ID + ", "
 						+ COL_BACKGROUND_COLOR + ", "

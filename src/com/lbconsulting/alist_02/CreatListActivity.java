@@ -37,18 +37,6 @@ public class CreatListActivity extends Activity implements
 	public final String TAG = AListUtilities.TAG;
 	private final boolean L = AListUtilities.L; // enable Logging
 
-	/*// Starting List Colors
-	private static final String DARKBLUE = "#00008B";
-	private static final String DARKGREEN = "#006400";
-	private static final String DARKSALMON = "#E9967A";
-	private static final String GHOSTWHITE = "#F8F8FF";
-	private static final String HOTPINK = "#FF69B4";
-	private static final String LAVENDER = "#E6E6FA";
-
-	private static final String BLACK = "#000000";
-	private static final String WHITE = "#FFFFFF";
-	private static final int DARKGREY = R.color.darkgray;*/
-
 	// CreateListActivity Views and related variables
 	private EditText txtNewListTitle = null;
 	private EditText txtNewListTypeName = null;
@@ -66,7 +54,7 @@ public class CreatListActivity extends Activity implements
 	// CreateListActivity Variables
 	private boolean verbose = true;
 	private long activeListID = -1;
-	private long activeListTypeID = 2;
+	private long activeListTypeID = -1;
 
 	private int backgroundColor;
 	private int normalTextColor;
@@ -513,7 +501,7 @@ public class CreatListActivity extends Activity implements
 		Cursor listTitlesCursor = null;
 		Uri uri = ListTitlesTable.CONTENT_URI;
 		String[] projection = ListTitlesTable.PROJECTION_ALL;
-		String selection = ListTitlesTable.COL_LIST_TITLE + " = ?";
+		String selection = ListTitlesTable.COL_LIST_TITLE_NAME + " = ?";
 		String selectionArgs[] = { proposedListTitle };
 		String sortOrder = ListTitlesTable.SORT_ORDER_LIST_TITLE;
 		try {
@@ -552,7 +540,7 @@ public class CreatListActivity extends Activity implements
 			// newListTitle not in ListTitlesTable .. so add it.
 			uri = ListTitlesTable.CONTENT_URI;
 			ContentValues values = new ContentValues();
-			values.put(ListTitlesTable.COL_LIST_TITLE, proposedListTitle);
+			values.put(ListTitlesTable.COL_LIST_TITLE_NAME, proposedListTitle);
 			values.put(ListTitlesTable.COL_LIST_TYPE_ID, this.activeListTypeID);
 
 			values.put(ListTitlesTable.COL_BACKGROUND_COLOR, this.backgroundColor);

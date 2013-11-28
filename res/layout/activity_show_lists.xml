@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/masterListRoot"
+    android:id="@+id/showListsRootLinearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/lt_grey"
@@ -12,22 +12,42 @@
     android:paddingRight="4dp"
     android:paddingTop="4dp" >
 
-    <TextView
-        android:id="@+id/txtStartingHint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="To start select: Options > Add New List"
-        android:visibility="gone" />
-
     <LinearLayout
-        android:id="@+id/linearLayoutListTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="false"
         android:orientation="horizontal" >
 
+        <Button
+            android:id="@+id/btnPreviousList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Previous" />
+
+        <Button
+            android:id="@+id/btnNextList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Next" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayoutCategories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="false"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/btnRemoveStruckOutItems"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ck" />
+
         <Spinner
-            android:id="@+id/spnListTitle"
+            android:id="@+id/spnCategories"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
@@ -38,25 +58,26 @@
         </Spinner>
 
         <Button
-            android:id="@+id/btnShowListsActivity"
+            android:id="@+id/btnNewCategory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btnStartListsViewActivity" />
+            android:text="@string/btnNewText" />
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/linearLayoutListItem"
+        android:id="@+id/newCategoryLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:visibility="visible" >
 
         <EditText
-            android:id="@+id/txtListItem"
+            android:id="@+id/txtCategoryName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/rectangle_black_stroke"
-            android:hint="@string/addMasterListItemHint"
+            android:hint="Enter Category"
             android:inputType="textAutoCorrect|textCapWords"
             android:maxLines="1"
             android:paddingBottom="6dp"
@@ -65,14 +86,14 @@
             android:paddingTop="6dp" />
 
         <Button
-            android:id="@+id/btnAddToMasterList"
+            android:id="@+id/btnAddCategory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/addMasterListItem" />
+            android:text="Add" />
     </LinearLayout>
 
     <ListView
-        android:id="@+id/lstItems"
+        android:id="@+id/lstListItems"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:divider="@null"

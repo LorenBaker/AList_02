@@ -25,11 +25,14 @@ public class ListsTable {
 			COL_MANUAL_SORT_ORDER, COL_CATEGORY_ID };
 
 	public static final String CONTENT_PATH = TABLE_LISTS;
+	public static final String CONTENT_LIST_WITH_CATEGORY = "listWithCategory";
 	public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + "vnd.lbconsulting."
 			+ TABLE_LISTS;
 	public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + "vnd.lbconsulting."
 			+ TABLE_LISTS;
 	public static final Uri CONTENT_URI = Uri.parse("content://" + AListContentProvider.AUTHORITY + "/" + CONTENT_PATH);
+	public static final Uri LIST_WITH_CATEGORY_URI = Uri.parse("content://" + AListContentProvider.AUTHORITY + "/"
+			+ CONTENT_LIST_WITH_CATEGORY);
 
 	// Database creation SQL statements
 	private static final String DATABASE_CREATE =
@@ -195,7 +198,7 @@ public class ListsTable {
 			listTitlesCurosr = getListTitlesCurosr(context, listTitleID);
 			if (listTitlesCurosr != null && listTitlesCurosr.getCount() > 0) {
 				listTitle = listTitlesCurosr.getString(listTitlesCurosr
-						.getColumnIndexOrThrow(ListTitlesTable.COL_LIST_TITLE));
+						.getColumnIndexOrThrow(ListTitlesTable.COL_LIST_TITLE_NAME));
 			}
 
 		} catch (Exception e) {

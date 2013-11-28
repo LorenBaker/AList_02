@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
@@ -28,17 +29,6 @@ public class AListContentProvider extends ContentProvider {
 
 	private final boolean L = AListUtilities.L; // enable Logging
 	private final String TAG = AListUtilities.TAG;
-
-	/*	// Starting List Colors
-		private static final String DARKBLUE = "#00008B";
-		private static final String DARKGREEN = "#006400";
-		private static final String DARKSALMON = "#E9967A";
-		private static final String GHOSTWHITE = "#F8F8FF";
-		private static final String HOTPINK = "#FF69B4";
-		private static final String LAVENDER = "#E6E6FA";
-
-		private static final String BLACK = "#000000";
-		private static final String WHITE = "#FFFFFF";*/
 
 	// AList database
 	private AListDatabaseHelper database = null;
@@ -65,6 +55,8 @@ public class AListContentProvider extends ContentProvider {
 	private static final int LIST_TYPE_MULTI_ROWS = 70;
 	private static final int LIST_TYPE_SINGLE_ROW = 71;
 
+	private static final int LIST_WITH_CATEGORY = 80;
+
 	public static final String AUTHORITY = "com.lbconsulting.alist_02.contentprovider";
 
 	private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -84,11 +76,10 @@ public class AListContentProvider extends ContentProvider {
 		sURIMatcher.addURI(AUTHORITY, CategoriesTable.CONTENT_PATH, CATEGORIES_MULTI_ROWS);
 		sURIMatcher.addURI(AUTHORITY, CategoriesTable.CONTENT_PATH + "/#", CATEGORIES_SINGLE_ROW);
 
-		/*sURIMatcher.addURI(AUTHORITY, SortOrdersTable.CONTENT_PATH, SORT_ORDERS_MULTI_ROWS);
-		sURIMatcher.addURI(AUTHORITY, SortOrdersTable.CONTENT_PATH + "/#", SORT_ORDERS_SINGLE_ROW);*/
-
 		sURIMatcher.addURI(AUTHORITY, ListTypesTable.CONTENT_PATH, LIST_TYPE_MULTI_ROWS);
 		sURIMatcher.addURI(AUTHORITY, ListTypesTable.CONTENT_PATH + "/#", LIST_TYPE_SINGLE_ROW);
+
+		sURIMatcher.addURI(AUTHORITY, ListsTable.CONTENT_LIST_WITH_CATEGORY, LIST_WITH_CATEGORY);
 	}
 
 	@Override
@@ -199,22 +190,6 @@ public class AListContentProvider extends ContentProvider {
 			deleteCount = db.delete(CategoriesTable.TABLE_CATEGORIES, selection, selectionArgs);
 			break;
 
-		/*case SORT_ORDERS_MULTI_ROWS:
-			if (selection == null) {
-				selection = "1";
-			}
-			// Perform the deletion
-			deleteCount = db.delete(SortOrdersTable.TABLE_SORT_ORDERS, selection, selectionArgs);
-			break;
-
-		case SORT_ORDERS_SINGLE_ROW:
-			rowID = uri.getLastPathSegment();
-			selection = SortOrdersTable.COL_ID + "=" + rowID
-					+ (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "");
-			// Perform the deletion
-			deleteCount = db.delete(SortOrdersTable.TABLE_SORT_ORDERS, selection, selectionArgs);
-			break;*/
-
 		case LIST_TYPE_MULTI_ROWS:
 			if (selection == null) {
 				selection = "1";
@@ -268,11 +243,6 @@ public class AListContentProvider extends ContentProvider {
 			return CategoriesTable.CONTENT_TYPE;
 		case CATEGORIES_SINGLE_ROW:
 			return CategoriesTable.CONTENT_ITEM_TYPE;
-
-			/*case SORT_ORDERS_MULTI_ROWS:
-				return SortOrdersTable.CONTENT_TYPE;
-			case SORT_ORDERS_SINGLE_ROW:
-				return SortOrdersTable.CONTENT_ITEM_TYPE;*/
 
 		case LIST_TYPE_MULTI_ROWS:
 			return ListTypesTable.CONTENT_TYPE;
@@ -377,22 +347,6 @@ public class AListContentProvider extends ContentProvider {
 			throw new IllegalArgumentException(
 					"Method insert: Cannot insert a new row with a single row URI. Illegal URI: " + uri);
 
-			/*case SORT_ORDERS_MULTI_ROWS:
-				newRowId = db.insertOrThrow(SortOrdersTable.TABLE_SORT_ORDERS, nullColumnHack, values);
-				if (newRowId > -1) {
-					// Construct and return the URI of the newly inserted row.
-					Uri newRowUri = ContentUris.withAppendedId(SortOrdersTable.CONTENT_URI, newRowId);
-					// Notify and observers of the change in the database.
-					getContext().getContentResolver().notifyChange(SortOrdersTable.CONTENT_URI, null);
-					return newRowUri;
-				} else {
-					return null;
-				}
-
-			case SORT_ORDERS_SINGLE_ROW:
-				throw new IllegalArgumentException(
-						"Method insert: Cannot insert a new row with a single row URI. Illegal URI: " + uri);*/
-
 		case LIST_TYPE_MULTI_ROWS:
 			newRowId = db.insertOrThrow(ListTypesTable.TABLE_LIST_TYPES, nullColumnHack, values);
 			if (newRowId > -1) {
@@ -477,17 +431,6 @@ public class AListContentProvider extends ContentProvider {
 			queryBuilder.appendWhere(CategoriesTable.COL_ID + "=" + uri.getLastPathSegment());
 			break;
 
-		/*case SORT_ORDERS_MULTI_ROWS:
-			queryBuilder.setTables(SortOrdersTable.TABLE_SORT_ORDERS);
-			checkSortOrdersColumnNames(projection);
-			break;
-
-		case SORT_ORDERS_SINGLE_ROW:
-			queryBuilder.setTables(SortOrdersTable.TABLE_SORT_ORDERS);
-			checkSortOrdersColumnNames(projection);
-			queryBuilder.appendWhere(SortOrdersTable.COL_ID + "=" + uri.getLastPathSegment());
-			break;*/
-
 		case LIST_TYPE_MULTI_ROWS:
 			queryBuilder.setTables(ListTypesTable.TABLE_LIST_TYPES);
 			checkListTypesColumnNames(projection);
@@ -498,6 +441,8 @@ public class AListContentProvider extends ContentProvider {
 			checkListTypesColumnNames(projection);
 			queryBuilder.appendWhere(ListTypesTable.COL_ID + "=" + uri.getLastPathSegment());
 			break;
+
+		case LIST_WITH_CATEGORY:
 
 		default:
 			throw new IllegalArgumentException("Method query. Unknown URI: " + uri);
@@ -617,21 +562,6 @@ public class AListContentProvider extends ContentProvider {
 			updateCount = db.update(CategoriesTable.TABLE_CATEGORIES, values, selection, selectionArgs);
 			break;
 
-		/*case SORT_ORDERS_MULTI_ROWS:
-			// Perform the update
-			updateCount = db.update(SortOrdersTable.TABLE_SORT_ORDERS, values, selection, selectionArgs);
-			break;
-
-		case SORT_ORDERS_SINGLE_ROW:
-			// Limit deletion to a single row
-			rowID = uri.getLastPathSegment();
-			selection = SortOrdersTable.COL_ID + "=" + rowID
-					+ (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "");
-
-			// Perform the update
-			updateCount = db.update(SortOrdersTable.TABLE_SORT_ORDERS, values, selection, selectionArgs);
-			break;*/
-
 		case LIST_TYPE_MULTI_ROWS:
 			// Perform the update
 			updateCount = db.update(ListTypesTable.TABLE_LIST_TYPES, values, selection, selectionArgs);
@@ -654,6 +584,76 @@ public class AListContentProvider extends ContentProvider {
 		// Notify and observers of the change in the database.
 		getContext().getContentResolver().notifyChange(uri, null);
 		return updateCount;
+	}
+
+	/* From: http://stackoverflow.com/questions/14090695/how-to-use-join-query-in-cursorloader-when-its-constructor-does-not-support-it
+	 
+	The Uri does not point to any table. It points to whatever you feel like pointing it to.
+
+	Let's pretend that your two tables are Customer and Order. One customer may have many orders. 
+	You want to execute a query to get all outstanding orders... but you want to join in some customer-related columns 
+	that you will need, such as the customer's name.
+
+	Let's further pretend that you already have 
+	content://your.authority.goes.here/customer and content://your.authority.goes.here/order 
+	defined to purely query those tables.
+
+	You have two choices:
+
+	(1)	Add the join of the customer's display name on your /order Uri. 
+		Having another available column probably will not break any existing consumers 
+		of the provider (though testing is always a good idea). This is what ContactsContract does -- 
+		it joins in some base columns, like the contact's name, on pretty much all queries of all tables.
+		
+	(2)	Create content://your.authority.goes.here/orderWithCust 
+		that does the same basic query as /order does, but contains your join. 
+		In this case, you could have insert(), update(), and delete() throw some sort of RuntimeException, 
+		to remind you that you should not be modifying data using /orderWithCust as a Uri.
+
+	In the end, designing a ContentProvider Uri system is similar to designing a REST Web service's URL system. 
+	In both cases, the join has to be done on the provider/server side, and so you may need to break 
+	the one-table-to-one-URL baseline to offer up some useful joins.*/
+
+	public Cursor getList(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+		return null;
+
+	}
+
+	public Cursor getList(long listTitleID) {
+		/*		SELECT itemName, categoryName FROM tblLists
+		JOIN tblMasterListItems, tblCategories
+		ON tblLists.MasterListItemID= tblMasterListItems._Id
+		WHERE tblLists.categoryID=tblCategories._Id
+		 AND tblLists.listTitleID=1*/
+
+		String sql = "SELECT itemName, categoryName FROM tblLists ";
+		sql = sql + "JOIN tblMasterListItems, tblCategories ";
+		sql = sql + "ON tblLists.MasterListItemID= tblMasterListItems._Id ";
+		sql = sql + "WHERE tblLists.categoryID=tblCategories._Id ";
+		sql = sql + "AND tblLists.listTitleID=" + String.valueOf(listTitleID);
+
+		Cursor cursor = null;
+		SQLiteDatabase db = null;
+		try {
+			db = database.getWritableDatabase();
+		} catch (SQLiteException ex) {
+			db = database.getReadableDatabase();
+		}
+
+		cursor = db.rawQuery(sql, null);
+
+		try {
+			ContentResolver cr = context.getContentResolver();
+			Uri uri = CONTENT_URI;
+			String[] projection = PROJECTION_ALL;
+			String where = COL_LIST_TITLE_ID + "= ?";
+			String[] selectionArgs = { String.valueOf(listTitleID) };
+			cursor = cr.query(uri, projection, where, selectionArgs, null);
+
+		} catch (Exception e) {
+			Log.e(TAG, "An Exception error occurred in getAllItems.", e);
+		}
+		return cursor;
 	}
 
 	private void checkMasterListItemsColumnNames(String[] projection) {
@@ -724,20 +724,6 @@ public class AListContentProvider extends ContentProvider {
 			}
 		}
 	}
-
-	/*private void checkSortOrdersColumnNames(String[] projection) {
-		// Check if the caller has requested a column that does not exist
-		if (projection != null) {
-			HashSet<String> requstedColumns = new HashSet<String>(Arrays.asList(projection));
-			HashSet<String> availableColumns = new HashSet<String>(Arrays.asList(SortOrdersTable.PROJECTION_ALL));
-
-			// Check if all columns which are requested are available
-			if (!availableColumns.containsAll(requstedColumns)) {
-				throw new IllegalArgumentException(
-						"Method checkSortOrdersColumnNames: Unknown SortOrdersTable column name!");
-			}
-		}
-	}*/
 
 	private void checkListTypesColumnNames(String[] projection) {
 		// Check if the caller has requested a column that does not exist
