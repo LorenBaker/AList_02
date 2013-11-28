@@ -4,9 +4,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import android.content.Context;
@@ -147,6 +149,10 @@ public class AListUtilities {
 			spinnerItem.close();
 		}*/
 		return spinnerIndex;
+	}
+
+	public static String formatInt(int number) {
+		return NumberFormat.getNumberInstance(Locale.US).format(number);
 	}
 
 	public static String formatDateTime(Context context, String timeToFormat) {

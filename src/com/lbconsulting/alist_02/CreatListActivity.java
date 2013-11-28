@@ -132,7 +132,7 @@ public class CreatListActivity extends Activity implements
 		// Set application states
 		this.verbose = storedStates.getBoolean("verbose", true);
 		this.activeListID = storedStates.getLong("activeListID", 1);
-		this.activeListTypeID = storedStates.getLong("activeListTypeID", 2); // 2 = Groceries		
+		this.activeListTypeID = storedStates.getLong("activeListTypeID", 1); // 1 = Groceries		
 		//this.txtNewListTitle.setText(storedStates.getString("txtNewListTitle", null));
 		//this.spnListTypesPosition = storedStates.getInt("spnListTypesPosition", 1); // 1 = [None]
 	}
@@ -342,7 +342,7 @@ public class CreatListActivity extends Activity implements
 			@Override
 			public void onClick(View v) {
 				// validate the selected list type
-				if (activeListTypeID < 2) {
+				if (activeListTypeID < 0) {
 					String msg = "Unable to create a new List.\nNo list type provided!\nPlease try again.";
 					Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
 					isNewListCreated = false;

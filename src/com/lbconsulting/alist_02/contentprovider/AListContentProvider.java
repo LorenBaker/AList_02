@@ -23,7 +23,6 @@ import com.lbconsulting.alist_02.database.ListTypesTable;
 import com.lbconsulting.alist_02.database.ListsTable;
 import com.lbconsulting.alist_02.database.MasterListItemsTable;
 import com.lbconsulting.alist_02.database.PreviousCategoryTable;
-import com.lbconsulting.alist_02.database.SortOrdersTable;
 
 public class AListContentProvider extends ContentProvider {
 
@@ -85,8 +84,8 @@ public class AListContentProvider extends ContentProvider {
 		sURIMatcher.addURI(AUTHORITY, CategoriesTable.CONTENT_PATH, CATEGORIES_MULTI_ROWS);
 		sURIMatcher.addURI(AUTHORITY, CategoriesTable.CONTENT_PATH + "/#", CATEGORIES_SINGLE_ROW);
 
-		sURIMatcher.addURI(AUTHORITY, SortOrdersTable.CONTENT_PATH, SORT_ORDERS_MULTI_ROWS);
-		sURIMatcher.addURI(AUTHORITY, SortOrdersTable.CONTENT_PATH + "/#", SORT_ORDERS_SINGLE_ROW);
+		/*sURIMatcher.addURI(AUTHORITY, SortOrdersTable.CONTENT_PATH, SORT_ORDERS_MULTI_ROWS);
+		sURIMatcher.addURI(AUTHORITY, SortOrdersTable.CONTENT_PATH + "/#", SORT_ORDERS_SINGLE_ROW);*/
 
 		sURIMatcher.addURI(AUTHORITY, ListTypesTable.CONTENT_PATH, LIST_TYPE_MULTI_ROWS);
 		sURIMatcher.addURI(AUTHORITY, ListTypesTable.CONTENT_PATH + "/#", LIST_TYPE_SINGLE_ROW);
@@ -200,7 +199,7 @@ public class AListContentProvider extends ContentProvider {
 			deleteCount = db.delete(CategoriesTable.TABLE_CATEGORIES, selection, selectionArgs);
 			break;
 
-		case SORT_ORDERS_MULTI_ROWS:
+		/*case SORT_ORDERS_MULTI_ROWS:
 			if (selection == null) {
 				selection = "1";
 			}
@@ -214,7 +213,7 @@ public class AListContentProvider extends ContentProvider {
 					+ (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "");
 			// Perform the deletion
 			deleteCount = db.delete(SortOrdersTable.TABLE_SORT_ORDERS, selection, selectionArgs);
-			break;
+			break;*/
 
 		case LIST_TYPE_MULTI_ROWS:
 			if (selection == null) {
@@ -270,10 +269,10 @@ public class AListContentProvider extends ContentProvider {
 		case CATEGORIES_SINGLE_ROW:
 			return CategoriesTable.CONTENT_ITEM_TYPE;
 
-		case SORT_ORDERS_MULTI_ROWS:
-			return SortOrdersTable.CONTENT_TYPE;
-		case SORT_ORDERS_SINGLE_ROW:
-			return SortOrdersTable.CONTENT_ITEM_TYPE;
+			/*case SORT_ORDERS_MULTI_ROWS:
+				return SortOrdersTable.CONTENT_TYPE;
+			case SORT_ORDERS_SINGLE_ROW:
+				return SortOrdersTable.CONTENT_ITEM_TYPE;*/
 
 		case LIST_TYPE_MULTI_ROWS:
 			return ListTypesTable.CONTENT_TYPE;
@@ -315,75 +314,6 @@ public class AListContentProvider extends ContentProvider {
 					"Method insert: Cannon insert a new row with a single row URI. Illegal URI: " + uri);
 
 		case LIST_TITLE_MULTI_ROWS:
-			/*// get the next Id for the lists title table
-			String nextIDQuery = "name='" + ListTitlesTable.TABLE_LIST_TITLES + "'";
-			long nextId = -1;
-			Cursor nextIDCursor = db
-					.query("SQLITE_SEQUENCE", new String[] { "*" }, nextIDQuery, null, null, null, null);
-			if (nextIDCursor != null) {
-				if (nextIDCursor.getCount() > 0) {
-					nextIDCursor.moveToFirst();
-					nextId = nextIDCursor.getLong(nextIDCursor.getColumnIndexOrThrow("seq"));
-					nextId++;
-				} else {
-					nextId = 1;
-				}
-
-				if (nextId > 0) {
-					// select the new list title's colors
-					String backgroundColor = DARKBLUE;
-					String textColor = WHITE;
-
-					int selector = (int) nextId % 6;
-					switch (selector) {
-					case 0:
-						backgroundColor = GHOSTWHITE;
-						textColor = BLACK;
-						break;
-					case 1:
-						backgroundColor = DARKBLUE;
-						textColor = WHITE;
-						break;
-					case 2:
-						backgroundColor = DARKGREEN;
-						textColor = WHITE;
-						break;
-					case 3:
-						backgroundColor = DARKSALMON;
-						textColor = WHITE;
-						break;
-					case 4:
-						backgroundColor = HOTPINK;
-						textColor = BLACK;
-						break;
-					case 5:
-						backgroundColor = LAVENDER;
-						textColor = BLACK;
-						break;
-					}
-
-					if (values == null) {
-						values = new ContentValues();
-					}
-					values.put(ListTitlesTable.COL_BACKGROUND_COLOR, backgroundColor);
-					values.put(ListTitlesTable.COL_NORMAL_TEXT_COLOR, textColor);
-				}
-
-				AListUtilities.closeQuietly(nextIDCursor);
-				newRowId = db.insertOrThrow(ListTitlesTable.TABLE_LIST_TITLES, nullColumnHack, values);
-
-				// Construct and return the URI of the newly inserted row.
-				Uri newRowUri = ContentUris.withAppendedId(ListTitlesTable.CONTENT_URI, newRowId);
-
-				// Notify and observers of the change in the database.
-				getContext().getContentResolver().notifyChange(ListTitlesTable.CONTENT_URI, null);
-
-				return newRowUri;
-
-			} else {
-				return null;
-			}*/
-
 			newRowId = db.insertOrThrow(ListTitlesTable.TABLE_LIST_TITLES, nullColumnHack, values);
 			if (newRowId > -1) {
 				// Construct and return the URI of the newly inserted row.
@@ -447,21 +377,21 @@ public class AListContentProvider extends ContentProvider {
 			throw new IllegalArgumentException(
 					"Method insert: Cannot insert a new row with a single row URI. Illegal URI: " + uri);
 
-		case SORT_ORDERS_MULTI_ROWS:
-			newRowId = db.insertOrThrow(SortOrdersTable.TABLE_SORT_ORDERS, nullColumnHack, values);
-			if (newRowId > -1) {
-				// Construct and return the URI of the newly inserted row.
-				Uri newRowUri = ContentUris.withAppendedId(SortOrdersTable.CONTENT_URI, newRowId);
-				// Notify and observers of the change in the database.
-				getContext().getContentResolver().notifyChange(SortOrdersTable.CONTENT_URI, null);
-				return newRowUri;
-			} else {
-				return null;
-			}
+			/*case SORT_ORDERS_MULTI_ROWS:
+				newRowId = db.insertOrThrow(SortOrdersTable.TABLE_SORT_ORDERS, nullColumnHack, values);
+				if (newRowId > -1) {
+					// Construct and return the URI of the newly inserted row.
+					Uri newRowUri = ContentUris.withAppendedId(SortOrdersTable.CONTENT_URI, newRowId);
+					// Notify and observers of the change in the database.
+					getContext().getContentResolver().notifyChange(SortOrdersTable.CONTENT_URI, null);
+					return newRowUri;
+				} else {
+					return null;
+				}
 
-		case SORT_ORDERS_SINGLE_ROW:
-			throw new IllegalArgumentException(
-					"Method insert: Cannot insert a new row with a single row URI. Illegal URI: " + uri);
+			case SORT_ORDERS_SINGLE_ROW:
+				throw new IllegalArgumentException(
+						"Method insert: Cannot insert a new row with a single row URI. Illegal URI: " + uri);*/
 
 		case LIST_TYPE_MULTI_ROWS:
 			newRowId = db.insertOrThrow(ListTypesTable.TABLE_LIST_TYPES, nullColumnHack, values);
@@ -547,7 +477,7 @@ public class AListContentProvider extends ContentProvider {
 			queryBuilder.appendWhere(CategoriesTable.COL_ID + "=" + uri.getLastPathSegment());
 			break;
 
-		case SORT_ORDERS_MULTI_ROWS:
+		/*case SORT_ORDERS_MULTI_ROWS:
 			queryBuilder.setTables(SortOrdersTable.TABLE_SORT_ORDERS);
 			checkSortOrdersColumnNames(projection);
 			break;
@@ -556,7 +486,7 @@ public class AListContentProvider extends ContentProvider {
 			queryBuilder.setTables(SortOrdersTable.TABLE_SORT_ORDERS);
 			checkSortOrdersColumnNames(projection);
 			queryBuilder.appendWhere(SortOrdersTable.COL_ID + "=" + uri.getLastPathSegment());
-			break;
+			break;*/
 
 		case LIST_TYPE_MULTI_ROWS:
 			queryBuilder.setTables(ListTypesTable.TABLE_LIST_TYPES);
@@ -687,7 +617,7 @@ public class AListContentProvider extends ContentProvider {
 			updateCount = db.update(CategoriesTable.TABLE_CATEGORIES, values, selection, selectionArgs);
 			break;
 
-		case SORT_ORDERS_MULTI_ROWS:
+		/*case SORT_ORDERS_MULTI_ROWS:
 			// Perform the update
 			updateCount = db.update(SortOrdersTable.TABLE_SORT_ORDERS, values, selection, selectionArgs);
 			break;
@@ -700,7 +630,7 @@ public class AListContentProvider extends ContentProvider {
 
 			// Perform the update
 			updateCount = db.update(SortOrdersTable.TABLE_SORT_ORDERS, values, selection, selectionArgs);
-			break;
+			break;*/
 
 		case LIST_TYPE_MULTI_ROWS:
 			// Perform the update
@@ -795,7 +725,7 @@ public class AListContentProvider extends ContentProvider {
 		}
 	}
 
-	private void checkSortOrdersColumnNames(String[] projection) {
+	/*private void checkSortOrdersColumnNames(String[] projection) {
 		// Check if the caller has requested a column that does not exist
 		if (projection != null) {
 			HashSet<String> requstedColumns = new HashSet<String>(Arrays.asList(projection));
@@ -807,7 +737,7 @@ public class AListContentProvider extends ContentProvider {
 						"Method checkSortOrdersColumnNames: Unknown SortOrdersTable column name!");
 			}
 		}
-	}
+	}*/
 
 	private void checkListTypesColumnNames(String[] projection) {
 		// Check if the caller has requested a column that does not exist

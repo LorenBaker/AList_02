@@ -43,8 +43,8 @@ public class ListTypesTable {
 		database.execSQL(DATABASE_CREATE);
 
 		ArrayList<String> sqlStatements = new ArrayList<String>();
-		sqlStatements.add("insert into " + TABLE_LIST_TYPES + " (" + COL_ID + ", " + COL_LIST_TYPE
-				+ ") VALUES (NULL, '[None]')");
+		/*sqlStatements.add("insert into " + TABLE_LIST_TYPES + " (" + COL_ID + ", " + COL_LIST_TYPE
+				+ ") VALUES (NULL, '[None]')");*/
 		sqlStatements.add("insert into " + TABLE_LIST_TYPES + " (" + COL_ID + ", " + COL_LIST_TYPE
 				+ ") VALUES (NULL, 'Grocery Items')");
 		sqlStatements.add("insert into " + TABLE_LIST_TYPES + " (" + COL_ID + ", " + COL_LIST_TYPE

@@ -29,7 +29,7 @@ public class AListDatabaseHelper extends SQLiteOpenHelper {
 
 		ListsTable.onCreate(database);
 		PreviousCategoryTable.onCreate(database);
-		SortOrdersTable.onCreate(database);
+
 	}
 
 	@Override
@@ -41,7 +41,7 @@ public class AListDatabaseHelper extends SQLiteOpenHelper {
 
 		ListsTable.onUpgrade(database, oldVersion, newVersion);
 		PreviousCategoryTable.onUpgrade(database, oldVersion, newVersion);
-		SortOrdersTable.onUpgrade(database, oldVersion, newVersion);
+
 	}
 
 }
