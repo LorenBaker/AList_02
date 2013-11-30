@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import android.content.ContentProvider;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
@@ -55,7 +54,7 @@ public class AListContentProvider extends ContentProvider {
 	private static final int LIST_TYPE_MULTI_ROWS = 70;
 	private static final int LIST_TYPE_SINGLE_ROW = 71;
 
-	private static final int LIST_WITH_CATEGORY = 80;
+	private static final int LIST_WITH_CATEGORY_SINGLE_ROW = 81;
 
 	public static final String AUTHORITY = "com.lbconsulting.alist_02.contentprovider";
 
@@ -79,7 +78,7 @@ public class AListContentProvider extends ContentProvider {
 		sURIMatcher.addURI(AUTHORITY, ListTypesTable.CONTENT_PATH, LIST_TYPE_MULTI_ROWS);
 		sURIMatcher.addURI(AUTHORITY, ListTypesTable.CONTENT_PATH + "/#", LIST_TYPE_SINGLE_ROW);
 
-		sURIMatcher.addURI(AUTHORITY, ListsTable.CONTENT_LIST_WITH_CATEGORY, LIST_WITH_CATEGORY);
+		sURIMatcher.addURI(AUTHORITY, ListsTable.CONTENT_LIST_WITH_CATEGORY + "/#", LIST_WITH_CATEGORY_SINGLE_ROW);
 	}
 
 	@Override
@@ -94,6 +93,12 @@ public class AListContentProvider extends ContentProvider {
 		return true;
 	}
 
+	/*A content provider is created when its hosting process is created, 
+	 * and remains around for as long as the process does, so there is 
+	 * no need to close the database -- it will get closed as part of the 
+	 * kernel cleaning up the process's resources when the process is killed.
+	 */
+	@SuppressWarnings("resource")
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
 		String rowID = null;
@@ -254,6 +259,7 @@ public class AListContentProvider extends ContentProvider {
 		}
 	}
 
+	@SuppressWarnings("resource")
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
 
@@ -368,6 +374,7 @@ public class AListContentProvider extends ContentProvider {
 		}
 	}
 
+	@SuppressWarnings("resource")
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 
@@ -442,7 +449,26 @@ public class AListContentProvider extends ContentProvider {
 			queryBuilder.appendWhere(ListTypesTable.COL_ID + "=" + uri.getLastPathSegment());
 			break;
 
-		case LIST_WITH_CATEGORY:
+		case LIST_WITH_CATEGORY_SINGLE_ROW:
+			/*		SELECT 
+			itemName, categoryName 
+			FROM 
+			tblLists JOIN tblMasterListItems, tblCategories ON tblLists.MasterListItemID= tblMasterListItems._Id
+			WHERE 
+			tblLists.categoryID=tblCategories._Id  AND tblLists.listTitleID=1*/
+
+			/*ArrayList<String> newProjection = new ArrayList<String>();
+			newProjection.add("itemName");
+			newProjection.add("categoryName");
+			projection = (String[]) newProjection.toArray();*/
+
+			String tables = "tblLists JOIN tblMasterListItems, tblCategories ON tblLists.MasterListItemID= tblMasterListItems._Id";
+			queryBuilder.setTables(tables);
+
+			String where = "tblLists.categoryID=tblCategories._Id  " +
+					"AND tblLists.listTitleID" + "=" + uri.getLastPathSegment();
+			queryBuilder.appendWhere(where);
+			break;
 
 		default:
 			throw new IllegalArgumentException("Method query. Unknown URI: " + uri);
@@ -476,6 +502,7 @@ public class AListContentProvider extends ContentProvider {
 		}
 	}
 
+	@SuppressWarnings("resource")
 	@Override
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		String rowID = null;
@@ -617,43 +644,6 @@ public class AListContentProvider extends ContentProvider {
 	public Cursor getList(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		return null;
 
-	}
-
-	public Cursor getList(long listTitleID) {
-		/*		SELECT itemName, categoryName FROM tblLists
-		JOIN tblMasterListItems, tblCategories
-		ON tblLists.MasterListItemID= tblMasterListItems._Id
-		WHERE tblLists.categoryID=tblCategories._Id
-		 AND tblLists.listTitleID=1*/
-
-		String sql = "SELECT itemName, categoryName FROM tblLists ";
-		sql = sql + "JOIN tblMasterListItems, tblCategories ";
-		sql = sql + "ON tblLists.MasterListItemID= tblMasterListItems._Id ";
-		sql = sql + "WHERE tblLists.categoryID=tblCategories._Id ";
-		sql = sql + "AND tblLists.listTitleID=" + String.valueOf(listTitleID);
-
-		Cursor cursor = null;
-		SQLiteDatabase db = null;
-		try {
-			db = database.getWritableDatabase();
-		} catch (SQLiteException ex) {
-			db = database.getReadableDatabase();
-		}
-
-		cursor = db.rawQuery(sql, null);
-
-		try {
-			ContentResolver cr = context.getContentResolver();
-			Uri uri = CONTENT_URI;
-			String[] projection = PROJECTION_ALL;
-			String where = COL_LIST_TITLE_ID + "= ?";
-			String[] selectionArgs = { String.valueOf(listTitleID) };
-			cursor = cr.query(uri, projection, where, selectionArgs, null);
-
-		} catch (Exception e) {
-			Log.e(TAG, "An Exception error occurred in getAllItems.", e);
-		}
-		return cursor;
 	}
 
 	private void checkMasterListItemsColumnNames(String[] projection) {

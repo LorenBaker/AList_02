@@ -1,4 +1,4 @@
-package com.lbconsulting.alist_02;
+package com.lbconsulting.alist_02.adapters;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -10,6 +10,10 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
+import com.lbconsulting.alist_02.R;
+import com.lbconsulting.alist_02.R.color;
+import com.lbconsulting.alist_02.R.id;
+import com.lbconsulting.alist_02.R.layout;
 import com.lbconsulting.alist_02.database.MasterListItemsTable;
 
 public class MasterListCursorAdapter extends CursorAdapter {

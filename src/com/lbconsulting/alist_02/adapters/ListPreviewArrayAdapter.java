@@ -1,4 +1,4 @@
-package com.lbconsulting.alist_02;
+package com.lbconsulting.alist_02.adapters;
 
 import android.content.Context;
 import android.graphics.Paint;
@@ -10,8 +10,10 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.lbconsulting.alist_02.R;
+
 public class ListPreviewArrayAdapter extends ArrayAdapter<String> {
-	private final Context context;
+	public final Context context;
 	private final String[] values;
 
 	private int backgroundColor;
@@ -39,16 +41,13 @@ public class ListPreviewArrayAdapter extends ArrayAdapter<String> {
 			// List Item Strikeout Text
 			itemName.setTypeface(null, Typeface.ITALIC);
 			itemName.setTextColor(this.strikeoutTextColor);
-			/*int hotpink = res.getColor(color.hotpink);
-			itemName.setTextColor(hotpink);*/
 			itemName.setPaintFlags(itemName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 			break;
 
 		default:
-			//List Item Normal Text
+
 			itemName.setTypeface(null, Typeface.NORMAL);
 			itemName.setTextColor(this.normalTextColor);
-			/*itemName.setTextColor(res.getColor(color.red));*/
 			break;
 		}
 

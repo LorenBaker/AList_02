@@ -38,6 +38,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.lbconsulting.alist_02.adapters.ListTitlesCursorAdapter;
+import com.lbconsulting.alist_02.adapters.ListTypesCursorAdapter;
+import com.lbconsulting.alist_02.adapters.MasterListCursorAdapter;
 import com.lbconsulting.alist_02.database.CategoriesTable;
 import com.lbconsulting.alist_02.database.ListTitlesTable;
 import com.lbconsulting.alist_02.database.ListTypesTable;
@@ -474,7 +477,7 @@ public class MasterListActivity extends Activity implements
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.master_list, menu);
 		if (L) {
-			Log.i(TAG, "onCreateOptionsMenu");
+			Log.i(TAG, "MasterListActivity onCreateOptionsMenu");
 		}
 		return true;
 	}
@@ -683,7 +686,7 @@ public class MasterListActivity extends Activity implements
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		if (L) {
-			Log.i(TAG, "onCreateLoader. id = " + id);
+			Log.i(TAG, "MasterListActivity onCreateLoader. id = " + id);
 		}
 
 		CursorLoader cursorLoader = null;
@@ -737,11 +740,11 @@ public class MasterListActivity extends Activity implements
 						sortOrder);
 
 			} catch (SQLiteException e) {
-				Log.e(TAG, "onCreateLoader: SQLiteException", e);
+				Log.e(TAG, "MasterListActivity onCreateLoader: SQLiteException", e);
 				return null;
 
 			} catch (IllegalArgumentException e) {
-				Log.e(TAG, "onCreateLoader: IllegalArgumentException", e);
+				Log.e(TAG, "MasterListActivity onCreateLoader: IllegalArgumentException", e);
 				return null;
 			}
 			break;
@@ -757,34 +760,14 @@ public class MasterListActivity extends Activity implements
 						sortOrder);
 
 			} catch (SQLiteException e) {
-				Log.e(TAG, "onCreateLoader: SQLiteException", e);
+				Log.e(TAG, "MasterListActivity onCreateLoader: SQLiteException", e);
 				return null;
 
 			} catch (IllegalArgumentException e) {
-				Log.e(TAG, "onCreateLoader: IllegalArgumentException", e);
+				Log.e(TAG, "MasterListActivity onCreateLoader: IllegalArgumentException", e);
 				return null;
 			}
 			break;
-
-		/*case LIST_TYPES_LOADER_ID:
-			// Create a new list types CursorLoader with the following query parameters.
-			uri = ListTypesTable.CONTENT_URI;
-			projection = ListTypesTable.PROJECTION_ALL;
-			sortOrder = ListTypesTable.SORT_ORDER_LIST_TYPE;
-
-			try {
-				cursorLoader = new CursorLoader(MasterListActivity.this, uri, projection, selection, selectionArgs,
-						sortOrder);
-
-			} catch (SQLiteException e) {
-				Log.e(TAG, "onCreateLoader: SQLiteException", e);
-				return null;
-
-			} catch (IllegalArgumentException e) {
-				Log.e(TAG, "onCreateLoader: IllegalArgumentException", e);
-				return null;
-			}
-			break;*/
 
 		default:
 			break;
@@ -795,7 +778,7 @@ public class MasterListActivity extends Activity implements
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor newCursor) {
 		if (L) {
-			Log.i(TAG, "onLoadFinished. loader id = " + loader.getId());
+			Log.i(TAG, "MasterListActivity onLoadFinished. loader id = " + loader.getId());
 		}
 		// The asynchronous load is complete and the newCursor is now available for use. 
 		// Update the masterListAdapter to show the changed data.
@@ -831,7 +814,7 @@ public class MasterListActivity extends Activity implements
 	@Override
 	public void onLoaderReset(Loader<Cursor> loader) {
 		if (L) {
-			Log.i(TAG, "onLoaderReset. loader id = " + loader.getId());
+			Log.i(TAG, "MasterListActivity onLoaderReset. loader id = " + loader.getId());
 		}
 
 		// For whatever reason, the Loader's data is now unavailable.
@@ -868,11 +851,11 @@ public class MasterListActivity extends Activity implements
 			return cursor;
 
 		} catch (SQLiteException e) {
-			Log.e(TAG, "getMasterListItem: SQLiteException", e);
+			Log.e(TAG, "MasterListActivity getMasterListItem: SQLiteException", e);
 			return null;
 
 		} catch (IllegalArgumentException e) {
-			Log.e(TAG, "getMasterListItem: IllegalArgumentException", e);
+			Log.e(TAG, "MasterListActivity getMasterListItem: IllegalArgumentException", e);
 			return null;
 		}
 	}
@@ -929,7 +912,7 @@ public class MasterListActivity extends Activity implements
 			this.setActionBarSubtitle(this.listTypeName, this.numberOfSelectedItems);
 
 		} catch (Exception e) {
-			Log.e(TAG, "An Exception error occurred in ActivateList. ", e);
+			Log.e(TAG, "MasterListActivity: An Exception error occurred in ActivateList. ", e);
 		}
 	}
 

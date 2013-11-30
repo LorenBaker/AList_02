@@ -1,10 +1,9 @@
 package com.lbconsulting.alist_02;
 
-import java.util.ArrayList;
-
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.ContentResolver;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.content.SharedPreferences;
@@ -22,8 +21,11 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 
+import com.lbconsulting.alist_02.adapters.CategoriesCursorAdapter;
+import com.lbconsulting.alist_02.adapters.ListsCursorAdapter;
 import com.lbconsulting.alist_02.database.AListDatabaseHelper;
 import com.lbconsulting.alist_02.database.CategoriesTable;
+import com.lbconsulting.alist_02.database.ListTitlesTable;
 import com.lbconsulting.alist_02.database.ListsTable;
 import com.lbconsulting.alist_02.database.MasterListItemsTable;
 
@@ -32,26 +34,32 @@ public class ShowListsActivity extends Activity implements
 	// String for logging the class name
 	public final String TAG = AListUtilities.TAG;
 	private final boolean L = AListUtilities.L; // enable Logging
+	private final int SORT_ORDER_ITEM_NAME = 0;
+	private final int SORT_ORDER_CATEGORY = 1;
 
 	// ShowListsActivity Views and related variables
 	private Spinner spnCategories = null;
 
-	private final Button btnPreviousList = null;
-	private final Button btnNextList = null;
+	private Button btnPreviousList = null;
+	private Button btnNextList = null;
 	private Button btnRemoveStruckOutItems = null;
-	private final Button btnNewCategory = null;
-	private final Button btnAddCategory = null;
+	private Button btnNewCategory = null;
+	private Button btnAddCategory = null;
 
 	private final EditText txtCategoryName = null;
 
-	private ListView lstListItems = null;
+	private ListView lvListItems = null;
 	private ActionBar actionBar = null;
 
 	// ShowListsActivity Variables
 	private boolean verbose = true;
-	private long activeListID = -1;
+	private long activeListID = 1;
 	private long activeListTypeID = -1;
 	private long activeCategoryID = -1;
+	private boolean showCategories = false;
+	private int listItemsSortOrder = SORT_ORDER_ITEM_NAME;
+	private Cursor listTitlesCursor = null;
+	private int listTitlesPosition = -1;
 
 	private int backgroundColor;
 	private int normalTextColor;
@@ -65,7 +73,7 @@ public class ShowListsActivity extends Activity implements
 	// The callbacks through which we will interact with the LoaderManager.
 	private LoaderManager.LoaderCallbacks<Cursor> createListActivityCallbacks;
 	private CategoriesCursorAdapter categoriesAdapter;
-	private ListsCursorAdapter listsAdapter;
+	private ListsCursorAdapter lvListsItemsAdapter;
 	private final AListDatabaseHelper database = null;
 
 	// /////////////////////////////////////////////////////////////////////////////
@@ -118,7 +126,20 @@ public class ShowListsActivity extends Activity implements
 		this.activeListID = storedStates.getLong("activeListID", 1);
 		this.activeListTypeID = storedStates.getLong("activeListTypeID", 1); // 1 = Groceries
 		this.activeCategoryID = storedStates.getLong("activeCategoryID", 1); // 1 = [None]
+		this.showCategories = storedStates.getBoolean("showCategories", false);
+		this.listItemsSortOrder = storedStates.getInt("listItemsSortOrder", SORT_ORDER_ITEM_NAME);
 
+		ContentResolver cr = this.getContentResolver();
+		Uri uri = ListTitlesTable.CONTENT_URI;
+		String[] projection = ListTitlesTable.PROJECTION_ALL;
+		String selection = null;
+		String[] selectionArgs = null;
+		String sortOrder = ListTitlesTable.SORT_ORDER_LIST_TITLE;
+		this.listTitlesCursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+		this.listTitlesPosition = AListUtilities.getPositionById(this.listTitlesCursor, this.activeListID);
+		if (this.listTitlesPosition > -1) {
+			this.activateList();
+		}
 		loaderManager.restartLoader(CATEGORIES_LOADER_ID, null, createListActivityCallbacks);
 	}
 
@@ -137,9 +158,14 @@ public class ShowListsActivity extends Activity implements
 		applicationStates.putLong("activeListID", this.activeListID);
 		applicationStates.putLong("activeListTypeID", this.activeListTypeID);
 		applicationStates.putLong("activeCategoryID", this.activeCategoryID);
+		applicationStates.putBoolean("showCategories", this.showCategories);
+		applicationStates.putInt("listItemsSortOrder", this.listItemsSortOrder);
 
 		// Commit to storage
 		applicationStates.commit();
+		if (this.listTitlesCursor != null) {
+			this.listTitlesCursor.close();
+		}
 	}
 
 	@Override
@@ -240,23 +266,81 @@ public class ShowListsActivity extends Activity implements
 
 		actionBar = getActionBar();
 		actionBar.setTitle("AList");
-		actionBar.setSubtitle("Show Lists");
+		//actionBar.setSubtitle("Show Lists");
 
 		// Initialize the controls
 		spnCategories = (Spinner) findViewById(R.id.spnCategories);
 
+		spnCategories.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parentView) {
+				// TODO Auto-generated method stub
+			}
+
+		});
+
+		btnPreviousList = (Button) findViewById(R.id.btnPreviousList);
+		btnPreviousList.setOnClickListener(new Button.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+
+		btnNextList = (Button) findViewById(R.id.btnNextList);
+		btnNextList.setOnClickListener(new Button.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+
+			}
+		});
 		btnRemoveStruckOutItems = (Button) findViewById(R.id.btnRemoveStruckOutItems);
+		btnRemoveStruckOutItems.setOnClickListener(new Button.OnClickListener() {
 
-		/*linearLayoutCategories = (LinearLayout) findViewById(R.id.linearLayoutCategories);*/
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
 
-		lstListItems = (ListView) findViewById(R.id.lstListItems);
+			}
+		});
+
+		btnNewCategory = (Button) findViewById(R.id.btnNewCategory);
+		btnNewCategory.setOnClickListener(new Button.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+
+		btnAddCategory = (Button) findViewById(R.id.btnAddCategory);
+		btnAddCategory.setOnClickListener(new Button.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+
+		lvListItems = (ListView) findViewById(R.id.lvListItems);
 
 		// set up laderManager
 		loaderManager = getLoaderManager();
 		createListActivityCallbacks = this;
 		// Note: using null for the cursor. The masterList and listTitle cursors
 		// loaded via onLoadFinished.
-		//loaderManager.initLoader(LISTS_LOADER_ID, null, createListActivityCallbacks);
+
+		loaderManager.initLoader(LISTS_LOADER_ID, null, createListActivityCallbacks);
 		loaderManager.initLoader(CATEGORIES_LOADER_ID, null, createListActivityCallbacks);
 
 		categoriesAdapter = new CategoriesCursorAdapter(this, null, 0);
@@ -273,12 +357,32 @@ public class ShowListsActivity extends Activity implements
 			}
 
 		});
+
+		lvListsItemsAdapter = new ListsCursorAdapter(this, null, 0);
+		lvListItems.setAdapter(lvListsItemsAdapter);
+
+	}
+
+	private void activateList() {
+		this.listTitlesCursor.moveToPosition(this.listTitlesPosition);
+		this.backgroundColor = this.listTitlesCursor.getInt(this.listTitlesCursor
+				.getColumnIndexOrThrow(ListTitlesTable.COL_BACKGROUND_COLOR));
+		this.normalTextColor = this.listTitlesCursor.getInt(this.listTitlesCursor
+				.getColumnIndexOrThrow(ListTitlesTable.COL_NORMAL_TEXT_COLOR));
+		this.strikeoutTextColor = this.listTitlesCursor.getInt(this.listTitlesCursor
+				.getColumnIndexOrThrow(ListTitlesTable.COL_STRIKEOUT_TEXT_COLOR));
+		this.lvListItems.setBackgroundColor(this.backgroundColor);
+		String listName = this.listTitlesCursor.getString(this.listTitlesCursor
+				.getColumnIndexOrThrow(ListTitlesTable.COL_LIST_TITLE_NAME));
+		actionBar.setSubtitle(listName);
+
+		loaderManager.restartLoader(LISTS_LOADER_ID, null, createListActivityCallbacks);
 	}
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		if (L) {
-			Log.i(TAG, "ShowLists onCreateLoader. id = " + id);
+			Log.i(TAG, "ShowListsActivity onCreateLoader. id = " + id);
 		}
 		CursorLoader cursorLoader = null;
 		Uri uri = null;
@@ -301,11 +405,11 @@ public class ShowListsActivity extends Activity implements
 						sortOrder);
 
 			} catch (SQLiteException e) {
-				Log.e(TAG, "ShowLists onCreateLoader: SQLiteException", e);
+				Log.e(TAG, "ShowListsActivity onCreateLoader: SQLiteException", e);
 				return null;
 
 			} catch (IllegalArgumentException e) {
-				Log.e(TAG, "ShowLists onCreateLoader: IllegalArgumentException", e);
+				Log.e(TAG, "ShowListsActivity onCreateLoader: IllegalArgumentException", e);
 				return null;
 			}
 			break;
@@ -318,16 +422,25 @@ public class ShowListsActivity extends Activity implements
 					WHERE tblLists.categoryID=tblCategories._Id
 					 AND tblLists.listTitleID=1*/
 
-			uri = ListsTable.LIST_WITH_CATEGORY_URI;
+			//if (activeListID > 0) {
+			uri = Uri.withAppendedPath(ListsTable.LIST_WITH_CATEGORY_URI, String.valueOf(activeListID));
 
-			ArrayList<String> selectionArgsList = new ArrayList<String>();
-			selectionArgsList.add(String.valueOf(activeListID));
-			selectionArgs = (String[]) selectionArgsList.toArray();
+			projection = new String[] { "tblMasterListItems._id", "itemName", "categoryName", "struckOut" };
 
-			sortOrder = MasterListItemsTable.SORT_ORDER_ITEM_NAME;
+			switch (listItemsSortOrder) {
+
+			case SORT_ORDER_CATEGORY:
+				sortOrder = CategoriesTable.SORT_ORDER_CATEGORY + ", " + MasterListItemsTable.SORT_ORDER_ITEM_NAME;
+				break;
+
+			default:
+				sortOrder = MasterListItemsTable.SORT_ORDER_ITEM_NAME;
+				break;
+			}
 
 			cursorLoader = new CursorLoader(ShowListsActivity.this, uri, projection, selection, selectionArgs,
 					sortOrder);
+			//}
 			break;
 
 		default:
@@ -340,7 +453,7 @@ public class ShowListsActivity extends Activity implements
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor newCursor) {
 		if (L) {
-			Log.i(TAG, "ShowLists onLoadFinished. loader id = " + loader.getId());
+			Log.i(TAG, "ShowListsActivity onLoadFinished. loader id = " + loader.getId());
 		}
 		// The asynchronous load is complete and the newCursor is now available for use. 
 		// Update the masterListAdapter to show the changed data.
@@ -351,6 +464,8 @@ public class ShowListsActivity extends Activity implements
 			break;
 
 		case LISTS_LOADER_ID:
+			lvListsItemsAdapter.setColors(this.backgroundColor, this.normalTextColor, this.strikeoutTextColor);
+			lvListsItemsAdapter.swapCursor(newCursor);
 
 			break;
 
@@ -363,7 +478,7 @@ public class ShowListsActivity extends Activity implements
 	@Override
 	public void onLoaderReset(Loader<Cursor> loader) {
 		if (L) {
-			Log.i(TAG, "ShowLists onLoaderReset. loader id = " + loader.getId());
+			Log.i(TAG, "ShowListsActivity onLoaderReset. loader id = " + loader.getId());
 		}
 		// For whatever reason, the Loader's data is now unavailable.
 		// Remove any references to the old data by replacing it with a null Cursor.
@@ -373,7 +488,7 @@ public class ShowListsActivity extends Activity implements
 			break;
 
 		case LISTS_LOADER_ID:
-
+			lvListsItemsAdapter.swapCursor(null);
 			break;
 
 		default:

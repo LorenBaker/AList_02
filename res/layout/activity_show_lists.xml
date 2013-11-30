@@ -93,7 +93,7 @@
     </LinearLayout>
 
     <ListView
-        android:id="@+id/lstListItems"
+        android:id="@+id/lvListItems"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:divider="@null"

@@ -27,6 +27,8 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.lbconsulting.alist_02.R.color;
+import com.lbconsulting.alist_02.adapters.ListPreviewArrayAdapter;
+import com.lbconsulting.alist_02.adapters.ListTypesCursorAdapter;
 import com.lbconsulting.alist_02.database.AListDatabaseHelper;
 import com.lbconsulting.alist_02.database.ListTitlesTable;
 import com.lbconsulting.alist_02.database.ListTypesTable;

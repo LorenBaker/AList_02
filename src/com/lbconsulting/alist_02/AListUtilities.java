@@ -151,6 +151,23 @@ public class AListUtilities {
 		return spinnerIndex;
 	}
 
+	public static int getPositionById(Cursor cursor, long theTargetId) {
+
+		int theWantedPosition = -1;
+		if (cursor != null && theTargetId > 0) {
+			if (cursor.moveToFirst()) {
+				while (!cursor.isAfterLast()) {
+					if (cursor.getLong(0) == theTargetId) {
+						theWantedPosition = cursor.getPosition();
+						break;
+					}
+					cursor.moveToNext();
+				}
+			}
+		}
+		return theWantedPosition;
+	}
+
 	public static String formatInt(int number) {
 		return NumberFormat.getNumberInstance(Locale.US).format(number);
 	}
