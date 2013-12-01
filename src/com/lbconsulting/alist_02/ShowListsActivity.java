@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.content.SharedPreferences;
@@ -15,11 +16,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.lbconsulting.alist_02.adapters.CategoriesCursorAdapter;
 import com.lbconsulting.alist_02.adapters.ListsCursorAdapter;
@@ -46,7 +50,9 @@ public class ShowListsActivity extends Activity implements
 	private Button btnNewCategory = null;
 	private Button btnAddCategory = null;
 
-	private final EditText txtCategoryName = null;
+	private LinearLayout layoutNewCategory = null;
+
+	private EditText txtCategoryName = null;
 
 	private ListView lvListItems = null;
 	private ActionBar actionBar = null;
@@ -56,7 +62,7 @@ public class ShowListsActivity extends Activity implements
 	private long activeListID = 1;
 	private long activeListTypeID = -1;
 	private long activeCategoryID = -1;
-	private boolean showCategories = false;
+	private boolean showCategories = true;
 	private int listItemsSortOrder = SORT_ORDER_ITEM_NAME;
 	private Cursor listTitlesCursor = null;
 	private int listTitlesPosition = -1;
@@ -125,20 +131,16 @@ public class ShowListsActivity extends Activity implements
 		this.verbose = storedStates.getBoolean("verbose", true);
 		this.activeListID = storedStates.getLong("activeListID", 1);
 		this.activeListTypeID = storedStates.getLong("activeListTypeID", 1); // 1 = Groceries
-		this.activeCategoryID = storedStates.getLong("activeCategoryID", 1); // 1 = [None]
-		this.showCategories = storedStates.getBoolean("showCategories", false);
+		//this.activeCategoryID = storedStates.getLong("activeCategoryID", 1); // 1 = [None]
+		this.showCategories = storedStates.getBoolean("showCategories", true);
 		this.listItemsSortOrder = storedStates.getInt("listItemsSortOrder", SORT_ORDER_ITEM_NAME);
 
-		ContentResolver cr = this.getContentResolver();
-		Uri uri = ListTitlesTable.CONTENT_URI;
-		String[] projection = ListTitlesTable.PROJECTION_ALL;
-		String selection = null;
-		String[] selectionArgs = null;
-		String sortOrder = ListTitlesTable.SORT_ORDER_LIST_TITLE;
-		this.listTitlesCursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+		this.listTitlesCursor = ListTitlesTable.getListTitlesCursor(this);
+
 		this.listTitlesPosition = AListUtilities.getPositionById(this.listTitlesCursor, this.activeListID);
 		if (this.listTitlesPosition > -1) {
-			this.activateList();
+			this.listTitlesCursor.moveToPosition(this.listTitlesPosition);
+			this.MakeListActive();
 		}
 		loaderManager.restartLoader(CATEGORIES_LOADER_ID, null, createListActivityCallbacks);
 	}
@@ -157,7 +159,7 @@ public class ShowListsActivity extends Activity implements
 
 		applicationStates.putLong("activeListID", this.activeListID);
 		applicationStates.putLong("activeListTypeID", this.activeListTypeID);
-		applicationStates.putLong("activeCategoryID", this.activeCategoryID);
+		//applicationStates.putLong("activeCategoryID", this.activeCategoryID);
 		applicationStates.putBoolean("showCategories", this.showCategories);
 		applicationStates.putInt("listItemsSortOrder", this.listItemsSortOrder);
 
@@ -289,8 +291,12 @@ public class ShowListsActivity extends Activity implements
 
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-
+				if (listTitlesCursor.moveToPrevious()) {
+					MakeListActive();
+				} else {
+					listTitlesCursor.moveToLast();
+					MakeListActive();
+				}
 			}
 		});
 
@@ -298,10 +304,15 @@ public class ShowListsActivity extends Activity implements
 		btnNextList.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-
+				if (listTitlesCursor.moveToNext()) {
+					MakeListActive();
+				} else {
+					listTitlesCursor.moveToFirst();
+					MakeListActive();
+				}
 			}
 		});
+
 		btnRemoveStruckOutItems = (Button) findViewById(R.id.btnRemoveStruckOutItems);
 		btnRemoveStruckOutItems.setOnClickListener(new Button.OnClickListener() {
 
@@ -311,14 +322,16 @@ public class ShowListsActivity extends Activity implements
 
 			}
 		});
-
+		txtCategoryName = (EditText) findViewById(R.id.txtCategoryName);
+		layoutNewCategory = (LinearLayout) findViewById(R.id.layoutNewCategory);
 		btnNewCategory = (Button) findViewById(R.id.btnNewCategory);
 		btnNewCategory.setOnClickListener(new Button.OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-
+				layoutNewCategory.setVisibility(View.VISIBLE);
+				txtCategoryName.setFocusableInTouchMode(true);
+				txtCategoryName.requestFocus();
 			}
 		});
 
@@ -327,12 +340,99 @@ public class ShowListsActivity extends Activity implements
 
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
+				CreateNewCategory();
+			}
 
+			private void CreateNewCategory() {
+				ContentResolver cr = getContentResolver();
+				Cursor categoriesCursor = null;
+				String proposedCategory = txtCategoryName.getText().toString().trim();
+
+				if (proposedCategory != null && proposedCategory.length() > 0) {
+
+					// check if the proposedCategory is already in the CategoriesTable
+					Uri uri = CategoriesTable.CONTENT_URI;
+					String[] projection = CategoriesTable.PROJECTION_ALL;
+					String selection = CategoriesTable.COL_CATEGORY_NAME + " = ?";
+					String selectionArgs[] = { proposedCategory };
+					String sortOrder = CategoriesTable.SORT_ORDER_CATEGORY;
+					categoriesCursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+
+				} else {
+					Log.e(TAG, "ERROR in CreateNewCategory: no Category Name provided!");
+					String msg = "Unable to create a new Category.\nNo Category provided!\nPlease try again.";
+					Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+					return;
+				}
+
+				if (categoriesCursor != null) {
+					if (categoriesCursor.getCount() > 0) {
+						// Proposed Category already in the database ... so make it active
+						activeCategoryID = categoriesCursor.getLong(categoriesCursor
+								.getColumnIndexOrThrow(CategoriesTable.COL_ID));
+						categoriesCursor.close();
+						spnCategories.setSelection(AListUtilities.getIndex(spnCategories, activeCategoryID));
+						layoutNewCategory.setVisibility(View.GONE);
+						txtCategoryName.setText("");
+						return;
+
+					} else {
+						// Proposed Category is not in the database ... so add it
+
+						Uri uri = CategoriesTable.CONTENT_URI;
+						ContentValues values = new ContentValues();
+						values.put(CategoriesTable.COL_CATEGORY_NAME, proposedCategory);
+						values.put(CategoriesTable.COL_LIST_TYPE_ID, activeListTypeID);
+						Uri categoyNameUri = cr.insert(uri, values);
+						activeCategoryID = Long.parseLong(categoyNameUri.getLastPathSegment());
+						ListTitlesTable.setActiveCategoryID(getBaseContext(), activeCategoryID, activeListID);
+						if (verbose) {
+							String msg = "List: " + "\"" + proposedCategory + "\"" + " added to the database.";
+							Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+						}
+
+						categoriesCursor.close();
+						layoutNewCategory.setVisibility(View.GONE);
+						txtCategoryName.setText("");
+						return;
+					}
+
+				} else {
+					Log.e(TAG,
+							"ERROR in CreateNewCategory: Exception in query. Unable to determine if proposed Category is in the database!");
+					String msg = "Unable to create a new Category.\nUnable to determine if \""
+							+ proposedCategory
+							+ "\" is already in the database!\nPlease try again.";
+					Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+
+					return;
+				}
 			}
 		});
 
 		lvListItems = (ListView) findViewById(R.id.lvListItems);
+		lvListItems.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				boolean strikOutValue = ListsTable.getStrikeOut(getBaseContext(), activeListID, id);
+				if (strikOutValue) {
+					// item is shown as struck out ... reverse it
+					ListsTable.setStrikeOut(getBaseContext(), activeListID, id, false);
+
+				} else {
+					// item is shown as NOT struck out ... reverse it
+					ListsTable.setStrikeOut(getBaseContext(), activeListID, id, true);
+					int autoAddCategoriesOnStrikeout = listTitlesCursor.getInt(listTitlesCursor
+							.getColumnIndex(ListTitlesTable.COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT));
+					if (autoAddCategoriesOnStrikeout == 1) {
+						ListsTable.setCategoryID(getBaseContext(), activeListID, id, activeCategoryID);
+					}
+				}
+				loaderManager.restartLoader(LISTS_LOADER_ID, null, createListActivityCallbacks);
+			}
+
+		});
 
 		// set up laderManager
 		loaderManager = getLoaderManager();
@@ -349,6 +449,7 @@ public class ShowListsActivity extends Activity implements
 			@Override
 			public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
 				activeCategoryID = id;
+				ListTitlesTable.setActiveCategoryID(getBaseContext(), id, activeListID);
 			}
 
 			@Override
@@ -363,20 +464,33 @@ public class ShowListsActivity extends Activity implements
 
 	}
 
-	private void activateList() {
-		this.listTitlesCursor.moveToPosition(this.listTitlesPosition);
-		this.backgroundColor = this.listTitlesCursor.getInt(this.listTitlesCursor
-				.getColumnIndexOrThrow(ListTitlesTable.COL_BACKGROUND_COLOR));
-		this.normalTextColor = this.listTitlesCursor.getInt(this.listTitlesCursor
-				.getColumnIndexOrThrow(ListTitlesTable.COL_NORMAL_TEXT_COLOR));
-		this.strikeoutTextColor = this.listTitlesCursor.getInt(this.listTitlesCursor
-				.getColumnIndexOrThrow(ListTitlesTable.COL_STRIKEOUT_TEXT_COLOR));
-		this.lvListItems.setBackgroundColor(this.backgroundColor);
-		String listName = this.listTitlesCursor.getString(this.listTitlesCursor
-				.getColumnIndexOrThrow(ListTitlesTable.COL_LIST_TITLE_NAME));
-		actionBar.setSubtitle(listName);
+	private void MakeListActive() {
+		this.activeListID = this.listTitlesCursor.getLong(this.listTitlesCursor
+				.getColumnIndexOrThrow(ListTitlesTable.COL_ID));
+		this.activeListTypeID = this.listTitlesCursor.getLong(this.listTitlesCursor
+				.getColumnIndexOrThrow(ListTitlesTable.COL_LIST_TYPE_ID));
 
-		loaderManager.restartLoader(LISTS_LOADER_ID, null, createListActivityCallbacks);
+		this.activeCategoryID = ListTitlesTable.getActiveCategoryId(this, activeListID);
+
+		this.ActivateList();
+		loaderManager.restartLoader(CATEGORIES_LOADER_ID, null, createListActivityCallbacks);
+	}
+
+	private void ActivateList() {
+		if (this.listTitlesCursor != null) {
+			this.backgroundColor = this.listTitlesCursor.getInt(this.listTitlesCursor
+					.getColumnIndexOrThrow(ListTitlesTable.COL_BACKGROUND_COLOR));
+			this.normalTextColor = this.listTitlesCursor.getInt(this.listTitlesCursor
+					.getColumnIndexOrThrow(ListTitlesTable.COL_NORMAL_TEXT_COLOR));
+			this.strikeoutTextColor = this.listTitlesCursor.getInt(this.listTitlesCursor
+					.getColumnIndexOrThrow(ListTitlesTable.COL_STRIKEOUT_TEXT_COLOR));
+			this.lvListItems.setBackgroundColor(this.backgroundColor);
+			String listName = this.listTitlesCursor.getString(this.listTitlesCursor
+					.getColumnIndexOrThrow(ListTitlesTable.COL_LIST_TITLE_NAME));
+			actionBar.setSubtitle(listName);
+
+			loaderManager.restartLoader(LISTS_LOADER_ID, null, createListActivityCallbacks);
+		}
 	}
 
 	@Override
@@ -415,17 +529,15 @@ public class ShowListsActivity extends Activity implements
 			break;
 
 		case LISTS_LOADER_ID:
-			/*		SELECT itemName, categoryName
-					FROM tblLists
-					JOIN tblMasterListItems, tblCategories
-					ON tblLists.MasterListItemID= tblMasterListItems._Id
-					WHERE tblLists.categoryID=tblCategories._Id
-					 AND tblLists.listTitleID=1*/
-
-			//if (activeListID > 0) {
 			uri = Uri.withAppendedPath(ListsTable.LIST_WITH_CATEGORY_URI, String.valueOf(activeListID));
 
-			projection = new String[] { "tblMasterListItems._id", "itemName", "categoryName", "struckOut" };
+			String tblMasterListItems_id = MasterListItemsTable.TABLE_MASTER_LIST_ITEMS + "."
+					+ MasterListItemsTable.COL_ID;
+			String itemName = MasterListItemsTable.COL_ITEM_NAME;
+			String categoryName = CategoriesTable.COL_CATEGORY_NAME;
+			String struckOut = ListsTable.COL_STRUCK_OUT;
+
+			projection = new String[] { tblMasterListItems_id, itemName, categoryName, struckOut };
 
 			switch (listItemsSortOrder) {
 
@@ -440,7 +552,6 @@ public class ShowListsActivity extends Activity implements
 
 			cursorLoader = new CursorLoader(ShowListsActivity.this, uri, projection, selection, selectionArgs,
 					sortOrder);
-			//}
 			break;
 
 		default:
@@ -465,6 +576,7 @@ public class ShowListsActivity extends Activity implements
 
 		case LISTS_LOADER_ID:
 			lvListsItemsAdapter.setColors(this.backgroundColor, this.normalTextColor, this.strikeoutTextColor);
+			lvListsItemsAdapter.setShowCategories(this.showCategories);
 			lvListsItemsAdapter.swapCursor(newCursor);
 
 			break;

@@ -1,6 +1,7 @@
 package com.lbconsulting.alist_02.database;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -18,15 +19,17 @@ public class ListTitlesTable {
 	public static final String COL_ID = "_id";
 	public static final String COL_LIST_TITLE_NAME = "listTitle";
 	public static final String COL_LIST_TYPE_ID = "listTypeID";
+	public static final String COL_ACTIVE_CATEGORY_ID = "activeCategoryID";
 	public static final String COL_SORT_ORDER_ID = "sortOrderID";
 	public static final String COL_BACKGROUND_COLOR = "backgroundColor";
 	public static final String COL_NORMAL_TEXT_COLOR = "normalTextColor";
 	public static final String COL_STRIKEOUT_TEXT_COLOR = "strikeoutTextColor";
 	public static final String COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT = "autoAddCategoriesOnStrikeout";
 
-	public static final String[] PROJECTION_ALL = { COL_ID, COL_LIST_TITLE_NAME, COL_LIST_TYPE_ID, COL_SORT_ORDER_ID,
-			COL_BACKGROUND_COLOR,
-			COL_NORMAL_TEXT_COLOR, COL_STRIKEOUT_TEXT_COLOR, COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT };
+	public static final String[] PROJECTION_ALL = { COL_ID, COL_LIST_TITLE_NAME, COL_LIST_TYPE_ID,
+			COL_ACTIVE_CATEGORY_ID, COL_SORT_ORDER_ID, COL_SORT_ORDER_ID,
+			COL_BACKGROUND_COLOR, COL_NORMAL_TEXT_COLOR, COL_STRIKEOUT_TEXT_COLOR,
+			COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT };
 
 	public static final String CONTENT_PATH = TABLE_LIST_TITLES;
 	public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + "vnd.lbconsulting."
@@ -45,6 +48,10 @@ public class ListTitlesTable {
 			+ COL_LIST_TITLE_NAME + " text collate nocase, "
 			+ COL_LIST_TYPE_ID + " integer not null references "
 			+ ListTypesTable.TABLE_LIST_TYPES + " (" + ListTypesTable.COL_ID + ") default 1, "
+
+			+ COL_ACTIVE_CATEGORY_ID + " integer not null references "
+			+ CategoriesTable.TABLE_CATEGORIES + " (" + CategoriesTable.COL_ID + ") default 1, "
+
 			+ COL_SORT_ORDER_ID + " integer default 0, " // default alphabetical
 			+ COL_BACKGROUND_COLOR + " integer default 0, "
 			+ COL_NORMAL_TEXT_COLOR + " integer default 0,"
@@ -100,7 +107,7 @@ public class ListTitlesTable {
 		onCreate(database);
 	}
 
-	public static Cursor getListTitleItemsCursor(Context context, long listTitleItemID) {
+	public static Cursor getListTitlesCursor(Context context, long listTitleItemID) {
 		Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(listTitleItemID));
 		String[] projection = PROJECTION_ALL;
 		String selection = null;
@@ -112,14 +119,32 @@ public class ListTitlesTable {
 		try {
 			cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
 		} catch (Exception e) {
-			Log.e(TAG, "An Exception error occurred in ListTitlesTable: getListTitleItemsCursor. ", e);
+			Log.e(TAG, "An Exception error occurred in ListTitlesTable: getListTitlesCursor. ", e);
+		}
+		return cursor;
+	}
+
+	public static Cursor getListTitlesCursor(Context context) {
+
+		Uri uri = CONTENT_URI;
+		String[] projection = PROJECTION_ALL;
+		String selection = null;
+		String[] selectionArgs = null;
+		String sortOrder = SORT_ORDER_LIST_TITLE;
+
+		ContentResolver cr = context.getContentResolver();
+		Cursor cursor = null;
+		try {
+			cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+		} catch (Exception e) {
+			Log.e(TAG, "An Exception error occurred in ListTitlesTable: getListTitlesCursor. ", e);
 		}
 		return cursor;
 	}
 
 	public static long getListTypeID(Context context, long listTitleItemID) {
 		long listTypeID = -1;
-		Cursor cursor = getListTitleItemsCursor(context, listTitleItemID);
+		Cursor cursor = getListTitlesCursor(context, listTitleItemID);
 		if (cursor != null && cursor.getCount() > 0) {
 			listTypeID = cursor.getLong(cursor.getColumnIndex(MasterListItemsTable.COL_LIST_TYPE_ID));
 		}
@@ -128,4 +153,34 @@ public class ListTitlesTable {
 		}
 		return listTypeID;
 	}
+
+	public static void setActiveCategoryID(Context context, long activeCategoryID, long listID) {
+		ContentResolver cr = context.getContentResolver();
+		Uri uri = ListTitlesTable.CONTENT_URI;
+
+		ContentValues values = new ContentValues();
+		values.put(COL_ACTIVE_CATEGORY_ID, activeCategoryID);
+		String selection = ListTitlesTable.COL_ID + " = ?";
+		String[] selectionArgs = new String[] { String.valueOf(listID) };
+		int numberOfUpdatedRecords = cr.update(uri, values, selection, selectionArgs);
+		if (numberOfUpdatedRecords != 1) {
+			Log.e(TAG, "More than one ListTitle records occurred in ListTitlesTable: setActiveCategoryID.");
+		}
+	}
+
+	public static long getActiveCategoryId(Context context, long listID) {
+		long activeCategoryID = 1;
+		Cursor listsCursor = getListTitlesCursor(context, listID);
+		//ContentResolver cr = context.getContentResolver();
+		/*Uri uri = Uri.withAppendedPath(ListTitlesTable.CONTENT_URI, String.valueOf(listID));
+		Cursor acitveListCursor = cr.query(uri, null, null, null, null);*/
+		if (listsCursor != null) {
+			activeCategoryID = listsCursor.getLong(listsCursor.getColumnIndexOrThrow(COL_ACTIVE_CATEGORY_ID));
+		}
+		if (listsCursor != null) {
+			listsCursor.close();
+		}
+		return activeCategoryID;
+	}
+
 }

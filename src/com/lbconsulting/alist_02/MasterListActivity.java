@@ -571,7 +571,7 @@ public class MasterListActivity extends Activity implements
 			values.put(ListsTable.COL_MANUAL_SORT_ORDER, newListID);
 
 			// Check if newMasterListItem has previously used a category
-			long previousCategoryID = PreviousCategoryTable.FindPreviousCategoryID(this, this.activeListID,
+			long previousCategoryID = PreviousCategoryTable.getPreviousCategoryID(this, this.activeListID,
 					newMasterListItemID);
 			if (previousCategoryID > 0) {
 				// previously used category found
@@ -905,6 +905,9 @@ public class MasterListActivity extends Activity implements
 			this.activeListID = listID;
 			this.activeListTypeID = ListTitlesTable.getListTypeID(this, listID);
 			SetLayoutBackgroundColor(listID);
+
+			spnListTitles.setSelection(AListUtilities.getIndex(spnListTitles, this.activeListID));
+
 			loaderManager.restartLoader(MASTER_LIST_LOADER_ID, null, masterListCallbacks);
 			MasterListItemsTable.ResetSelectedColumn(this);
 			this.numberOfSelectedItems = MasterListItemsTable.SetSelectedColumn(this, listID);

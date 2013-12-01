@@ -1,6 +1,7 @@
 package com.lbconsulting.alist_02.database;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -152,7 +153,7 @@ public class ListsTable {
 			String[] projection = ListTitlesTable.PROJECTION_ALL;
 			cursor = cr.query(uri, projection, null, null, null);
 		} catch (Exception e) {
-			Log.e(TAG, "An Exception error occurred in getListTitleItem. ", e);
+			Log.e(TAG, "An Exception error occurred in ListsTable: getListTitleItem. ", e);
 		}
 		return cursor;
 	}
@@ -202,7 +203,7 @@ public class ListsTable {
 			}
 
 		} catch (Exception e) {
-			Log.e(TAG, "An Exception error occurred in getListTitle.", e);
+			Log.e(TAG, "An Exception error occurred in ListsTable: getListTitle.", e);
 		}
 		AListUtilities.closeQuietly(listTitlesCurosr);
 		return listTitle;
@@ -219,7 +220,7 @@ public class ListsTable {
 			String orderBy = ListTitlesTable.SORT_ORDER_LIST_TITLE;
 			listTitlesCursor = cr.query(uri, projection, null, null, orderBy);
 		} catch (Exception e) {
-			Log.e(TAG, "An Exception error occurred in FindNextListID. ", e);
+			Log.e(TAG, "An Exception error occurred in ListsTable: FindNextListID. ", e);
 			return -1;
 		}
 
@@ -261,7 +262,7 @@ public class ListsTable {
 			String[] whereArgs = { String.valueOf(listTitleID) };
 			numberOfDeletedRecords = cr.delete(uri, where, whereArgs);
 		} catch (Exception e) {
-			Log.e(TAG, "An Exception error occurred in DeleteAllItems. ", e);
+			Log.e(TAG, "An Exception error occurred in ListsTable: DeleteAllItems. ", e);
 		}
 		return numberOfDeletedRecords;
 	}
@@ -275,7 +276,7 @@ public class ListsTable {
 			String[] whereArgs = { String.valueOf(listTitleID) };
 			numberOfDeletedRecords = cr.delete(uri, where, whereArgs);
 		} catch (Exception e) {
-			Log.e(TAG, "An Exception error occurred in DeleteAllPreviousCategoryItems. ", e);
+			Log.e(TAG, "An Exception error occurred in ListsTable: DeleteAllPreviousCategoryItems. ", e);
 		}
 		return numberOfDeletedRecords;
 	}
@@ -286,7 +287,7 @@ public class ListsTable {
 			Uri uri = Uri.withAppendedPath(ListTitlesTable.CONTENT_URI, String.valueOf(listTitleID));
 			cr.delete(uri, null, null);
 		} catch (Exception e) {
-			Log.e(TAG, "An Exception error occurred in DeleteListTitle. ", e);
+			Log.e(TAG, "An Exception error occurred in ListsTable: DeleteListTitle. ", e);
 		}
 	}
 
@@ -301,7 +302,7 @@ public class ListsTable {
 			cursor = cr.query(uri, projection, where, selectionArgs, null);
 
 		} catch (Exception e) {
-			Log.e(TAG, "An Exception error occurred in getAllItems.", e);
+			Log.e(TAG, "An Exception error occurred in ListsTable: getAllItems.", e);
 		}
 		return cursor;
 	}
@@ -316,9 +317,63 @@ public class ListsTable {
 			numberOfRowsDeleted = cr.delete(uri, where, selectionArgs);
 
 		} catch (Exception e) {
-			Log.e(TAG, "An Exception error occurred in RemoveItem.", e);
+			Log.e(TAG, "An Exception error occurred in ListsTable: RemoveItem.", e);
 		}
 		return numberOfRowsDeleted;
 	}
 
+	public static void setStrikeOut(Context context, long listTitleID, long masterListItemID, boolean value) {
+		ContentResolver cr = context.getContentResolver();
+		int strikeOut = AListUtilities.boolToInt(value);
+		Uri uri = CONTENT_URI;
+		ContentValues values = new ContentValues();
+		values.put(COL_STRUCK_OUT, strikeOut);
+		String selection = COL_LIST_TITLE_ID + " = ? AND " + COL_MASTER_LIST_ITEM_ID + " = ?";
+		String[] selectionArgs = new String[] { String.valueOf(listTitleID), String.valueOf(masterListItemID) };
+		int numberOfUpdatedRecords = cr.update(uri, values, selection, selectionArgs);
+		if (numberOfUpdatedRecords != 1) {
+			Log.e(TAG, "More than one List records updated in ListsTable: setStrikeOut.");
+		}
+	}
+
+	public static boolean getStrikeOut(Context context, long listTitleID, long masterListItemID) {
+		boolean strikeOutValue = false;
+		Cursor cursor = getListsCursor(context, listTitleID, masterListItemID);
+		if (cursor != null) {
+			int strikeOut = cursor.getInt(cursor.getColumnIndexOrThrow(COL_STRUCK_OUT));
+			strikeOutValue = AListUtilities.intToBoolean(strikeOut);
+			cursor.close();
+		}
+		return strikeOutValue;
+	}
+
+	public static Cursor getListsCursor(Context context, long listTitleID, long masterListItemID) {
+		Cursor cursor = null;
+		try {
+			ContentResolver cr = context.getContentResolver();
+			Uri uri = CONTENT_URI;
+			String[] projection = PROJECTION_ALL;
+			String where = COL_LIST_TITLE_ID + " = ? AND " + COL_MASTER_LIST_ITEM_ID + " = ?";
+			String[] selectionArgs = new String[] { String.valueOf(listTitleID), String.valueOf(masterListItemID) };
+			cursor = cr.query(uri, projection, where, selectionArgs, null);
+
+		} catch (Exception e) {
+			Log.e(TAG, "An Exception error occurred in ListsTable: getListsCursor.", e);
+		}
+		return cursor;
+	}
+
+	public static void setCategoryID(Context context, long listTitleID, long masterListItemID, long categoryID) {
+		ContentResolver cr = context.getContentResolver();
+		Uri uri = CONTENT_URI;
+		ContentValues values = new ContentValues();
+		values.put(COL_CATEGORY_ID, categoryID);
+		String selection = COL_LIST_TITLE_ID + " = ? AND " + COL_MASTER_LIST_ITEM_ID + " = ?";
+		String[] selectionArgs = new String[] { String.valueOf(listTitleID), String.valueOf(masterListItemID) };
+		int numberOfUpdatedRecords = cr.update(uri, values, selection, selectionArgs);
+		if (numberOfUpdatedRecords != 1) {
+			Log.e(TAG, "More than one List records updated in ListsTable: setCategoryID.");
+		}
+		PreviousCategoryTable.setPreviousCategoryID(context, listTitleID, masterListItemID, categoryID);
+	}
 }

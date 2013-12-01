@@ -1,8 +1,7 @@
 package com.lbconsulting.alist_02.database;
 
-import java.util.ArrayList;
-
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -47,7 +46,7 @@ public class PreviousCategoryTable {
 		database.execSQL(DATABASE_CREATE);
 
 		//TODO: For testing
-		ArrayList<String> sqlStatements = new ArrayList<String>();
+		/*ArrayList<String> sqlStatements = new ArrayList<String>();
 		sqlStatements.add("insert into " + TABLE_PREVIOUS_CATEGORY + " ("
 				+ COL_ID + ", "
 				+ COL_LIST_TITLE_ID + ", "
@@ -69,7 +68,7 @@ public class PreviousCategoryTable {
 				+ COL_CATEGORY_ID
 				+ ") VALUES (NULL, 1,18,4)");
 
-		AListUtilities.execMultipleSQL(database, sqlStatements);
+		AListUtilities.execMultipleSQL(database, sqlStatements);*/
 	}
 
 	public static void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
@@ -96,7 +95,7 @@ public class PreviousCategoryTable {
 		return cursor;
 	}
 
-	public static long FindPreviousCategoryID(Context context, long listTitleID, long masterListItemID) {
+	public static long getPreviousCategoryID(Context context, long listTitleID, long masterListItemID) {
 		Cursor cursor = getPreviousCategoryCurosr(context, listTitleID, masterListItemID);
 		if (cursor == null) {
 			return -1;
@@ -109,6 +108,35 @@ public class PreviousCategoryTable {
 		else {
 			cursor.close();
 			return -1;
+		}
+	}
+
+	public static void setPreviousCategoryID(Context context, long listTitleID, long masterListItemID, long categoryID) {
+		Cursor cursor = getPreviousCategoryCurosr(context, listTitleID, masterListItemID);
+		if (cursor != null) {
+			ContentResolver cr = context.getContentResolver();
+			Uri uri = CONTENT_URI;
+			ContentValues values = new ContentValues();
+			values.put(COL_CATEGORY_ID, categoryID);
+
+			if (cursor.getCount() > 0) {
+				// a categoryID for this listTitleID-masterListItemID pair is already in the PreviousCategoryTable.
+				// so update it
+
+				String selection = COL_LIST_TITLE_ID + " = ? AND " + COL_MASTER_LIST_ITEM_ID + " = ?";
+				String[] selectionArgs = new String[] { String.valueOf(listTitleID), String.valueOf(masterListItemID) };
+				int numberOfUpdatedRecords = cr.update(uri, values, selection, selectionArgs);
+				if (numberOfUpdatedRecords != 1) {
+					Log.e(TAG,
+							"More than one CategoryID records updated in PreviousCategoryTable: setPreviousCategoryID.");
+				}
+
+			} else {
+				// a categoryID for this listTitleID-masterListItemID pair is NOT in the PreviousCategoryTable.
+				// so create it
+				Uri newPreviousCategoryItem = cr.insert(uri, values);
+				//long newPreviousCategoryID = Long.parseLong(newPreviousCategoryItem.getLastPathSegment());
+			}
 		}
 	}
 }

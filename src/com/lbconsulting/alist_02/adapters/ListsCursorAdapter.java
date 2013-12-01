@@ -45,6 +45,7 @@ public class ListsCursorAdapter extends CursorAdapter {
 			// item is NOT struck out
 			txtListItemName.setTypeface(null, Typeface.NORMAL);
 			txtListItemName.setTextColor(this.normalTextColor);
+			txtListItemName.setPaintFlags(txtListItemName.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
 		}
 
 		if (this.showCategories) {
@@ -52,16 +53,19 @@ public class ListsCursorAdapter extends CursorAdapter {
 			txtListItemCategory.setBackgroundColor(this.backgroundColor);
 			String categoryText =
 					"(" + cursor.getString(cursor.getColumnIndex(CategoriesTable.COL_CATEGORY_NAME)) + ")";
+			if (categoryText.equals("([None])")) {
+				categoryText = "(None)";
+			}
 			txtListItemCategory.setText(categoryText);
+			txtListItemCategory.setTypeface(null, Typeface.ITALIC);
 			if (isStruckOut > 0) {
-				// item has been struck out
-				txtListItemCategory.setTypeface(null, Typeface.ITALIC);
+				// item has been struck out			
 				txtListItemCategory.setTextColor(this.strikeoutTextColor);
 				//txtListItemCategory.setPaintFlags(txtListItemName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 			} else {
 				// item is NOT struck out
-				txtListItemCategory.setTypeface(null, Typeface.NORMAL);
-				txtListItemCategory.setTextColor(this.normalTextColor);
+				//txtListItemCategory.setTextColor(this.normalTextColor);
+				txtListItemCategory.setTextColor(this.strikeoutTextColor);
 			}
 		}
 	}

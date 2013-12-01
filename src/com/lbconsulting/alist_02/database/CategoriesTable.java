@@ -18,6 +18,7 @@ public class CategoriesTable {
 	public static final String COL_ID = "_id";
 	public static final String COL_CATEGORY_NAME = "categoryName";
 	public static final String COL_LIST_TYPE_ID = "listTypeID";
+
 	public static final String[] PROJECTION_ALL = { COL_ID, COL_CATEGORY_NAME, COL_LIST_TYPE_ID };
 
 	public static final String CONTENT_PATH = TABLE_CATEGORIES;

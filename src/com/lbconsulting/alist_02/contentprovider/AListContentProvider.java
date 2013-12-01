@@ -450,23 +450,29 @@ public class AListContentProvider extends ContentProvider {
 			break;
 
 		case LIST_WITH_CATEGORY_SINGLE_ROW:
-			/*		SELECT 
-			itemName, categoryName 
-			FROM 
-			tblLists JOIN tblMasterListItems, tblCategories ON tblLists.MasterListItemID= tblMasterListItems._Id
-			WHERE 
-			tblLists.categoryID=tblCategories._Id  AND tblLists.listTitleID=1*/
+			String tblLists = ListsTable.TABLE_LISTS;
+			String tblMasterListItems = MasterListItemsTable.TABLE_MASTER_LIST_ITEMS;
+			String tblCategories = CategoriesTable.TABLE_CATEGORIES;
 
-			/*ArrayList<String> newProjection = new ArrayList<String>();
-			newProjection.add("itemName");
-			newProjection.add("categoryName");
-			projection = (String[]) newProjection.toArray();*/
+			String tblListsMasterListItemID = ListsTable.COL_MASTER_LIST_ITEM_ID;
+			String tblMasterListItemsID = MasterListItemsTable.COL_ID;
 
-			String tables = "tblLists JOIN tblMasterListItems, tblCategories ON tblLists.MasterListItemID= tblMasterListItems._Id";
+			String tables = tblLists + " JOIN " + tblMasterListItems + ", " + tblCategories
+					+ " ON " + tblLists + "." + tblListsMasterListItemID + "="
+					+ tblMasterListItems + "." + tblMasterListItemsID;
+
+			/*String tables = "tblLists JOIN tblMasterListItems, tblCategories ON tblLists.MasterListItemID= tblMasterListItems._Id";*/
 			queryBuilder.setTables(tables);
 
-			String where = "tblLists.categoryID=tblCategories._Id  " +
-					"AND tblLists.listTitleID" + "=" + uri.getLastPathSegment();
+			String tblListsCategoryID = ListsTable.COL_CATEGORY_ID;
+			String tblCategoriesCategoryID = CategoriesTable.COL_ID;
+			String tblListsListTitleID = ListsTable.COL_LIST_TITLE_ID;
+
+			String where = tblLists + "." + tblListsCategoryID + "=" + tblCategories + "." + tblCategoriesCategoryID
+					+ " AND " + tblLists + "." + tblListsListTitleID + "=" + uri.getLastPathSegment();
+
+			/*String where = "tblLists.categoryID=tblCategories._Id  " +
+					"AND tblLists.listTitleID" + "=" + uri.getLastPathSegment();*/
 			queryBuilder.appendWhere(where);
 			break;
 

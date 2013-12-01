@@ -65,11 +65,11 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/newCategoryLinearLayout"
+        android:id="@+id/layoutNewCategory"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:visibility="visible" >
+        android:visibility="gone" >
 
         <EditText
             android:id="@+id/txtCategoryName"
