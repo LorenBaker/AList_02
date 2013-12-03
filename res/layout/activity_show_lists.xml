@@ -19,18 +19,30 @@
         android:orientation="horizontal" >
 
         <Button
+            android:id="@+id/btnRemoveStruckOutItems"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:text="Ck" />
+
+        <Button
             android:id="@+id/btnPreviousList"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Previous" />
 
         <Button
             android:id="@+id/btnNextList"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Next" />
+
+        <Button
+            android:id="@+id/btnShowMasterList"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:text="+" />
     </LinearLayout>
 
     <LinearLayout
@@ -38,13 +50,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="false"
+        android:gravity="center_vertical"
         android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/btnRemoveStruckOutItems"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Ck" />
 
         <Spinner
             android:id="@+id/spnCategories"
@@ -59,9 +66,10 @@
 
         <Button
             android:id="@+id/btnNewCategory"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/btnNewText" />
+            android:layout_width="50dp"
+            android:layout_height="48dp"
+            android:text="@string/btnNewCategory"
+            android:textSize="12sp" />
     </LinearLayout>
 
     <LinearLayout

@@ -19,6 +19,7 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -70,14 +71,14 @@ public class MasterListActivity extends Activity implements
 
 	// Application preferences
 	private boolean autoAddItem = true;
-	private boolean verbose = true;
+	private boolean verbose = false;
 	public long activeListID = -1;
 	public long activeListTypeID = -1;
+	private String activeListTypeName = "";
 	private int masterListSortOrder = SORT_ORDER_ALPHABETICAL;
 	private int masterListViewFirstVisiblePosition = 0;
 	private int masterListViewTop = 0;
 	private int numberOfSelectedItems = 0;
-	private String listTypeName = "";
 
 	private boolean flagFirstTimeThruListTitlesLoader = true;
 	private int spnListTitlesPosition = -1;
@@ -100,7 +101,7 @@ public class MasterListActivity extends Activity implements
 	private static Spinner spnListTitles = null;
 	private static LinearLayout layoutListTitle = null;
 	private static LinearLayout layoutListItem = null;
-	private static TextView txtStartingHint = null;
+	// private static TextView txtStartingHint = null;
 
 	private ActionBar actionBar = null;
 	private long proposedListTypeId;
@@ -156,7 +157,7 @@ public class MasterListActivity extends Activity implements
 
 		// Set application states
 		this.autoAddItem = storedStates.getBoolean("autoAddItem", true);
-		this.verbose = storedStates.getBoolean("verbose", true);
+		this.verbose = storedStates.getBoolean("verbose", false);
 
 		this.activeListID = storedStates.getLong("activeListID", -1);
 		this.activeListTypeID = storedStates.getLong("activeListTypeID", -1);
@@ -168,6 +169,8 @@ public class MasterListActivity extends Activity implements
 
 		if (this.activeListID > 0) {
 			this.ActivateList(this.activeListID);
+		} else {
+			this.AddNewList();
 		}
 	}
 
@@ -306,12 +309,12 @@ public class MasterListActivity extends Activity implements
 		spnListTitles = (Spinner) findViewById(R.id.spnListTitle);
 		layoutListTitle = (LinearLayout) findViewById(R.id.linearLayoutListTitle);
 		layoutListItem = (LinearLayout) findViewById(R.id.linearLayoutListItem);
-		txtStartingHint = (TextView) findViewById(R.id.txtStartingHint);
+		// txtStartingHint = (TextView) findViewById(R.id.txtStartingHint);
 
 		if (this.activeListID < 1) {
 			layoutListTitle.setVisibility(View.INVISIBLE);
 			layoutListItem.setVisibility(View.INVISIBLE);
-			txtStartingHint.setVisibility(View.VISIBLE);
+			//txtStartingHint.setVisibility(View.VISIBLE);
 		}
 
 		// setup txtListItem Listeners
@@ -423,14 +426,7 @@ public class MasterListActivity extends Activity implements
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent,
 					View view, int position, long id) {
-				// TODO create dialog giving the user the choice to: Delete or Edit the selected item, or Cancel
-				if (verbose) {
-					String msg = "masterListView LONG CLICK: Position = "
-							+ position + "; ID = " + id;
-					Toast.makeText(getApplicationContext(), msg,
-							Toast.LENGTH_SHORT).show();
-				}
-				// Long Click handled.
+				EditOrDeleteMasterListItem(id);
 				return true;
 			}
 		});
@@ -446,7 +442,8 @@ public class MasterListActivity extends Activity implements
 			public void onNothingSelected(AdapterView<?> parentView) {
 				layoutListTitle.setVisibility(View.INVISIBLE);
 				layoutListItem.setVisibility(View.INVISIBLE);
-				txtStartingHint.setVisibility(View.VISIBLE);
+				//txtStartingHint.setVisibility(View.VISIBLE);
+				AddNewList();
 				activeListID = -1;
 			}
 
@@ -471,6 +468,64 @@ public class MasterListActivity extends Activity implements
 		loaderManager.initLoader(LIST_TITLES_LOADER_ID, null, masterListCallbacks);
 		//loaderManager.initLoader(LIST_TYPES_LOADER_ID, null, masterListCallbacks);
 	} // End doCreate
+
+	protected void EditOrDeleteMasterListItem(final long itemID) {
+		// TODO create dialog giving the user the choice to: Delete or Edit the selected item, or Cancel
+
+		AlertDialog.Builder inputDialog = new AlertDialog.Builder(this);
+		inputDialog.setTitle("Edit or permanently delete item");
+
+		final EditText txtItemName = new EditText(this);
+		txtItemName.setInputType(InputType.TYPE_TEXT_FLAG_AUTO_CORRECT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+		Cursor itemNameCursor = MasterListItemsTable.getMasterListItemsCursor(this, itemID);
+
+		// get the active list info
+		final int isSelected = itemNameCursor.getInt(itemNameCursor
+				.getColumnIndexOrThrow(MasterListItemsTable.COL_SELECTED));
+		String selectedListItemName = itemNameCursor.getString(itemNameCursor
+				.getColumnIndexOrThrow(MasterListItemsTable.COL_ITEM_NAME));
+		itemNameCursor.close();
+
+		txtItemName.setText(selectedListItemName);
+
+		inputDialog.setView(txtItemName);
+
+		inputDialog.setPositiveButton("SAVE Item",
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int whichButton) {
+						String revisedItemName = txtItemName.getText().toString().trim();
+						if (revisedItemName.length() > 0) {
+							// update the selected item's name
+							Uri uri = Uri.withAppendedPath(MasterListItemsTable.CONTENT_URI, String.valueOf(itemID));
+							ContentValues values = new ContentValues();
+							values.put(MasterListItemsTable.COL_ITEM_NAME, revisedItemName);
+							String selection = null;
+							String[] selectionArgs = null;
+							ContentResolver cr = getContentResolver();
+							cr.update(uri, values, selection, selectionArgs);
+						}
+					}
+				});
+
+		inputDialog.setNeutralButton("DELETE Item",
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int whichButton) {
+						MasterListItemsTable.DeleteItem(getBaseContext(), itemID);
+						if (isSelected == 1) {
+							numberOfSelectedItems--;
+							setActionBarSubtitle(activeListTypeName, numberOfSelectedItems);
+						}
+					}
+				});
+
+		inputDialog.setNegativeButton(this.getString(R.string.Cancel), null);
+		inputDialog.show();
+
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -497,10 +552,7 @@ public class MasterListActivity extends Activity implements
 			return true;
 
 		case R.id.editActiveListTitle:
-			// TODO code menu editActiveListTitle
-			msg = "Edit Active List Title under construction.";
-			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG)
-					.show();
+			this.EditActiveListTitle();
 			return true;
 
 		case R.id.deleteActiveList:
@@ -512,29 +564,66 @@ public class MasterListActivity extends Activity implements
 			return true;
 
 		case R.id.deleteAllMasterListItems:
-			// TODO code menu deleteAllMasterListItems
-			msg = "Delete All Master List Items under construction.";
-			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG)
-					.show();
+			MasterListItemsTable.DeleteALLitems(this, activeListTypeID);
+			setActionBarSubtitle(activeListTypeName, 0);
 			return true;
 
 		case R.id.about:
 			// TODO code menu about
 			// startActivity(new Intent(this, About.class));
 			msg = "About under construction.";
-			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG)
-					.show();
+			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 			return true;
 
 		case R.id.masterListSettings:
 			// TODO code menu masterListSettings
 			msg = "Master List Settings under construction.";
-			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG)
-					.show();
+			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	private void EditActiveListTitle() {
+
+		AlertDialog.Builder inputDialog = new AlertDialog.Builder(this);
+		inputDialog.setTitle("Edit List Title:");
+
+		final EditText txtRevisedListTitle = new EditText(this);
+		txtRevisedListTitle.setInputType(InputType.TYPE_TEXT_FLAG_AUTO_CORRECT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+		Cursor activeListTitleCursor = ListTitlesTable.getListTitlesCursor(this, activeListID);
+
+		// get the active list title name
+		String activeListTitleName = activeListTitleCursor.getString(activeListTitleCursor
+				.getColumnIndexOrThrow(ListTitlesTable.COL_LIST_TITLE_NAME));
+		activeListTitleCursor.close();
+		txtRevisedListTitle.setText(activeListTitleName);
+
+		inputDialog.setView(txtRevisedListTitle);
+
+		inputDialog.setPositiveButton(this.getString(R.string.OK),
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int whichButton) {
+						String revisedListTitle = txtRevisedListTitle.getText().toString().trim();
+						if (revisedListTitle.length() > 0) {
+							// update the active list title name
+							Uri uri = Uri.withAppendedPath(ListTitlesTable.CONTENT_URI, String.valueOf(activeListID));
+							ContentValues values = new ContentValues();
+							values.put(ListTitlesTable.COL_LIST_TITLE_NAME, revisedListTitle);
+							String selection = null;
+							String[] selectionArgs = null;
+							ContentResolver cr = getContentResolver();
+							cr.update(uri, values, selection, selectionArgs);
+						}
+					}
+				});
+
+		inputDialog.setNegativeButton(this.getString(R.string.Cancel), null);
+		inputDialog.show();
+
 	}
 
 	private void AddItemToActiveList(String newMasterListItem, long newMasterListItemID) {
@@ -549,10 +638,10 @@ public class MasterListActivity extends Activity implements
 		// Check that masterListItemID is not already included in the ListsTable
 		long listID = ListsTable.FindListID(this, this.activeListID, newMasterListItemID);
 		if (listID > 0) {
-			if (verbose) {
+			/*if (verbose) {
 				msg = "\"" + newMasterListItem + "\"" + " is already included in the active list!";
 				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-			}
+			}*/
 		}
 		else {
 			// newMasterListItemID is not included in the active list ... so add it
@@ -563,12 +652,12 @@ public class MasterListActivity extends Activity implements
 			values.put(ListsTable.COL_MASTER_LIST_ITEM_ID, newMasterListItemID);
 
 			Uri newListUri = cr.insert(ListsTable.CONTENT_URI, values);
-			long newListID = Long.parseLong(newListUri.getLastPathSegment());
+			long newListItemID = Long.parseLong(newListUri.getLastPathSegment());
 
 			// make the manual sort order equal to the newListID 
 			// i.e. added to the bottom of the list.
 			values = new ContentValues();
-			values.put(ListsTable.COL_MANUAL_SORT_ORDER, newListID);
+			values.put(ListsTable.COL_MANUAL_SORT_ORDER, newListItemID);
 
 			// Check if newMasterListItem has previously used a category
 			long previousCategoryID = PreviousCategoryTable.getPreviousCategoryID(this, this.activeListID,
@@ -591,7 +680,7 @@ public class MasterListActivity extends Activity implements
 			cr.update(uri, values, null, null);
 
 			this.numberOfSelectedItems++;
-			this.setActionBarSubtitle(this.listTypeName, this.numberOfSelectedItems);
+			this.setActionBarSubtitle(this.activeListTypeName, this.numberOfSelectedItems);
 
 			if (verbose) {
 				msg = "\"" + newMasterListItem + "\"" + " added to the active List.\nDate: "
@@ -630,7 +719,7 @@ public class MasterListActivity extends Activity implements
 			cr.update(uri, values, null, null);
 
 			this.numberOfSelectedItems--;
-			this.setActionBarSubtitle(this.listTypeName, this.numberOfSelectedItems);
+			this.setActionBarSubtitle(this.activeListTypeName, this.numberOfSelectedItems);
 
 			if (verbose) {
 				msg = "\"" + masterListItem + "\" removed from the active list.";
@@ -793,7 +882,7 @@ public class MasterListActivity extends Activity implements
 			if (newCursor.getCount() > 0) {
 				layoutListTitle.setVisibility(View.VISIBLE);
 				layoutListItem.setVisibility(View.VISIBLE);
-				txtStartingHint.setVisibility(View.GONE);
+				//txtStartingHint.setVisibility(View.GONE);
 			}
 
 			if (this.flagFirstTimeThruListTitlesLoader) {
@@ -911,8 +1000,8 @@ public class MasterListActivity extends Activity implements
 			loaderManager.restartLoader(MASTER_LIST_LOADER_ID, null, masterListCallbacks);
 			MasterListItemsTable.ResetSelectedColumn(this);
 			this.numberOfSelectedItems = MasterListItemsTable.SetSelectedColumn(this, listID);
-			this.listTypeName = ListTypesTable.getListTypeName(this, this.activeListTypeID);
-			this.setActionBarSubtitle(this.listTypeName, this.numberOfSelectedItems);
+			this.activeListTypeName = ListTypesTable.getListTypeName(this, this.activeListTypeID);
+			this.setActionBarSubtitle(this.activeListTypeName, this.numberOfSelectedItems);
 
 		} catch (Exception e) {
 			Log.e(TAG, "MasterListActivity: An Exception error occurred in ActivateList. ", e);
@@ -920,7 +1009,12 @@ public class MasterListActivity extends Activity implements
 	}
 
 	private void setActionBarSubtitle(String listType, int numberOfItems) {
-		actionBar.setSubtitle(listType + " (" + AListUtilities.formatInt(numberOfItems) + ")");
+		if (numberOfItems > 0) {
+			actionBar.setSubtitle(listType + " (" + AListUtilities.formatInt(numberOfItems) + ")");
+		} else {
+			actionBar.setSubtitle(listType);
+		}
+
 	}
 
 	private void SetLayoutBackgroundColor(long listTitleID) {
@@ -950,15 +1044,14 @@ public class MasterListActivity extends Activity implements
 
 	private void DeleteList(long listTitleID) {
 
-		if (listTitleID < 0) {
+		if (listTitleID < 1) {
 			return;
 		}
 
 		// confirm user wants to delete the current active list.
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-		String activeListTitle = ListsTable.getListTitle(this, listTitleID);
-		String deleteListPrompt = "Delete list: " + "\"" + activeListTitle
-				+ "\" ?";
+		final String activeListTitle = ListsTable.getListTitle(this, listTitleID);
+		String deleteListPrompt = "Delete list: " + "\"" + activeListTitle + "\" ?";
 
 		alert.setTitle(deleteListPrompt);
 
@@ -966,13 +1059,14 @@ public class MasterListActivity extends Activity implements
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int whichButton) {
-						String activeListTitle = ListsTable.getListTitle(
-								getBaseContext(), activeListID);
-						doDeleteList(activeListID);
-						String deleteListPrompt = "List: " + "\""
-								+ activeListTitle + "\" DELETED.";
-						Toast.makeText(getApplicationContext(),
-								deleteListPrompt, Toast.LENGTH_SHORT).show();
+						long listIDforDeletion = activeListID;
+						activeListID = ListsTable.FindNextListID(getBaseContext(), listIDforDeletion);
+						ListTitlesTable.DeleteList(getBaseContext(), listIDforDeletion);
+						String completeDeleteListPrompt = "List: " + "\"" + activeListTitle + "\" DELETED.";
+						if (verbose) {
+							Toast.makeText(getApplicationContext(), completeDeleteListPrompt, Toast.LENGTH_SHORT)
+									.show();
+						}
 					}
 				});
 
@@ -981,25 +1075,12 @@ public class MasterListActivity extends Activity implements
 					@Override
 					public void onClick(DialogInterface dialog, int whichButton) {
 						// Canceled.
-						String activeListTitle = ListsTable.getListTitle(
-								getBaseContext(), activeListID);
-						String cancelDeleteListPrompt = "Deleting of list: "
-								+ "\"" + activeListTitle + "\" CANCELED.";
-						Toast.makeText(getApplicationContext(),
-								cancelDeleteListPrompt, Toast.LENGTH_SHORT)
-								.show();
+						String cancelDeleteListPrompt = "Deleting of list: " + "\"" + activeListTitle + "\" CANCELED.";
+						Toast.makeText(getApplicationContext(), cancelDeleteListPrompt, Toast.LENGTH_SHORT).show();
 					}
 				});
 
 		alert.show();
-	}
-
-	private void doDeleteList(long listTitleID) {
-		this.activeListID = ListsTable.FindNextListID(this, listTitleID);
-		ListsTable.DeleteAllItems(this, listTitleID);
-		ListsTable.DeleteAllPreviousCategoryItems(this, listTitleID);
-		MasterListItemsTable.ResetSelectedColumn(this);
-		ListsTable.DeleteListTitleItem(this, listTitleID);
 	}
 
 	/** Deletes the Active List from the database. */

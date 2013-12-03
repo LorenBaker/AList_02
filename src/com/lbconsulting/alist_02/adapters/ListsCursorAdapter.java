@@ -48,14 +48,19 @@ public class ListsCursorAdapter extends CursorAdapter {
 			txtListItemName.setPaintFlags(txtListItemName.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
 		}
 
+		TextView txtListItemCategory = (TextView) view.findViewById(R.id.txtListItemCategory);
 		if (this.showCategories) {
-			TextView txtListItemCategory = (TextView) view.findViewById(R.id.txtListItemCategory);
+			txtListItemCategory.setVisibility(View.VISIBLE);
 			txtListItemCategory.setBackgroundColor(this.backgroundColor);
 			String categoryText =
 					"(" + cursor.getString(cursor.getColumnIndex(CategoriesTable.COL_CATEGORY_NAME)) + ")";
-			if (categoryText.equals("([None])")) {
-				categoryText = "(None)";
+
+			String defalutCategoryValue = context.getResources().getString(R.string.defalutCategoryValue);
+
+			if (categoryText.startsWith("([")) {
+				categoryText = "(" + defalutCategoryValue.substring(1, defalutCategoryValue.length() - 1) + ")";
 			}
+
 			txtListItemCategory.setText(categoryText);
 			txtListItemCategory.setTypeface(null, Typeface.ITALIC);
 			if (isStruckOut > 0) {
@@ -67,6 +72,8 @@ public class ListsCursorAdapter extends CursorAdapter {
 				//txtListItemCategory.setTextColor(this.normalTextColor);
 				txtListItemCategory.setTextColor(this.strikeoutTextColor);
 			}
+		} else {
+			txtListItemCategory.setVisibility(View.GONE);
 		}
 	}
 

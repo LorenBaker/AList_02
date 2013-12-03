@@ -26,6 +26,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal" >
 
         <Spinner
@@ -38,9 +39,10 @@
 
         <Button
             android:id="@+id/btnNewListType"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/btnNewText" />
+            android:layout_width="50dp"
+            android:layout_height="48dp"
+            android:text="@string/btnNewListType"
+            android:textSize="12sp" />
     </LinearLayout>
 
     <LinearLayout

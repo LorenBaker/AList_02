@@ -2,10 +2,12 @@ package com.lbconsulting.alist_02;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -13,7 +15,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -47,6 +52,7 @@ public class ShowListsActivity extends Activity implements
 	private Button btnPreviousList = null;
 	private Button btnNextList = null;
 	private Button btnRemoveStruckOutItems = null;
+	private Button btnShowMasterList = null;
 	private Button btnNewCategory = null;
 	private Button btnAddCategory = null;
 
@@ -63,7 +69,9 @@ public class ShowListsActivity extends Activity implements
 	private long activeListTypeID = -1;
 	private long activeCategoryID = -1;
 	private boolean showCategories = true;
-	private int listItemsSortOrder = SORT_ORDER_ITEM_NAME;
+	private final int listItemsSortOrder = SORT_ORDER_ITEM_NAME;
+	private boolean sortByCategory = false;
+
 	private Cursor listTitlesCursor = null;
 	private int listTitlesPosition = -1;
 
@@ -133,7 +141,7 @@ public class ShowListsActivity extends Activity implements
 		this.activeListTypeID = storedStates.getLong("activeListTypeID", 1); // 1 = Groceries
 		//this.activeCategoryID = storedStates.getLong("activeCategoryID", 1); // 1 = [None]
 		this.showCategories = storedStates.getBoolean("showCategories", true);
-		this.listItemsSortOrder = storedStates.getInt("listItemsSortOrder", SORT_ORDER_ITEM_NAME);
+		this.sortByCategory = storedStates.getBoolean("sortByCategory", sortByCategory);
 
 		this.listTitlesCursor = ListTitlesTable.getListTitlesCursor(this);
 
@@ -161,7 +169,7 @@ public class ShowListsActivity extends Activity implements
 		applicationStates.putLong("activeListTypeID", this.activeListTypeID);
 		//applicationStates.putLong("activeCategoryID", this.activeCategoryID);
 		applicationStates.putBoolean("showCategories", this.showCategories);
-		applicationStates.putInt("listItemsSortOrder", this.listItemsSortOrder);
+		applicationStates.putBoolean("sortByCategory", this.sortByCategory);
 
 		// Commit to storage
 		applicationStates.commit();
@@ -267,7 +275,7 @@ public class ShowListsActivity extends Activity implements
 		setContentView(R.layout.activity_show_lists);
 
 		actionBar = getActionBar();
-		actionBar.setTitle("AList");
+		//actionBar.setTitle("AList");
 		//actionBar.setSubtitle("Show Lists");
 
 		// Initialize the controls
@@ -318,10 +326,24 @@ public class ShowListsActivity extends Activity implements
 
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
+				// deleted all of the items from the ListsTable
+				// that are in the activeList and that are struck out
 
+				ContentResolver cr = getContentResolver();
+
+				Uri uri = ListsTable.CONTENT_URI;
+				String where = ListsTable.COL_LIST_TITLE_ID + " = ? AND "
+						+ ListsTable.COL_STRUCK_OUT + " = 1";
+				String selectionArgs[] = { String.valueOf(activeListID) };
+				int numberOfItemsDeleted = cr.delete(uri, where, selectionArgs);
+				loaderManager.restartLoader(LISTS_LOADER_ID, null, createListActivityCallbacks);
+				if (verbose) {
+					String msg = String.valueOf(numberOfItemsDeleted) + " struck out items removed.";
+					Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+				}
 			}
 		});
+
 		txtCategoryName = (EditText) findViewById(R.id.txtCategoryName);
 		layoutNewCategory = (LinearLayout) findViewById(R.id.layoutNewCategory);
 		btnNewCategory = (Button) findViewById(R.id.btnNewCategory);
@@ -410,6 +432,15 @@ public class ShowListsActivity extends Activity implements
 			}
 		});
 
+		btnShowMasterList = (Button) findViewById(R.id.btnShowMasterList);
+		btnShowMasterList.setOnClickListener(new Button.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				onBackPressed();
+			}
+
+		});
+
 		lvListItems = (ListView) findViewById(R.id.lvListItems);
 		lvListItems.setOnItemClickListener(new OnItemClickListener() {
 
@@ -426,6 +457,7 @@ public class ShowListsActivity extends Activity implements
 					int autoAddCategoriesOnStrikeout = listTitlesCursor.getInt(listTitlesCursor
 							.getColumnIndex(ListTitlesTable.COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT));
 					if (autoAddCategoriesOnStrikeout == 1) {
+						// set the list item's category
 						ListsTable.setCategoryID(getBaseContext(), activeListID, id, activeCategoryID);
 					}
 				}
@@ -464,6 +496,143 @@ public class ShowListsActivity extends Activity implements
 
 	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.show_lists, menu);
+		if (L) {
+			Log.i(TAG, "ShowListsActivity onCreateOptionsMenu");
+		}
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		String msg = null;
+
+		switch (item.getItemId()) {
+
+		case R.id.editCategoryName:
+			this.EditCategoryName();
+			return true;
+
+		case R.id.listItemsSortOrder:
+			// TODO code menu editActiveListTitle
+			msg = "Sort Order menu under construction.";
+			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+			return true;
+
+		case R.id.removeAllItems:
+			ListsTable.RemoveAllItems(this, activeListID);
+			loaderManager.restartLoader(LISTS_LOADER_ID, null, createListActivityCallbacks);
+			return true;
+
+		case R.id.categoryAttributes:
+			// TODO code menu editActiveListTitle
+			/*msg = "Category Attributes menu under construction.";
+			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();*/
+			this.setCategoryAttributes();
+			return true;
+
+		case R.id.about:
+			// TODO code menu about
+			// startActivity(new Intent(this, About.class));
+			msg = "About menu under construction.";
+			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+			return true;
+
+		case R.id.masterListSettings:
+			// TODO code menu masterListSettings
+			msg = "Settings menu under construction.";
+			Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+			return true;
+
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	private void setCategoryAttributes() {
+		AlertDialog.Builder inputDialog = new AlertDialog.Builder(this);
+		inputDialog.setTitle("Set category attributes");
+		final String[] items = new String[] { "Show categories", "Sort by category" };
+		final boolean[] checkedItems = { this.showCategories, this.sortByCategory };
+		inputDialog.setMultiChoiceItems(items, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
+			@Override
+			public void onClick(DialogInterface dialogInterface, int item, boolean b) {
+				switch (item) {
+				case 0:
+					showCategories = b;
+					if (showCategories) {
+
+					} else {
+
+					}
+					break;
+				case 1:
+					sortByCategory = b;
+					break;
+				default:
+					break;
+				}
+
+			}
+		});
+		inputDialog.setPositiveButton("OK",
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int whichButton) {
+						loaderManager.restartLoader(LISTS_LOADER_ID, null, createListActivityCallbacks);
+					}
+				});
+		inputDialog.show();
+	}
+
+	private void EditCategoryName() {
+		AlertDialog.Builder inputDialog = new AlertDialog.Builder(this);
+		inputDialog.setTitle("Edit category name");
+
+		final EditText txtCategoryName = new EditText(this);
+		txtCategoryName.setInputType(InputType.TYPE_TEXT_FLAG_AUTO_CORRECT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+		final long selectedCategoryID = spnCategories.getSelectedItemId();
+		Cursor categoryNameCursor = CategoriesTable.getCategoriesCursor(this, selectedCategoryID);
+
+		// get the active list info
+		String selectedCategoryName = categoryNameCursor.getString(categoryNameCursor
+				.getColumnIndexOrThrow(CategoriesTable.COL_CATEGORY_NAME));
+		categoryNameCursor.close();
+
+		txtCategoryName.setText(selectedCategoryName);
+
+		inputDialog.setView(txtCategoryName);
+
+		inputDialog.setPositiveButton("SAVE Item",
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int whichButton) {
+						String revisedCategoryName = txtCategoryName.getText().toString().trim();
+						if (revisedCategoryName.length() > 0) {
+							// update the selected category's name
+							Uri uri = Uri.withAppendedPath(CategoriesTable.CONTENT_URI,
+									String.valueOf(selectedCategoryID));
+							ContentValues values = new ContentValues();
+							values.put(CategoriesTable.COL_CATEGORY_NAME, revisedCategoryName);
+							String selection = null;
+							String[] selectionArgs = null;
+							ContentResolver cr = getContentResolver();
+							cr.update(uri, values, selection, selectionArgs);
+							loaderManager.restartLoader(LISTS_LOADER_ID, null, createListActivityCallbacks);
+						}
+					}
+				});
+
+		inputDialog.setNegativeButton(this.getString(R.string.Cancel), null);
+		inputDialog.show();
+
+	}
+
 	private void MakeListActive() {
 		this.activeListID = this.listTitlesCursor.getLong(this.listTitlesCursor
 				.getColumnIndexOrThrow(ListTitlesTable.COL_ID));
@@ -487,7 +656,7 @@ public class ShowListsActivity extends Activity implements
 			this.lvListItems.setBackgroundColor(this.backgroundColor);
 			String listName = this.listTitlesCursor.getString(this.listTitlesCursor
 					.getColumnIndexOrThrow(ListTitlesTable.COL_LIST_TITLE_NAME));
-			actionBar.setSubtitle(listName);
+			actionBar.setTitle(listName);
 
 			loaderManager.restartLoader(LISTS_LOADER_ID, null, createListActivityCallbacks);
 		}

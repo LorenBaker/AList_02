@@ -14,12 +14,12 @@
         android:title="@string/editActiveListTitle">
     </item>
     <item
-        android:id="@+id/deleteActiveList"
-        android:title="@string/deleteActiveList">
-    </item>
-    <item
         android:id="@+id/masterListSorting"
         android:title="@string/sortingMasterList">
+    </item>
+    <item
+        android:id="@+id/deleteActiveList"
+        android:title="@string/deleteActiveList">
     </item>
     <item
         android:id="@+id/deleteAllMasterListItems"

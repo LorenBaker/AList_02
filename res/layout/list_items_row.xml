@@ -23,7 +23,6 @@
         android:layout_height="wrap_content"
         android:gravity="bottom"
         android:paddingLeft="3dp"
-        android:text="(Category)"
         android:visibility="visible" />
 
 </LinearLayout>

@@ -253,7 +253,7 @@ public class ListsTable {
 
 	}
 
-	public static int DeleteAllItems(Context context, long listTitleID) {
+	public static int DeleteListTitleItems(Context context, long listTitleID) {
 		int numberOfDeletedRecords = 0;
 		try {
 			ContentResolver cr = context.getContentResolver();
@@ -267,29 +267,30 @@ public class ListsTable {
 		return numberOfDeletedRecords;
 	}
 
-	public static int DeleteAllPreviousCategoryItems(Context context, long listTitleID) {
-		int numberOfDeletedRecords = 0;
-		try {
-			ContentResolver cr = context.getContentResolver();
-			Uri uri = PreviousCategoryTable.CONTENT_URI;
-			String where = PreviousCategoryTable.COL_LIST_TITLE_ID + "= ?";
-			String[] whereArgs = { String.valueOf(listTitleID) };
-			numberOfDeletedRecords = cr.delete(uri, where, whereArgs);
-		} catch (Exception e) {
-			Log.e(TAG, "An Exception error occurred in ListsTable: DeleteAllPreviousCategoryItems. ", e);
-		}
-		return numberOfDeletedRecords;
-	}
+	/*	public static int DeleteAllPreviousCategoryItems(Context context, long listTitleID) {
+			int numberOfDeletedRecords = 0;
+			try {
+				ContentResolver cr = context.getContentResolver();
+				Uri uri = PreviousCategoryTable.CONTENT_URI;
+				String where = PreviousCategoryTable.COL_LIST_TITLE_ID + "= ?";
+				String[] whereArgs = { String.valueOf(listTitleID) };
+				numberOfDeletedRecords = cr.delete(uri, where, whereArgs);
+			} catch (Exception e) {
+				Log.e(TAG, "An Exception error occurred in ListsTable: DeleteAllPreviousCategoryItems. ", e);
+			}
+			return numberOfDeletedRecords;
+		}*/
 
-	public static void DeleteListTitleItem(Context context, long listTitleID) {
-		try {
-			ContentResolver cr = context.getContentResolver();
-			Uri uri = Uri.withAppendedPath(ListTitlesTable.CONTENT_URI, String.valueOf(listTitleID));
-			cr.delete(uri, null, null);
-		} catch (Exception e) {
-			Log.e(TAG, "An Exception error occurred in ListsTable: DeleteListTitle. ", e);
-		}
-	}
+	/*	public static void DeleteListTitleItem(Context context, long listTitleID) {
+			ListTitlesTable.
+			try {
+				ContentResolver cr = context.getContentResolver();
+				Uri uri = Uri.withAppendedPath(ListTitlesTable.CONTENT_URI, String.valueOf(listTitleID));
+				cr.delete(uri, null, null);
+			} catch (Exception e) {
+				Log.e(TAG, "An Exception error occurred in ListsTable: DeleteListTitle. ", e);
+			}
+		}*/
 
 	public static Cursor getAllItems(Context context, long listTitleID) {
 		Cursor cursor = null;
@@ -305,6 +306,21 @@ public class ListsTable {
 			Log.e(TAG, "An Exception error occurred in ListsTable: getAllItems.", e);
 		}
 		return cursor;
+	}
+
+	public static int RemoveAllItems(Context context, long listID) {
+		int numberOfRowsDeleted = 0;
+		try {
+			ContentResolver cr = context.getContentResolver();
+			Uri uri = CONTENT_URI;
+			String where = COL_LIST_TITLE_ID + "= ?";
+			String[] selectionArgs = { String.valueOf(listID) };
+			numberOfRowsDeleted = cr.delete(uri, where, selectionArgs);
+
+		} catch (Exception e) {
+			Log.e(TAG, "An Exception error occurred in ListsTable: RemoveItem.", e);
+		}
+		return numberOfRowsDeleted;
 	}
 
 	public static int RemoveItem(Context context, long listID, long masterListItemID) {
@@ -364,6 +380,7 @@ public class ListsTable {
 	}
 
 	public static void setCategoryID(Context context, long listTitleID, long masterListItemID, long categoryID) {
+
 		ContentResolver cr = context.getContentResolver();
 		Uri uri = CONTENT_URI;
 		ContentValues values = new ContentValues();
@@ -376,4 +393,15 @@ public class ListsTable {
 		}
 		PreviousCategoryTable.setPreviousCategoryID(context, listTitleID, masterListItemID, categoryID);
 	}
+
+	public static void DeleteMasterListItems(Context context, long masterListItemID) {
+		if (masterListItemID > 0) {
+			ContentResolver cr = context.getContentResolver();
+			Uri uri = CONTENT_URI;
+			String where = COL_MASTER_LIST_ITEM_ID + " = ?";
+			String[] selectionArgs = new String[] { String.valueOf(masterListItemID) };
+			cr.delete(uri, where, selectionArgs);
+		}
+	}
+
 }

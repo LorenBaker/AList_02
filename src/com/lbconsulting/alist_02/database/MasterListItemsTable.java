@@ -304,7 +304,7 @@ public class MasterListItemsTable {
 	}
 
 	public static void ClearAllSelectedItems(Context context, long listTitleID) {
-		ListsTable.DeleteAllItems(context, listTitleID);
+		ListsTable.DeleteListTitleItems(context, listTitleID);
 		ResetSelectedColumn(context);
 	}
 
@@ -342,6 +342,23 @@ public class MasterListItemsTable {
 		return cursor;
 	}
 
+	private static Cursor getALLmasterListItemsCursor(Context context, long listTypeID) {
+		Uri uri = CONTENT_URI;
+		String[] projection = PROJECTION_ALL;
+		String selection = COL_LIST_TYPE_ID + " = ?";
+		String[] selectionArgs = new String[] { String.valueOf(listTypeID) };
+		String sortOrder = null;
+
+		ContentResolver cr = context.getContentResolver();
+		Cursor cursor = null;
+		try {
+			cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+		} catch (Exception e) {
+			Log.e(TAG, "An Exception error occurred in MasterListItemsTable: getALLmasterListItemsCursor. ", e);
+		}
+		return cursor;
+	}
+
 	public static long getListTypeID(Context context, long masterListItemID) {
 		long listTypeID = -1;
 		Cursor cursor = getMasterListItemsCursor(context, masterListItemID);
@@ -373,4 +390,39 @@ public class MasterListItemsTable {
 			return -1;
 		}
 	}
+
+	public static void DeleteItem(Context context, long masterListItemID) {
+		if (masterListItemID > 0) {
+			ContentResolver cr = context.getContentResolver();
+			Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(masterListItemID));
+			String where = null;
+			String[] selectionArgs = null;
+			cr.delete(uri, where, selectionArgs);
+
+			ListsTable.DeleteMasterListItems(context, masterListItemID);
+			PreviousCategoryTable.DeleteMasterListItems(context, masterListItemID);
+		}
+	}
+
+	public static void DeleteALLitems(Context context, long listTypeID) {
+		if (listTypeID > 0) {
+			Cursor cursor = getALLmasterListItemsCursor(context, listTypeID);
+			if (cursor != null && cursor.getCount() > 0) {
+				long masterListItemID = 0;
+				do {
+					masterListItemID = cursor.getLong(cursor.getColumnIndexOrThrow(COL_ID));
+					ListsTable.DeleteMasterListItems(context, masterListItemID);
+					PreviousCategoryTable.DeleteMasterListItems(context, masterListItemID);
+				} while (cursor.moveToNext());
+				cursor.close();
+
+				ContentResolver cr = context.getContentResolver();
+				Uri uri = CONTENT_URI;
+				String where = COL_LIST_TYPE_ID + " = ?";
+				String[] selectionArgs = new String[] { String.valueOf(listTypeID) };
+				cr.delete(uri, where, selectionArgs);
+			}
+		}
+	}
+
 }

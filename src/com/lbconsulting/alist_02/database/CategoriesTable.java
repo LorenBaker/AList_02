@@ -3,14 +3,18 @@ package com.lbconsulting.alist_02.database;
 import java.util.ArrayList;
 
 import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
 import com.lbconsulting.alist_02.AListUtilities;
+import com.lbconsulting.alist_02.R;
 import com.lbconsulting.alist_02.contentprovider.AListContentProvider;
 
 public class CategoriesTable {
+
 	private static final String TAG = AListUtilities.TAG;
 
 	// Categories data table
@@ -40,13 +44,21 @@ public class CategoriesTable {
 			+ ListTypesTable.TABLE_LIST_TYPES + " (" + ListTypesTable.COL_ID + ") default 1 "
 			+ ");";
 
+	/*private static String defalutCategoryValue = "[No Category]";*/
+	private static String defalutCategoryValue = "";
+
+	public static void setDefalutCategoryValue(Context context) {
+		defalutCategoryValue = context.getResources().getString(R.string.defalutCategoryValue);
+
+	}
+
 	public static void onCreate(SQLiteDatabase database) {
 		database.execSQL(DATABASE_CREATE);
 
 		ArrayList<String> sqlStatements = new ArrayList<String>();
-		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY_NAME
-				+ ", " + COL_LIST_TYPE_ID
-				+ ") VALUES (NULL, '[None]', -1)");
+		String sql = "insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY_NAME
+				+ ", " + COL_LIST_TYPE_ID + ") VALUES (NULL, '" + defalutCategoryValue + "', -1)";
+		sqlStatements.add(sql);
 		sqlStatements.add("insert into " + TABLE_CATEGORIES + " (" + COL_ID + ", " + COL_CATEGORY_NAME
 				+ ", " + COL_LIST_TYPE_ID
 				+ ") VALUES (NULL, 'Aisle 1', 1)");
@@ -84,4 +96,22 @@ public class CategoriesTable {
 		database.execSQL("DROP TABLE IF EXISTS " + TABLE_CATEGORIES);
 		onCreate(database);
 	}
+
+	public static Cursor getCategoriesCursor(Context context, long categoryID) {
+		Uri uri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(categoryID));
+		String[] projection = PROJECTION_ALL;
+		String selection = null;
+		String selectionArgs[] = null;
+		String sortOrder = null;
+
+		ContentResolver cr = context.getContentResolver();
+		Cursor cursor = null;
+		try {
+			cursor = cr.query(uri, projection, selection, selectionArgs, sortOrder);
+		} catch (Exception e) {
+			Log.e(TAG, "An Exception error occurred in CategoriesTable: getCategoriesCursor. ", e);
+		}
+		return cursor;
+	}
+
 }

@@ -101,12 +101,13 @@ public class PreviousCategoryTable {
 			return -1;
 		}
 		if (cursor.getCount() > 0) {
-			long listItemID = cursor.getLong(cursor.getColumnIndexOrThrow(COL_ID));
+			long categoryID = cursor.getLong(cursor.getColumnIndexOrThrow(COL_CATEGORY_ID));
 			cursor.close();
-			return listItemID;
+			return categoryID;
 		}
 		else {
 			cursor.close();
+			// return -1 so that the [None] category will not be added to the database
 			return -1;
 		}
 	}
@@ -119,24 +120,58 @@ public class PreviousCategoryTable {
 			ContentValues values = new ContentValues();
 			values.put(COL_CATEGORY_ID, categoryID);
 
+			String selection = COL_LIST_TITLE_ID + " = ? AND " + COL_MASTER_LIST_ITEM_ID + " = ?";
+			String[] selectionArgs = new String[] { String.valueOf(listTitleID), String.valueOf(masterListItemID) };
+
 			if (cursor.getCount() > 0) {
 				// a categoryID for this listTitleID-masterListItemID pair is already in the PreviousCategoryTable.
-				// so update it
-
-				String selection = COL_LIST_TITLE_ID + " = ? AND " + COL_MASTER_LIST_ITEM_ID + " = ?";
-				String[] selectionArgs = new String[] { String.valueOf(listTitleID), String.valueOf(masterListItemID) };
-				int numberOfUpdatedRecords = cr.update(uri, values, selection, selectionArgs);
-				if (numberOfUpdatedRecords != 1) {
-					Log.e(TAG,
-							"More than one CategoryID records updated in PreviousCategoryTable: setPreviousCategoryID.");
+				// so update it if categoryID does not equal 1.
+				// if categoryID equals 1, then delete the record from the PreviousCategoryTable
+				if (categoryID != 1) {
+					int numberOfUpdatedRecords = cr.update(uri, values, selection, selectionArgs);
+					if (numberOfUpdatedRecords != 1) {
+						Log.e(TAG, "More than one CategoryID records updated in PreviousCategoryTable: " +
+								"setPreviousCategoryID.");
+					}
+				} else {
+					// categoryID equals 1 ... delete the record from the PreviousCategoryTable
+					int numberOfDeleteddRecords = cr.delete(uri, selection, selectionArgs);
+					if (numberOfDeleteddRecords != 1) {
+						Log.e(TAG, "More than one CategoryID records deleted from PreviousCategoryTable: " +
+								"setPreviousCategoryID.");
+					}
 				}
 
 			} else {
 				// a categoryID for this listTitleID-masterListItemID pair is NOT in the PreviousCategoryTable.
-				// so create it
-				Uri newPreviousCategoryItem = cr.insert(uri, values);
-				//long newPreviousCategoryID = Long.parseLong(newPreviousCategoryItem.getLastPathSegment());
+				// so create it if categoryID does not equal 1 [None]
+				if (categoryID != 1) {
+					values.put(COL_LIST_TITLE_ID, listTitleID);
+					values.put(COL_MASTER_LIST_ITEM_ID, masterListItemID);
+					cr.insert(uri, values);
+				}
 			}
+			cursor.close();
+		}
+	}
+
+	public static void DeleteMasterListItems(Context context, long masterListItemID) {
+		if (masterListItemID > 0) {
+			ContentResolver cr = context.getContentResolver();
+			Uri uri = CONTENT_URI;
+			String where = COL_MASTER_LIST_ITEM_ID + " = ?";
+			String[] selectionArgs = new String[] { String.valueOf(masterListItemID) };
+			cr.delete(uri, where, selectionArgs);
+		}
+	}
+
+	public static void DeleteListTitleItems(Context context, long listTitleID) {
+		if (listTitleID > 0) {
+			ContentResolver cr = context.getContentResolver();
+			Uri uri = CONTENT_URI;
+			String where = COL_LIST_TITLE_ID + " = ?";
+			String[] selectionArgs = new String[] { String.valueOf(listTitleID) };
+			cr.delete(uri, where, selectionArgs);
 		}
 	}
 }

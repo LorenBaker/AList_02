@@ -12,13 +12,6 @@
     android:paddingRight="4dp"
     android:paddingTop="4dp" >
 
-    <TextView
-        android:id="@+id/txtStartingHint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="To start select: Options > Add New List"
-        android:visibility="gone" />
-
     <LinearLayout
         android:id="@+id/linearLayoutListTitle"
         android:layout_width="match_parent"

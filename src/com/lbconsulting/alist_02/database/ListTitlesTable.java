@@ -183,4 +183,22 @@ public class ListTitlesTable {
 		return activeCategoryID;
 	}
 
+	public static void DeleteList(Context context, long listTitleID) {
+
+		ListsTable.DeleteListTitleItems(context, listTitleID);
+		PreviousCategoryTable.DeleteListTitleItems(context, listTitleID);
+		MasterListItemsTable.ResetSelectedColumn(context);
+		DeleteListTitleItem(context, listTitleID);
+	}
+
+	private static void DeleteListTitleItem(Context context, long listTitleID) {
+		if (listTitleID > 0) {
+			ContentResolver cr = context.getContentResolver();
+			Uri uri = CONTENT_URI;
+			String where = COL_ID + " = ?";
+			String[] selectionArgs = new String[] { String.valueOf(listTitleID) };
+			cr.delete(uri, where, selectionArgs);
+		}
+
+	}
 }

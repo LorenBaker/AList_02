@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/editCategoryName"
+        android:title="Edit Category Name">
+    </item>
+    <item
+        android:id="@+id/listItemsSortOrder"
+        android:title="Sort Order">
+    </item>
+    <item
+        android:id="@+id/removeAllItems"
+        android:title="Remove All Items">
+    </item>
+    <item
+        android:id="@+id/categoryAttributes"
+        android:title="Category Attributes">
+    </item>
+    <item
+        android:id="@+id/about"
+        android:title="@string/action_about">
+    </item>
+    <item
+        android:id="@+id/masterListSettings"
+        android:title="@string/menu_settings">
+    </item>
+
+</menu>

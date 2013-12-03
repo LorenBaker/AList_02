@@ -247,8 +247,8 @@ public class CreatListActivity extends Activity implements
 		setContentView(R.layout.activity_create_list);
 
 		actionBar = getActionBar();
-		actionBar.setTitle("AList");
-		actionBar.setSubtitle("Create List");
+		//actionBar.setTitle("AList");
+		actionBar.setTitle("Create A New List");
 
 		// Initialize the controls
 		txtNewListTitle = (EditText) findViewById(R.id.txtNewListTitle);

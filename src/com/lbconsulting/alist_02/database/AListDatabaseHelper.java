@@ -10,12 +10,14 @@ import com.lbconsulting.alist_02.AListUtilities;
 public class AListDatabaseHelper extends SQLiteOpenHelper {
 	private final boolean L = AListUtilities.L; // enable Logging
 	private final String TAG = AListUtilities.TAG;
+	private final Context context;
 
 	private static final String DATABASE_NAME = "AList.db";
-	private static final int DATABASE_VERSION = 7;
+	private static final int DATABASE_VERSION = 1;
 
 	public AListDatabaseHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		this.context = context;
 	}
 
 	@Override
@@ -24,6 +26,7 @@ public class AListDatabaseHelper extends SQLiteOpenHelper {
 			Log.i(TAG, "AListDatabaseHelper onCreate Starting.");
 		MasterListItemsTable.onCreate(database);
 		ListTitlesTable.onCreate(database);
+		CategoriesTable.setDefalutCategoryValue(context);
 		CategoriesTable.onCreate(database);
 		ListTypesTable.onCreate(database);
 

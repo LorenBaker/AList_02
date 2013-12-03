@@ -11,13 +11,13 @@
     <string name="addMasterListItemHint">Enter Item</string>
     <string name="editMasterListItem">Edit Item</string>
     <string name="deleteMasterListItem">Delete Item</string>
-    <string name="sortingMasterList">Master List Sort Order</string>
+    <string name="sortingMasterList">Select Sort Order</string>
     <string name="addNewList">Add New List</string>
     <string name="addNewListTitleHint">New List Title</string>
     <string name="addNewListTitleContentDescription">New List Title</string>
-    <string name="editActiveListTitle">Edit Active List Title</string>
-    <string name="deleteActiveList">Delete Active List</string>
-    <string name="deleteAllMasterListItems">Delete All Master List Items</string>
+    <string name="editActiveListTitle">Edit List Title</string>
+    <string name="deleteActiveList">Delete List</string>
+    <string name="deleteAllMasterListItems">Delete All Items</string>
     <string name="clearAllSelectedItems">Clear All Selected Items</string>
     <string name="spnListTitleEmpty">Create or Select a List</string>
     <string name="masterListTextViewHint">Master List Item</string>
@@ -26,6 +26,7 @@
     <string name="sort_alphabetical">Alphabetical</string>
     <string name="sort_selected_at_bottom">Selected items at bottom</string>
     <string name="sort_selected_at_top">Selected items at top</string>
+    <string name="sort_selected_not_shown">Do not show selected items</string>
     <string name="sort_dialog_title">Choose how to sort the master items list.</string>
     <string name="set_sort_order">SET SORT ORDER</string>
     <string name="btnCreateNewList">Create New List</string>
@@ -36,8 +37,10 @@
     <string name="Yes">Yes</string>
     <string name="No">No</string>
     <string name="txtNewListTitleHint">New List Title</string>
-    <string name="btnNewText">New</string>
+    <string name="btnNewCategory">New Cat</string>
+    <string name="btnNewListType">New Type</string>
     <string name="NewItemTypeHint">New Item Type</string>
     <string name="btnAddNewItemTypeHint">Add</string>
+    <string name="defalutCategoryValue">[No Category]</string>
 
 </resources>
