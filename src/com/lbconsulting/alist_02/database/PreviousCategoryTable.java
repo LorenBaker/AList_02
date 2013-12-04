@@ -44,31 +44,6 @@ public class PreviousCategoryTable {
 
 	public static void onCreate(SQLiteDatabase database) {
 		database.execSQL(DATABASE_CREATE);
-
-		//TODO: For testing
-		/*ArrayList<String> sqlStatements = new ArrayList<String>();
-		sqlStatements.add("insert into " + TABLE_PREVIOUS_CATEGORY + " ("
-				+ COL_ID + ", "
-				+ COL_LIST_TITLE_ID + ", "
-				+ COL_MASTER_LIST_ITEM_ID + ", "
-				+ COL_CATEGORY_ID
-				+ ") VALUES (NULL, 2,23,2)");
-
-		sqlStatements.add("insert into " + TABLE_PREVIOUS_CATEGORY + " ("
-				+ COL_ID + ", "
-				+ COL_LIST_TITLE_ID + ", "
-				+ COL_MASTER_LIST_ITEM_ID + ", "
-				+ COL_CATEGORY_ID
-				+ ") VALUES (NULL, 3,26,3)");
-
-		sqlStatements.add("insert into " + TABLE_PREVIOUS_CATEGORY + " ("
-				+ COL_ID + ", "
-				+ COL_LIST_TITLE_ID + ", "
-				+ COL_MASTER_LIST_ITEM_ID + ", "
-				+ COL_CATEGORY_ID
-				+ ") VALUES (NULL, 1,18,4)");
-
-		AListUtilities.execMultipleSQL(database, sqlStatements);*/
 	}
 
 	public static void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {

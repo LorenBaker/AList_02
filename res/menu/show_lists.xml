@@ -15,7 +15,7 @@
     </item>
     <item
         android:id="@+id/categoryAttributes"
-        android:title="Category Attributes">
+        android:title="Show Categories">
     </item>
     <item
         android:id="@+id/about"

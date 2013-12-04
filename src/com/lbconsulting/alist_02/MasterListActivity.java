@@ -42,7 +42,6 @@ import android.widget.Toast;
 import com.lbconsulting.alist_02.adapters.ListTitlesCursorAdapter;
 import com.lbconsulting.alist_02.adapters.ListTypesCursorAdapter;
 import com.lbconsulting.alist_02.adapters.MasterListCursorAdapter;
-import com.lbconsulting.alist_02.database.CategoriesTable;
 import com.lbconsulting.alist_02.database.ListTitlesTable;
 import com.lbconsulting.alist_02.database.ListTypesTable;
 import com.lbconsulting.alist_02.database.ListsTable;
@@ -70,7 +69,7 @@ public class MasterListActivity extends Activity implements
 	private static final int LIST_TITLES_LOADER_ID = 2;
 
 	// Application preferences
-	private boolean autoAddItem = true;
+	private final boolean autoAddItem = true;
 	private boolean verbose = false;
 	public long activeListID = -1;
 	public long activeListTypeID = -1;
@@ -81,9 +80,7 @@ public class MasterListActivity extends Activity implements
 	private int numberOfSelectedItems = 0;
 
 	private boolean flagFirstTimeThruListTitlesLoader = true;
-	private int spnListTitlesPosition = -1;
-
-	// TODO create preferences for color, text size, etc for
+	private final int spnListTitlesPosition = -1;
 
 	// AList module variables
 	private LoaderManager loaderManager = null;
@@ -156,16 +153,18 @@ public class MasterListActivity extends Activity implements
 		SharedPreferences storedStates = getSharedPreferences("AList", MODE_PRIVATE);
 
 		// Set application states
-		this.autoAddItem = storedStates.getBoolean("autoAddItem", true);
+		/*this.autoAddItem = storedStates.getBoolean("autoAddItem", true);*/
 		this.verbose = storedStates.getBoolean("verbose", false);
-
 		this.activeListID = storedStates.getLong("activeListID", -1);
-		this.activeListTypeID = storedStates.getLong("activeListTypeID", -1);
-		this.masterListSortOrder = storedStates.getInt("masterListSortOrder", this.SORT_ORDER_ALPHABETICAL);
-		this.txtListItem.setText(storedStates.getString("txtListItem", null));
-		this.masterListViewFirstVisiblePosition = storedStates.getInt("masterListViewFirstVisiblePosition", 0);
-		this.masterListViewTop = storedStates.getInt("masterListViewTop", 0);
-		this.spnListTitlesPosition = storedStates.getInt("spnListTitlesPosition", -1);
+		/*this.activeListTypeID = storedStates.getLong("activeListTypeID", -1);*/
+
+		/*this.masterListSortOrder = storedStates.getInt("masterListSortOrder", this.SORT_ORDER_ALPHABETICAL);*/
+		/*this.txtListItem.setText(storedStates.getString("txtListItem", null));*/
+
+		/*this.masterListViewFirstVisiblePosition = storedStates.getInt("masterListViewFirstVisiblePosition", 0);
+		this.masterListViewTop = storedStates.getInt("masterListViewTop", 0);*/
+
+		/*this.spnListTitlesPosition = storedStates.getInt("spnListTitlesPosition", -1);*/
 
 		if (this.activeListID > 0) {
 			this.ActivateList(this.activeListID);
@@ -186,18 +185,22 @@ public class MasterListActivity extends Activity implements
 		SharedPreferences preferences = getSharedPreferences("AList", MODE_PRIVATE);
 		SharedPreferences.Editor applicationStates = preferences.edit();
 
-		applicationStates.putBoolean("autoAddItem", autoAddItem);
+		/*applicationStates.putBoolean("autoAddItem", autoAddItem);*/
 		applicationStates.putBoolean("verbose", verbose);
 		applicationStates.putLong("activeListID", this.activeListID);
-		applicationStates.putLong("activeListTypeID", this.activeListTypeID);
-		applicationStates.putString("txtListItem", txtListItem.getText().toString());
-		applicationStates.putInt("masterListSortOrder", masterListSortOrder);
 
-		applicationStates.putInt("masterListViewFirstVisiblePosition", masterListView.getFirstVisiblePosition());
+		ListTitlesTable.setIntItem(this, activeListID, ListTitlesTable.COL_MASTERLIST_SORT_ORDER,
+				this.masterListSortOrder);
+
+		ListTitlesTable.setStringItem(this, activeListID, ListTitlesTable.COL_TXT_LIST_ITEM, txtListItem.getText()
+				.toString().trim());
+
+		ListTitlesTable.setIntItem(this, activeListID, ListTitlesTable.COL_MASTERLISTVIEW_FIRST_VISIBLE_POSITION,
+				this.masterListView.getFirstVisiblePosition());
+
 		View v = masterListView.getChildAt(0);
-		masterListViewTop = (v == null) ? 0 : v.getTop();
-		applicationStates.putInt("masterListViewTop", masterListViewTop);
-		applicationStates.putInt("spnListTitlesPosition", spnListTitles.getSelectedItemPosition());
+		this.masterListViewTop = (v == null) ? 0 : v.getTop();
+		ListTitlesTable.setIntItem(this, activeListID, ListTitlesTable.COL_MASTERLISTVIEW_TOP, this.masterListViewTop);
 
 		// Commit to storage
 		applicationStates.commit();
@@ -311,11 +314,11 @@ public class MasterListActivity extends Activity implements
 		layoutListItem = (LinearLayout) findViewById(R.id.linearLayoutListItem);
 		// txtStartingHint = (TextView) findViewById(R.id.txtStartingHint);
 
-		if (this.activeListID < 1) {
-			layoutListTitle.setVisibility(View.INVISIBLE);
-			layoutListItem.setVisibility(View.INVISIBLE);
-			//txtStartingHint.setVisibility(View.VISIBLE);
-		}
+		/*		if (this.activeListID < 1) {
+					layoutListTitle.setVisibility(View.INVISIBLE);
+					layoutListItem.setVisibility(View.INVISIBLE);
+					//txtStartingHint.setVisibility(View.VISIBLE);
+				}*/
 
 		// setup txtListItem Listeners
 		txtListItem.setOnKeyListener(new OnKeyListener() {
@@ -819,9 +822,7 @@ public class MasterListActivity extends Activity implements
 			}
 			else {
 				// txtListItemText is empty
-				/*if (this.activeListTypeID > 1) {*/
 				selection = MasterListItemsTable.COL_LIST_TYPE_ID + " = " + this.activeListTypeID;
-				/*}*/
 			}
 
 			try {
@@ -879,20 +880,21 @@ public class MasterListActivity extends Activity implements
 
 		case LIST_TITLES_LOADER_ID:
 			listTitlesAdapter.swapCursor(newCursor);
-			if (newCursor.getCount() > 0) {
-				layoutListTitle.setVisibility(View.VISIBLE);
-				layoutListItem.setVisibility(View.VISIBLE);
-				//txtStartingHint.setVisibility(View.GONE);
-			}
+			spnListTitles.setSelection(AListUtilities.getIndex(spnListTitles, this.activeListID));
 
-			if (this.flagFirstTimeThruListTitlesLoader) {
-				if (spnListTitlesPosition > -1) {
-					spnListTitles.setSelection(this.spnListTitlesPosition);
-				}
-				this.flagFirstTimeThruListTitlesLoader = false;
-			} else {
-				spnListTitles.setSelection(AListUtilities.getIndex(spnListTitles, this.activeListID));
-			}
+			/*			if (newCursor.getCount() > 0) {
+							layoutListTitle.setVisibility(View.VISIBLE);
+							layoutListItem.setVisibility(View.VISIBLE);
+						}
+
+						if (this.flagFirstTimeThruListTitlesLoader) {
+							if (spnListTitlesPosition > -1) {
+								spnListTitles.setSelection(this.spnListTitlesPosition);
+							}
+							this.flagFirstTimeThruListTitlesLoader = false;
+						} else {
+							spnListTitles.setSelection(AListUtilities.getIndex(spnListTitles, this.activeListID));
+						}*/
 			break;
 
 		default:
@@ -992,8 +994,22 @@ public class MasterListActivity extends Activity implements
 	private void ActivateList(long listID) {
 		try {
 			this.activeListID = listID;
-			this.activeListTypeID = ListTitlesTable.getListTypeID(this, listID);
-			SetLayoutBackgroundColor(listID);
+
+			// TODO: get the activeListCursor to get all of these attributes to 
+			// avoid successive cursor calls in the ListTitlesTable
+			this.activeListTypeID = ListTitlesTable.getLongItem(this, listID, ListTitlesTable.COL_LIST_TYPE_ID);
+
+			this.masterListSortOrder = ListTitlesTable.getIntItem(this, activeListID,
+					ListTitlesTable.COL_MASTERLIST_SORT_ORDER);
+			this.txtListItem.setText(ListTitlesTable.getStringItem(this, activeListID,
+					ListTitlesTable.COL_TXT_LIST_ITEM));
+
+			this.masterListViewFirstVisiblePosition = ListTitlesTable.getIntItem(this, activeListID,
+					ListTitlesTable.COL_MASTERLISTVIEW_FIRST_VISIBLE_POSITION);
+			this.masterListViewTop = ListTitlesTable.getIntItem(this, activeListID,
+					ListTitlesTable.COL_MASTERLISTVIEW_TOP);
+
+			this.SetLayoutBackgroundColor(listID);
 
 			spnListTitles.setSelection(AListUtilities.getIndex(spnListTitles, this.activeListID));
 
@@ -1082,189 +1098,191 @@ public class MasterListActivity extends Activity implements
 
 		alert.show();
 	}
+}
 
-	/** Deletes the Active List from the database. */
-	/*
-	 * private void DeleteActiveList() {
-	 * 
-	 * final String activeListTitle = db.getListTitle(this.activeListID); final
-	 * String msgQuestion = "Delete list: " +"\"" + activeListTitle + "\" ?";
-	 * final String msgDeletedResult = "List: " +"\"" + activeListTitle +"\"" +
-	 * " deleted."; final String msgDeleteCancled = "Deletion of List: " +"\"" +
-	 * activeListTitle +"\"" + " cancled."; if(verbose) { // Verify that the
-	 * user wants to delete the Active List AlertDialog.Builder alert = new
-	 * AlertDialog.Builder(this);
-	 * 
-	 * alert.setTitle(msgQuestion);
-	 * 
-	 * alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-	 * public void onClick(DialogInterface dialog, int whichButton) {
-	 * if(db.deleteList(this.activeListID)) { showFirstList();
-	 * Toast.makeText(getApplicationContext(), msgDeletedResult,
-	 * Toast.LENGTH_SHORT).show(); } } });
-	 * 
-	 * alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-	 * public void onClick(DialogInterface dialog, int whichButton) { //
-	 * Canceled. Toast.makeText(getApplicationContext(), msgDeleteCancled,
-	 * Toast.LENGTH_SHORT).show(); } });
-	 * 
-	 * alert.show(); } else { if (db.deleteList(this.activeListID)) {
-	 * Toast.makeText(getApplicationContext(), msgDeletedResult,
-	 * Toast.LENGTH_SHORT).show(); } } }
-	 */
+/** Deletes the Active List from the database. */
+/*
+ * private void DeleteActiveList() {
+ * 
+ * final String activeListTitle = db.getListTitle(this.activeListID); final
+ * String msgQuestion = "Delete list: " +"\"" + activeListTitle + "\" ?";
+ * final String msgDeletedResult = "List: " +"\"" + activeListTitle +"\"" +
+ * " deleted."; final String msgDeleteCancled = "Deletion of List: " +"\"" +
+ * activeListTitle +"\"" + " cancled."; if(verbose) { // Verify that the
+ * user wants to delete the Active List AlertDialog.Builder alert = new
+ * AlertDialog.Builder(this);
+ * 
+ * alert.setTitle(msgQuestion);
+ * 
+ * alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+ * public void onClick(DialogInterface dialog, int whichButton) {
+ * if(db.deleteList(this.activeListID)) { showFirstList();
+ * Toast.makeText(getApplicationContext(), msgDeletedResult,
+ * Toast.LENGTH_SHORT).show(); } } });
+ * 
+ * alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+ * public void onClick(DialogInterface dialog, int whichButton) { //
+ * Canceled. Toast.makeText(getApplicationContext(), msgDeleteCancled,
+ * Toast.LENGTH_SHORT).show(); } });
+ * 
+ * alert.show(); } else { if (db.deleteList(this.activeListID)) {
+ * Toast.makeText(getApplicationContext(), msgDeletedResult,
+ * Toast.LENGTH_SHORT).show(); } } }
+ */
 
-	private void TestInserts() {
-		// muliti row Uris
+/*private void TestInserts() {
+	// muliti row Uris
 
-		ContentResolver cr = getContentResolver();
-		ContentValues values = null;
-		int i = 1;
+	ContentResolver cr = getContentResolver();
+	ContentValues values = null;
+	int i = 1;
 
-		do {
-			values = new ContentValues();
-			values.put(MasterListItemsTable.COL_ITEM_NAME, "MasterListItem "
-					+ String.valueOf(i));
-			cr.insert(MasterListItemsTable.CONTENT_URI, values);
+	do {
+		values = new ContentValues();
+		values.put(MasterListItemsTable.COL_ITEM_NAME, "MasterListItem "
+				+ String.valueOf(i));
+		cr.insert(MasterListItemsTable.CONTENT_URI, values);
 
-			values = new ContentValues();
-			values.put(ListTitlesTable.COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT, i);
-			values.put(ListTitlesTable.COL_BACKGROUND_COLOR,
-					"Background Color " + String.valueOf(i));
-			values.put(ListTitlesTable.COL_NORMAL_TEXT_COLOR,
-					"Normal Text Color " + String.valueOf(i));
-			values.put(ListTitlesTable.COL_STRIKEOUT_TEXT_COLOR,
-					"Strikeout Color " + String.valueOf(i));
-			values.put(ListTitlesTable.COL_LIST_TITLE_NAME,
-					"List Title " + String.valueOf(i));
-			values.put(ListTitlesTable.COL_SORT_ORDER_ID, i);
-			cr.insert(ListTitlesTable.CONTENT_URI, values);
+		values = new ContentValues();
+		values.put(ListTitlesTable.COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT, i);
+		values.put(ListTitlesTable.COL_BACKGROUND_COLOR,
+				"Background Color " + String.valueOf(i));
+		values.put(ListTitlesTable.COL_NORMAL_TEXT_COLOR,
+				"Normal Text Color " + String.valueOf(i));
+		values.put(ListTitlesTable.COL_STRIKEOUT_TEXT_COLOR,
+				"Strikeout Color " + String.valueOf(i));
+		values.put(ListTitlesTable.COL_LIST_TITLE_NAME,
+				"List Title " + String.valueOf(i));
+		values.put(ListTitlesTable.COL_SORT_ORDER_ID, i);
+		cr.insert(ListTitlesTable.CONTENT_URI, values);
 
-			values = new ContentValues();
-			values.put(ListsTable.COL_CATEGORY_ID, i);
-			values.put(ListsTable.COL_LIST_TITLE_ID, i);
-			values.put(ListsTable.COL_MASTER_LIST_ITEM_ID, i);
-			values.put(ListsTable.COL_MANUAL_SORT_ORDER, i);
-			values.put(ListsTable.COL_STRUCK_OUT, i);
-			cr.insert(ListsTable.CONTENT_URI, values);
+		values = new ContentValues();
+		values.put(ListsTable.COL_CATEGORY_ID, i);
+		values.put(ListsTable.COL_LIST_TITLE_ID, i);
+		values.put(ListsTable.COL_MASTER_LIST_ITEM_ID, i);
+		values.put(ListsTable.COL_MANUAL_SORT_ORDER, i);
+		values.put(ListsTable.COL_STRUCK_OUT, i);
+		cr.insert(ListsTable.CONTENT_URI, values);
 
-			values = new ContentValues();
-			values.put(CategoriesTable.COL_CATEGORY_NAME,
-					"Category " + String.valueOf(i));
-			cr.insert(CategoriesTable.CONTENT_URI, values);
+		values = new ContentValues();
+		values.put(CategoriesTable.COL_CATEGORY_NAME,
+				"Category " + String.valueOf(i));
+		cr.insert(CategoriesTable.CONTENT_URI, values);
 
-			values = new ContentValues();
-			values.put(PreviousCategoryTable.COL_CATEGORY_ID, i);
-			values.put(PreviousCategoryTable.COL_LIST_TITLE_ID, i);
-			values.put(PreviousCategoryTable.COL_MASTER_LIST_ITEM_ID, i);
-			cr.insert(PreviousCategoryTable.CONTENT_URI, values);
+		values = new ContentValues();
+		values.put(PreviousCategoryTable.COL_CATEGORY_ID, i);
+		values.put(PreviousCategoryTable.COL_LIST_TITLE_ID, i);
+		values.put(PreviousCategoryTable.COL_MASTER_LIST_ITEM_ID, i);
+		cr.insert(PreviousCategoryTable.CONTENT_URI, values);
 
-			values = new ContentValues();
-			/*values.put(SortOrdersTable.COL_SORT_ORDER_NAME, "Sort Order Name "
-					+ String.valueOf(i));
-			values.put(SortOrdersTable.COL_SORT_ORDER_FIELD,
-					"Sort Order Field " + String.valueOf(i));
-			cr.insert(SortOrdersTable.CONTENT_URI, values);*/
-
-			i++;
-		} while (i < 5);
-	}
-
-	private void TestUpDates() {
-		TestInserts();
-		ContentResolver cr = getContentResolver();
-		ContentValues values = null;
-		int i = 1;
-
-		do {
-			values = new ContentValues();
-			values.put(MasterListItemsTable.COL_ITEM_NAME, "MasterListItem "
-					+ String.valueOf(i + 5));
-			cr.update(Uri.withAppendedPath(MasterListItemsTable.CONTENT_URI,
-					String.valueOf(i)), values, null, null);
-
-			values = new ContentValues();
-			values.put(ListTitlesTable.COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT,
-					i + 5);
-			values.put(ListTitlesTable.COL_BACKGROUND_COLOR,
-					"Background Color " + String.valueOf(i + 5));
-			values.put(ListTitlesTable.COL_NORMAL_TEXT_COLOR,
-					"Normal Text Color " + String.valueOf(i + 5));
-			values.put(ListTitlesTable.COL_STRIKEOUT_TEXT_COLOR,
-					"Strikeout Color " + String.valueOf(i + 5));
-			values.put(ListTitlesTable.COL_LIST_TITLE_NAME,
-					"List Title " + String.valueOf(i + 5));
-			values.put(ListTitlesTable.COL_SORT_ORDER_ID, i + 5);
-			cr.update(
-					Uri.withAppendedPath(ListTitlesTable.CONTENT_URI,
-							String.valueOf(i)), values, null, null);
-
-			values = new ContentValues();
-			values.put(ListsTable.COL_CATEGORY_ID, i + 5);
-			values.put(ListsTable.COL_LIST_TITLE_ID, i + 5);
-			values.put(ListsTable.COL_MASTER_LIST_ITEM_ID, i + 5);
-			values.put(ListsTable.COL_MANUAL_SORT_ORDER, i + 5);
-			values.put(ListsTable.COL_STRUCK_OUT, i + 5);
-			cr.update(
-					Uri.withAppendedPath(ListsTable.CONTENT_URI,
-							String.valueOf(i)), values, null, null);
-
-			values = new ContentValues();
-			values.put(CategoriesTable.COL_CATEGORY_NAME,
-					"Category " + String.valueOf(i + 5));
-			cr.update(
-					Uri.withAppendedPath(CategoriesTable.CONTENT_URI,
-							String.valueOf(i)), values, null, null);
-
-			values = new ContentValues();
-			values.put(PreviousCategoryTable.COL_CATEGORY_ID, i + 5);
-			values.put(PreviousCategoryTable.COL_LIST_TITLE_ID, i + 5);
-			values.put(PreviousCategoryTable.COL_MASTER_LIST_ITEM_ID, i + 5);
-			cr.update(Uri.withAppendedPath(PreviousCategoryTable.CONTENT_URI,
-					String.valueOf(i)), values, null, null);
-
-			values = new ContentValues();
-			/*values.put(SortOrdersTable.COL_SORT_ORDER_NAME, "Sort Order Name "
-					+ String.valueOf(i + 5));
-			values.put(SortOrdersTable.COL_SORT_ORDER_FIELD,
-					"Sort Order Field " + String.valueOf(i + 5));
-			cr.update(
-					Uri.withAppendedPath(SortOrdersTable.CONTENT_URI,
-							String.valueOf(i)), values, null, null);*/
-
-			i++;
-
-		} while (i < 5);
+		values = new ContentValues();
+		values.put(SortOrdersTable.COL_SORT_ORDER_NAME, "Sort Order Name "
+				+ String.valueOf(i));
+		values.put(SortOrdersTable.COL_SORT_ORDER_FIELD,
+				"Sort Order Field " + String.valueOf(i));
+		cr.insert(SortOrdersTable.CONTENT_URI, values);
 
 		i++;
-		String where = null;
-		String[] whereArgs = null;
+	} while (i < 5);
+}
 
+private void TestUpDates() {
+	TestInserts();
+	ContentResolver cr = getContentResolver();
+	ContentValues values = null;
+	int i = 1;
+
+	do {
 		values = new ContentValues();
 		values.put(MasterListItemsTable.COL_ITEM_NAME, "MasterListItem "
 				+ String.valueOf(i + 5));
-		where = MasterListItemsTable.COL_ITEM_NAME
-				+ " = 'MasterListItem 6' OR "
-				+ MasterListItemsTable.COL_ITEM_NAME
-				+ " = 'MasterListItem 7' OR "
-				+ MasterListItemsTable.COL_ITEM_NAME + " = 'MasterListItem 8'";
-		/* whereArgs = new String[] {"6", "7", "8"}; */
-		cr.update(MasterListItemsTable.CONTENT_URI, values, where, whereArgs);
+		cr.update(Uri.withAppendedPath(MasterListItemsTable.CONTENT_URI,
+				String.valueOf(i)), values, null, null);
 
 		values = new ContentValues();
-		values.put(ListTitlesTable.COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT, i + 5);
-		values.put(ListTitlesTable.COL_BACKGROUND_COLOR, "Background Color "
-				+ String.valueOf(i + 5));
-		values.put(ListTitlesTable.COL_NORMAL_TEXT_COLOR, "Normal Text Color "
-				+ String.valueOf(i + 5));
-		values.put(ListTitlesTable.COL_STRIKEOUT_TEXT_COLOR, "Strikeout Color "
-				+ String.valueOf(i + 5));
+		values.put(ListTitlesTable.COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT,
+				i + 5);
+		values.put(ListTitlesTable.COL_BACKGROUND_COLOR,
+				"Background Color " + String.valueOf(i + 5));
+		values.put(ListTitlesTable.COL_NORMAL_TEXT_COLOR,
+				"Normal Text Color " + String.valueOf(i + 5));
+		values.put(ListTitlesTable.COL_STRIKEOUT_TEXT_COLOR,
+				"Strikeout Color " + String.valueOf(i + 5));
 		values.put(ListTitlesTable.COL_LIST_TITLE_NAME,
 				"List Title " + String.valueOf(i + 5));
 		values.put(ListTitlesTable.COL_SORT_ORDER_ID, i + 5);
+		cr.update(
+				Uri.withAppendedPath(ListTitlesTable.CONTENT_URI,
+						String.valueOf(i)), values, null, null);
 
-		where = ListTitlesTable.COL_SORT_ORDER_ID + " = ? OR "
-				+ ListTitlesTable.COL_SORT_ORDER_ID + " = ?";
-		whereArgs = new String[] { "6", "7" };
-		cr.update(ListTitlesTable.CONTENT_URI, values, where, whereArgs);
-	}
+		values = new ContentValues();
+		values.put(ListsTable.COL_CATEGORY_ID, i + 5);
+		values.put(ListsTable.COL_LIST_TITLE_ID, i + 5);
+		values.put(ListsTable.COL_MASTER_LIST_ITEM_ID, i + 5);
+		values.put(ListsTable.COL_MANUAL_SORT_ORDER, i + 5);
+		values.put(ListsTable.COL_STRUCK_OUT, i + 5);
+		cr.update(
+				Uri.withAppendedPath(ListsTable.CONTENT_URI,
+						String.valueOf(i)), values, null, null);
+
+		values = new ContentValues();
+		values.put(CategoriesTable.COL_CATEGORY_NAME,
+				"Category " + String.valueOf(i + 5));
+		cr.update(
+				Uri.withAppendedPath(CategoriesTable.CONTENT_URI,
+						String.valueOf(i)), values, null, null);
+
+		values = new ContentValues();
+		values.put(PreviousCategoryTable.COL_CATEGORY_ID, i + 5);
+		values.put(PreviousCategoryTable.COL_LIST_TITLE_ID, i + 5);
+		values.put(PreviousCategoryTable.COL_MASTER_LIST_ITEM_ID, i + 5);
+		cr.update(Uri.withAppendedPath(PreviousCategoryTable.CONTENT_URI,
+				String.valueOf(i)), values, null, null);
+
+		values = new ContentValues();
+		values.put(SortOrdersTable.COL_SORT_ORDER_NAME, "Sort Order Name "
+				+ String.valueOf(i + 5));
+		values.put(SortOrdersTable.COL_SORT_ORDER_FIELD,
+				"Sort Order Field " + String.valueOf(i + 5));
+		cr.update(
+				Uri.withAppendedPath(SortOrdersTable.CONTENT_URI,
+						String.valueOf(i)), values, null, null);
+
+		i++;
+
+	} while (i < 5);
+
+	i++;
+	String where = null;
+	String[] whereArgs = null;
+
+	values = new ContentValues();
+	values.put(MasterListItemsTable.COL_ITEM_NAME, "MasterListItem "
+			+ String.valueOf(i + 5));
+	where = MasterListItemsTable.COL_ITEM_NAME
+			+ " = 'MasterListItem 6' OR "
+			+ MasterListItemsTable.COL_ITEM_NAME
+			+ " = 'MasterListItem 7' OR "
+			+ MasterListItemsTable.COL_ITEM_NAME + " = 'MasterListItem 8'";
+	 whereArgs = new String[] {"6", "7", "8"}; 
+	cr.update(MasterListItemsTable.CONTENT_URI, values, where, whereArgs);
+
+	values = new ContentValues();
+	values.put(ListTitlesTable.COL_AUTO_ADD_CATEGORIES_ON_STRIKEOUT, i + 5);
+	values.put(ListTitlesTable.COL_BACKGROUND_COLOR, "Background Color "
+			+ String.valueOf(i + 5));
+	values.put(ListTitlesTable.COL_NORMAL_TEXT_COLOR, "Normal Text Color "
+			+ String.valueOf(i + 5));
+	values.put(ListTitlesTable.COL_STRIKEOUT_TEXT_COLOR, "Strikeout Color "
+			+ String.valueOf(i + 5));
+	values.put(ListTitlesTable.COL_LIST_TITLE_NAME,
+			"List Title " + String.valueOf(i + 5));
+	values.put(ListTitlesTable.COL_SORT_ORDER_ID, i + 5);
+
+	where = ListTitlesTable.COL_SORT_ORDER_ID + " = ? OR "
+			+ ListTitlesTable.COL_SORT_ORDER_ID + " = ?";
+	whereArgs = new String[] { "6", "7" };
+	cr.update(ListTitlesTable.CONTENT_URI, values, where, whereArgs);
 }
+}
+*/

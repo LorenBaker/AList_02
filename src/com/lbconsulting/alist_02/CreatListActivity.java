@@ -26,7 +26,6 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.lbconsulting.alist_02.R.color;
 import com.lbconsulting.alist_02.adapters.ListPreviewArrayAdapter;
 import com.lbconsulting.alist_02.adapters.ListTypesCursorAdapter;
 import com.lbconsulting.alist_02.database.AListDatabaseHelper;
@@ -452,8 +451,43 @@ public class CreatListActivity extends Activity implements
 
 				int selector = (int) nextId % 6;
 				switch (selector) {
+				/*case 0:
+					this.backgroundColor = Color.parseColor("#705688");
+					this.normalTextColor = Color.parseColor("#B19CC4");
+					this.strikeoutTextColor = Color.parseColor("#594A66");
+					break;
+				case 1:
+					this.backgroundColor = Color.parseColor("#566787");
+					this.normalTextColor = Color.parseColor("#E5CDA1");
+					this.strikeoutTextColor = Color.parseColor("#4A5365");
+					break;
+				case 2:
+					this.backgroundColor = Color.parseColor("#597070");
+					this.normalTextColor = Color.parseColor("#1C5E39");
+					this.strikeoutTextColor = Color.parseColor("#4C6C5A");
+					break;
+				case 3:
+					this.backgroundColor = Color.parseColor("#CAB57A");
+					this.normalTextColor = Color.parseColor("#846B28");
+					this.strikeoutTextColor = Color.parseColor("#988C6B");
+					break;
+				case 4:
+					this.backgroundColor = Color.parseColor("#CA977A");
+					this.normalTextColor = Color.parseColor("#508576");
+					this.strikeoutTextColor = Color.parseColor("#987B6B");
+					break;
+				case 5:
+					this.backgroundColor = Color.parseColor("#3A5281");
+					this.normalTextColor = Color.parseColor("#F2EAC5");
+					this.strikeoutTextColor = Color.parseColor("#97B1E3");
+					break;
+				default:
+					this.backgroundColor = Color.parseColor("#705688");
+					this.normalTextColor = Color.parseColor("#B19CC4");
+					this.strikeoutTextColor = Color.parseColor("#594A66");
+					break;*/
 				case 0:
-					this.backgroundColor = res.getColor(color.ghostwhite);
+					this.backgroundColor = res.getColor(R.color.ghostwhite);
 					this.normalTextColor = res.getColor(R.color.black);
 					this.strikeoutTextColor = res.getColor(R.color.darkgray);
 					break;
